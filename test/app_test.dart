@@ -1,0 +1,75 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:planles_custom/app/app.dart';
+import 'package:planles_custom/app/router.dart';
+import 'package:planles_custom/core/network/api_client.dart';
+import 'package:planles_custom/core/providers.dart';
+import 'package:planles_custom/core/storage/token_storage.dart';
+import 'package:planles_custom/features/auth/providers/auth_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+/// Boots the real app (router, theme, providers) with an empty token store,
+/// which is exactly what a first-time user sees. No network is touched.
+Future<ProviderContainer> _pumpSignedOutApp(WidgetTester tester) async {
+  SharedPreferences.setMockInitialValues({});
+
+  final storage = await TokenStorage.create();
+  final apiClient = ApiClient(tokenStorage: storage);
+
+  final container = ProviderContainer(
+    overrides: [
+      tokenStorageProvider.overrideWithValue(storage),
+      apiClientProvider.overrideWithValue(apiClient),
+    ],
+    retry: (retryCount, error) => null,
+  );
+  addTearDown(container.dispose);
+
+  await container.read(authControllerProvider.notifier).restore();
+
+  await tester.pumpWidget(
+    UncontrolledProviderScope(
+      container: container,
+      child: PlanlesApp(router: container.read(routerProvider)),
+    ),
+  );
+  await tester.pumpAndSettle();
+
+  return container;
+}
+
+void main() {
+  testWidgets('a signed out user lands on the login screen', (tester) async {
+    await _pumpSignedOutApp(tester);
+
+    expect(find.text('Welkom terug'), findsOneWidget);
+    expect(find.widgetWithText(FilledButton, 'Inloggen'), findsOneWidget);
+    expect(find.byType(NavigationBar), findsNothing);
+  });
+
+  testWidgets('login form rejects an empty submission', (tester) async {
+    await _pumpSignedOutApp(tester);
+
+    await tester.tap(find.widgetWithText(FilledButton, 'Inloggen'));
+    await tester.pump();
+
+    expect(find.text('Vul je e-mailadres in'), findsOneWidget);
+    expect(find.text('Vul je wachtwoord in'), findsOneWidget);
+  });
+
+  testWidgets('navigation between the auth screens works', (tester) async {
+    await _pumpSignedOutApp(tester);
+
+    await tester.tap(find.text('Registreren'));
+    await tester.pumpAndSettle();
+    expect(find.text('Accounttype'), findsOneWidget);
+
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Wachtwoord vergeten?'));
+    await tester.pumpAndSettle();
+    expect(find.text('Herstel je wachtwoord'), findsOneWidget);
+  });
+}

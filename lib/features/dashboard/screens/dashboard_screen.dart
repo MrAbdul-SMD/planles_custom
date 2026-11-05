@@ -1,0 +1,412 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../core/utils/formatters.dart';
+import '../../../shared/widgets.dart';
+import '../../auth/models/user.dart';
+import '../../auth/providers/auth_provider.dart';
+import '../../notifications/providers/notifications_providers.dart';
+import '../../orders/providers/orders_providers.dart';
+import '../../planning/models/planning.dart';
+import '../../planning/providers/planning_providers.dart';
+
+class DashboardScreen extends ConsumerWidget {
+  const DashboardScreen({super.key});
+
+  Future<void> _refresh(WidgetRef ref) async {
+    await Future.wait([
+      ref.refresh(planningListProvider.future),
+      ref.refresh(ordersListProvider.future),
+      ref.refresh(unreadCountProvider.future),
+      ref.read(authControllerProvider.notifier).refreshUser(),
+    ]);
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(currentUserProvider);
+    final planning = ref.watch(planningListProvider);
+    final unread = ref.watch(unreadCountProvider).value ?? 0;
+    final notifications =
+        ref.watch(notificationsProvider).items.take(2).toList();
+
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(_greeting()),
+        actions: [
+          IconButton(
+            tooltip: 'Meldingen',
+            onPressed: () => context.go('/notifications'),
+            icon: Badge(
+              isLabelVisible: unread > 0,
+              label: Text('$unread'),
+              child: const Icon(Icons.notifications_outlined),
+            ),
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
+      body: RefreshIndicator(
+        onRefresh: () => _refresh(ref),
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+          children: [
+            _BalanceCard(user: user),
+            const SizedBox(height: 20),
+            SectionHeader(
+              'Eerstvolgende lessen',
+              trailing: TextButton(
+                onPressed: () => context.go('/planning'),
+                child: const Text('Alles bekijken'),
+              ),
+            ),
+            planning.when(
+              skipLoadingOnReload: true,
+              loading: () => const Padding(
+                padding: EdgeInsets.symmetric(vertical: 32),
+                child: Center(child: CircularProgressIndicator()),
+              ),
+              error: (e, _) => ErrorView(
+                message: e.toString(),
+                onRetry: () => ref.invalidate(planningListProvider),
+              ),
+              data: (page) {
+                final upcoming = page.upcoming.take(3).toList();
+                if (upcoming.isEmpty) {
+                  return const _NoLessons();
+                }
+                return Column(
+                  children: [
+                    for (final p in upcoming) ...[
+                      PlanningTile(planning: p),
+                      const SizedBox(height: 10),
+                    ],
+                  ],
+                );
+              },
+            ),
+            const SizedBox(height: 20),
+            const SectionHeader('Snel regelen'),
+            Row(
+              children: [
+                Expanded(
+                  child: _ActionCard(
+                    icon: Icons.add_shopping_cart_outlined,
+                    label: 'Lessen kopen',
+                    onTap: () => context.push('/orders/new'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _ActionCard(
+                    icon: Icons.account_balance_wallet_outlined,
+                    label: 'Saldo opwaarderen',
+                    onTap: () => context.push('/balance/topup'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _ActionCard(
+                    icon: Icons.receipt_long_outlined,
+                    label: 'Bestellingen',
+                    onTap: () => context.go('/orders'),
+                  ),
+                ),
+              ],
+            ),
+            if (user?.isInstructor == true) ...[
+              const SizedBox(height: 12),
+              _ActionCard(
+                icon: Icons.groups_outlined,
+                label: 'Mijn leerlingen',
+                onTap: () => context.push('/students'),
+              ),
+            ],
+            if (notifications.isNotEmpty) ...[
+              const SizedBox(height: 24),
+              SectionHeader(
+                'Recente meldingen',
+                trailing: TextButton(
+                  onPressed: () => context.go('/notifications'),
+                  child: const Text('Alle meldingen'),
+                ),
+              ),
+              for (final n in notifications)
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: CircleAvatar(
+                    backgroundColor: theme.colorScheme.primaryContainer,
+                    child: Icon(
+                      n.isRead
+                          ? Icons.notifications_none_rounded
+                          : Icons.notifications_active_rounded,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                  title: Text(n.title ?? 'Melding',
+                      maxLines: 1, overflow: TextOverflow.ellipsis),
+                  subtitle: Text(
+                    n.body ?? '',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  trailing: n.createdAt == null
+                      ? null
+                      : Text(
+                          F.relativeDay(n.createdAt),
+                          style: theme.textTheme.bodySmall,
+                        ),
+                ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _greeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return 'Goedemorgen';
+    if (hour < 18) return 'Goedemiddag';
+    return 'Goedenavond';
+  }
+}
+
+class _BalanceCard extends ConsumerWidget {
+  const _BalanceCard({required this.user});
+
+  final User? user;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.all(22),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [theme.colorScheme.primary, theme.colorScheme.tertiary],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(22),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Hallo ${user?.firstName ?? ''}'.trim(),
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              AppAvatar(
+                initials: user?.initials ?? '?',
+                size: 40,
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          Text(
+            'Saldo',
+            style: theme.textTheme.bodySmall
+                ?.copyWith(color: Colors.white70),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            F.money(user?.balance ?? 0),
+            style: theme.textTheme.headlineMedium?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 16),
+          FilledButton.tonal(
+            onPressed: () => context.push('/balance/topup'),
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: theme.colorScheme.primary,
+              minimumSize: const Size.fromHeight(46),
+            ),
+            child: const Text('Saldo opwaarderen'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _NoLessons extends StatelessWidget {
+  const _NoLessons();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Column(
+        children: [
+          Icon(Icons.event_available_outlined,
+              size: 34, color: theme.colorScheme.outline),
+          const SizedBox(height: 12),
+          const Text('Nog geen lessen gepland'),
+          const SizedBox(height: 4),
+          Text(
+            'Koop een lespakket om je eerste les in te plannen.',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodySmall
+                ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+          ),
+          const SizedBox(height: 16),
+          OutlinedButton.icon(
+            onPressed: () => context.push('/orders/new'),
+            icon: const Icon(Icons.add),
+            label: const Text('Lessen kopen'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ActionCard extends StatelessWidget {
+  const _ActionCard({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 10),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: theme.colorScheme.primary),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.labelSmall
+                  ?.copyWith(fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Compact lesson row used on the dashboard and the planning tab.
+class PlanningTile extends StatelessWidget {
+  const PlanningTile({super.key, required this.planning, this.trailing});
+
+  final Planning planning;
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final start = planning.startDate;
+    final end = planning.endDate;
+
+    return Card(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () => context.push('/planning/${planning.id}'),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            children: [
+              Container(
+                width: 58,
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      start == null ? '–' : F.dayLabel(start),
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: theme.colorScheme.onPrimaryContainer,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    Text(
+                      start == null ? '' : F.time(start),
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: theme.colorScheme.onPrimaryContainer,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      planning.drivingClass?.name ?? 'Les',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleSmall
+                          ?.copyWith(fontWeight: FontWeight.w700),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      [
+                        if (end != null && start != null)
+                          '${F.time(start)} – ${F.time(end)}',
+                        if (planning.instructor?.fullName != null)
+                          planning.instructor!.fullName,
+                      ].join(' · '),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall
+                          ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              trailing ??
+                  StatusChip(
+                    label: planning.statusLabel,
+                    tone: PlanningTone.forStatus(planning.status),
+                  ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
