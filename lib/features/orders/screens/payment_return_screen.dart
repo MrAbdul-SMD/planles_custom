@@ -28,18 +28,26 @@ class _PaymentReturnScreenState extends ConsumerState<PaymentReturnScreen> {
 
   Future<void> _finish() async {
     final l10n = context.l10n;
+    final uri = GoRouterState.of(context).uri;
+    final kind = uri.queryParameters['kind'] ?? widget.kind;
+    final orderId = int.tryParse(uri.queryParameters['orderId'] ?? '');
+
     try {
-      if (widget.kind == 'topup') {
+      if (kind == 'topup') {
         await ref.read(authControllerProvider.notifier).refreshUser();
       } else {
         ref.invalidate(ordersListProvider);
+        if (orderId != null) {
+          ref.invalidate(orderDetailProvider(orderId));
+          ref.invalidate(orderItemsProvider(orderId));
+        }
       }
     } catch (_) {
       // Best effort; the user can refresh manually.
     }
     if (!mounted) return;
     showAppSnack(context, l10n.paymentReturnSuccess);
-    context.go('/');
+    context.go('/home');
   }
 
   @override

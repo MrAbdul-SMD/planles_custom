@@ -150,6 +150,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           kind: state.uri.queryParameters['kind'] ?? 'payment',
         ),
       ),
+      GoRoute(
+        path: '/topup/callback',
+        builder: (_, _) => const PaymentReturnScreen(kind: 'topup'),
+      ),
     ],
   );
 

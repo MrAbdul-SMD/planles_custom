@@ -85,26 +85,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Container(
-                        width: 76,
-                        height: 76,
+                        width: 84,
+                        height: 84,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              theme.colorScheme.primary,
-                              theme.colorScheme.tertiary,
-                            ],
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF0369A1), Color(0xFFEA580C)],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: BorderRadius.circular(26),
                           boxShadow: [
                             BoxShadow(
-                              color: theme.colorScheme.primary.withValues(
-                                alpha: 0.35,
-                              ),
-                              blurRadius: 24,
-                              offset: const Offset(0, 10),
+                              color: const Color(0xFF0369A1)
+                                  .withValues(alpha: 0.35),
+                              blurRadius: 28,
+                              offset: const Offset(0, 12),
                             ),
                           ],
                         ),
@@ -112,8 +108,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           'P',
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 36,
+                            fontSize: 40,
                             fontWeight: FontWeight.w800,
+                            letterSpacing: -1,
                           ),
                         ),
                       ),

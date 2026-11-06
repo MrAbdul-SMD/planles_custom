@@ -72,6 +72,7 @@ void main() {
   testWidgets('navigation between the auth screens works', (tester) async {
     await _pumpSignedOutApp(tester);
 
+    await tester.ensureVisible(find.text('Registreren'));
     await tester.tap(find.text('Registreren'));
     await tester.pumpAndSettle();
     expect(find.text('Accounttype'), findsOneWidget);
