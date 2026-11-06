@@ -103,8 +103,13 @@ class _NotificationSettingsScreenState
                       if (i > 0) const Divider(),
                       SwitchListTile(
                         title: Text(pref.label(l10n)),
-                        value: pref.inAppEnabled || pref.pushEnabled,
-                        onChanged: (value) => _toggle(pref, value),
+                        subtitle: pref.locked
+                            ? Text(l10n.notifPrefLocked)
+                            : null,
+                        value: pref.pushEnabled,
+                        onChanged: pref.locked
+                            ? null
+                            : (value) => _toggle(pref, value),
                       ),
                     ],
                   ],
@@ -148,9 +153,10 @@ class _NotificationSettingsScreenState
     setState(() {
       final updated = [
         for (final p in _draft!.preferences)
-          p.type == pref.type
+          p.category == pref.category
               ? NotificationPreference(
-                  type: p.type,
+                  category: p.category,
+                      locked: p.locked,
                   inAppEnabled: value,
                   pushEnabled: value,
                 )
@@ -185,11 +191,16 @@ class _NotificationSettingsScreenState
   Future<void> _save() async {
     final draft = _draft;
     if (draft == null) return;
+    // `ACCOUNT` is locked and not editable on the backend — don't send it.
+    final toSave = NotificationSettings(
+      quietHours: draft.quietHours,
+      preferences: draft.preferences.where((p) => !p.locked).toList(),
+    );
     setState(() => _saving = true);
     try {
       final updated = await ref
           .read(notificationsRepositoryProvider)
-          .updateSettings(draft);
+          .updateSettings(toSave);
       ref.invalidate(notificationSettingsProvider);
       if (mounted) {
         setState(() => _draft = updated);

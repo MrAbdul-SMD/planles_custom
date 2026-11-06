@@ -31,6 +31,7 @@ dependencies:
   cached_network_image: ^4.0.6
   printing: ^5.15.1
   flutter_dotenv: ^6.0.1
+  app_links: ^7.2.2
 
 dev_dependencies:
   flutter_test:

@@ -739,5 +739,13 @@
   "notifPrefExamCancelled": "Examen geannuleerd",
   "notifPrefLessonCardUpdated": "Leskaart bijgewerkt",
   "notifPrefInstructorFeedback": "Instructeur feedback",
-  "notifPrefAccountSecurity": "Accountbeveiliging"
+  "notifPrefAccountSecurity": "Accountbeveiliging",
+  "notifPrefLessons": "Lessen",
+  "notifPrefPayments": "Betalingen",
+  "notifPrefExams": "Examens",
+  "notifPrefLessonCards": "Leskaarten",
+  "notifPrefAccount": "Account",
+  "notifPrefLocked": "Altijd aan (kan niet worden uitgezet)",
+  "paymentReturnProcessing": "Betaling verwerken…",
+  "paymentReturnSuccess": "Betaling ontvangen"
 }

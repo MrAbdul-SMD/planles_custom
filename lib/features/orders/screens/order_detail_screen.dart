@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:printing/printing.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/deep_links.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../l10n/l10n.dart';
@@ -56,7 +57,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
     final url = await _checkout(
       () => ref
           .read(ordersRepositoryProvider)
-          .pay(orderId: widget.id, redirectUrl: 'planles://payment'),
+          .pay(orderId: widget.id, redirectUrl: paymentRedirectUrl(kind: paymentRedirectKind)),
     );
     if (url != null) await _open(url);
   }

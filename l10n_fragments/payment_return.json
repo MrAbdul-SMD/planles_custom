@@ -1,0 +1,4 @@
+{
+  "paymentReturnProcessing": {"nl": "Betaling verwerken…", "en": "Processing payment…"},
+  "paymentReturnSuccess": {"nl": "Betaling ontvangen", "en": "Payment received"}
+}

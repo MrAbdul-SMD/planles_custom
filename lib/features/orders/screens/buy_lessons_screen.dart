@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/deep_links.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../l10n/l10n.dart';
@@ -279,7 +280,7 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
             paymentType: _paymentType,
             items: [(id: classId, quantity: _quantity)],
             studentId: _studentId,
-            redirectUrl: 'planles://payment',
+            redirectUrl: paymentRedirectUrl(kind: paymentRedirectKind),
           );
 
       ref.invalidate(ordersListProvider);

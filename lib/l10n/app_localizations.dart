@@ -2089,6 +2089,54 @@ abstract class AppLocalizations {
   /// In nl, this message translates to:
   /// **'Accountbeveiliging'**
   String get notifPrefAccountSecurity;
+
+  /// No description provided for @notifPrefLessons.
+  ///
+  /// In nl, this message translates to:
+  /// **'Lessen'**
+  String get notifPrefLessons;
+
+  /// No description provided for @notifPrefPayments.
+  ///
+  /// In nl, this message translates to:
+  /// **'Betalingen'**
+  String get notifPrefPayments;
+
+  /// No description provided for @notifPrefExams.
+  ///
+  /// In nl, this message translates to:
+  /// **'Examens'**
+  String get notifPrefExams;
+
+  /// No description provided for @notifPrefLessonCards.
+  ///
+  /// In nl, this message translates to:
+  /// **'Leskaarten'**
+  String get notifPrefLessonCards;
+
+  /// No description provided for @notifPrefAccount.
+  ///
+  /// In nl, this message translates to:
+  /// **'Account'**
+  String get notifPrefAccount;
+
+  /// No description provided for @notifPrefLocked.
+  ///
+  /// In nl, this message translates to:
+  /// **'Altijd aan (kan niet worden uitgezet)'**
+  String get notifPrefLocked;
+
+  /// No description provided for @paymentReturnProcessing.
+  ///
+  /// In nl, this message translates to:
+  /// **'Betaling verwerken…'**
+  String get paymentReturnProcessing;
+
+  /// No description provided for @paymentReturnSuccess.
+  ///
+  /// In nl, this message translates to:
+  /// **'Betaling ontvangen'**
+  String get paymentReturnSuccess;
 }
 
 class _AppLocalizationsDelegate

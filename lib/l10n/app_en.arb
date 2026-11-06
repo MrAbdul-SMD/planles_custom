@@ -330,5 +330,13 @@
   "notifPrefExamCancelled": "Exam cancelled",
   "notifPrefLessonCardUpdated": "Lesson card updated",
   "notifPrefInstructorFeedback": "Instructor feedback",
-  "notifPrefAccountSecurity": "Account security"
+  "notifPrefAccountSecurity": "Account security",
+  "notifPrefLessons": "Lessons",
+  "notifPrefPayments": "Payments",
+  "notifPrefExams": "Exams",
+  "notifPrefLessonCards": "Lesson cards",
+  "notifPrefAccount": "Account",
+  "notifPrefLocked": "Always on (cannot be turned off)",
+  "paymentReturnProcessing": "Processing payment…",
+  "paymentReturnSuccess": "Payment received"
 }

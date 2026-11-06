@@ -1063,4 +1063,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notifPrefAccountSecurity => 'Account security';
+
+  @override
+  String get notifPrefLessons => 'Lessons';
+
+  @override
+  String get notifPrefPayments => 'Payments';
+
+  @override
+  String get notifPrefExams => 'Exams';
+
+  @override
+  String get notifPrefLessonCards => 'Lesson cards';
+
+  @override
+  String get notifPrefAccount => 'Account';
+
+  @override
+  String get notifPrefLocked => 'Always on (cannot be turned off)';
+
+  @override
+  String get paymentReturnProcessing => 'Processing payment…';
+
+  @override
+  String get paymentReturnSuccess => 'Payment received';
 }

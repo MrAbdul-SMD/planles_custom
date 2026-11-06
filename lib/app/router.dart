@@ -13,6 +13,7 @@ import '../features/notifications/screens/notifications_screen.dart';
 import '../features/orders/screens/buy_lessons_screen.dart';
 import '../features/orders/screens/order_detail_screen.dart';
 import '../features/orders/screens/orders_screen.dart';
+import '../features/orders/screens/payment_return_screen.dart';
 import '../features/orders/screens/schedule_lesson_screen.dart';
 import '../features/planning/screens/lesson_cards_screen.dart';
 import '../features/planning/screens/planning_detail_screen.dart';
@@ -143,6 +144,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, _) => const ChangePasswordScreen(),
       ),
       GoRoute(path: '/students', builder: (_, _) => const StudentsScreen()),
+      GoRoute(
+        path: '/payment/callback',
+        builder: (_, state) => PaymentReturnScreen(
+          kind: state.uri.queryParameters['kind'] ?? 'payment',
+        ),
+      ),
     ],
   );
 

@@ -42,49 +42,43 @@ class AppNotification {
 
 class NotificationPreference {
   NotificationPreference({
-    required this.type,
+    required this.category,
     this.inAppEnabled = true,
     this.pushEnabled = true,
+    this.locked = false,
   });
 
   factory NotificationPreference.fromJson(Map<String, dynamic> json) =>
       NotificationPreference(
-        type: json['type']?.toString() ?? '',
-        inAppEnabled: json['inAppEnabled'] as bool? ?? true,
+        category: json['category']?.toString() ??
+            json['type']?.toString() ??
+            '',
+        inAppEnabled: json['inAppEnabled'] as bool? ??
+            (json['pushEnabled'] as bool? ?? true),
         pushEnabled: json['pushEnabled'] as bool? ?? true,
+        locked: json['locked'] as bool? ?? false,
       );
 
-  final String type;
+  final String category;
   bool inAppEnabled;
   bool pushEnabled;
+  final bool locked;
+
+  /// Backwards-compatible alias used by older call sites.
+  String get type => category;
 
   Map<String, dynamic> toJson() => {
-    'type': type,
-    'inAppEnabled': inAppEnabled,
+    'category': category,
     'pushEnabled': pushEnabled,
   };
 
-  String label(AppLocalizations l10n) => switch (type) {
-    'LESSON_BOOKED' => l10n.notifPrefLessonBooked,
-    'LESSON_REMINDER_24H' => l10n.notifPrefLessonReminder24h,
-    'LESSON_REMINDER_1H' => l10n.notifPrefLessonReminder1h,
-    'LESSON_CANCELLED' => l10n.notifPrefLessonCancelled,
-    'LESSON_CHANGED' => l10n.notifPrefLessonChanged,
-    'LESSON_COMPLETED' => l10n.notifPrefLessonCompleted,
-    'PAYMENT_SUCCESSFUL' => l10n.notifPrefPaymentSuccessful,
-    'PAYMENT_FAILED' => l10n.notifPrefPaymentFailed,
-    'PAYMENT_REFUNDED' => l10n.notifPrefPaymentRefunded,
-    'PAYMENT_REQUESTED' => l10n.notifPrefPaymentRequested,
-    'LOW_LESSON_CREDIT' => l10n.notifPrefLowLessonCredit,
-    'EXAM_BOOKED' => l10n.notifPrefExamBooked,
-    'EXAM_REMINDER_7D' => l10n.notifPrefExamReminder7d,
-    'EXAM_REMINDER_24H' => l10n.notifPrefExamReminder24h,
-    'EXAM_CHANGED' => l10n.notifPrefExamChanged,
-    'EXAM_CANCELLED' => l10n.notifPrefExamCancelled,
-    'LESSON_CARD_UPDATED' => l10n.notifPrefLessonCardUpdated,
-    'INSTRUCTOR_FEEDBACK' => l10n.notifPrefInstructorFeedback,
-    'ACCOUNT_SECURITY' => l10n.notifPrefAccountSecurity,
-    _ => type,
+  String label(AppLocalizations l10n) => switch (category) {
+    'LESSONS' => l10n.notifPrefLessons,
+    'PAYMENTS' => l10n.notifPrefPayments,
+    'EXAMS' => l10n.notifPrefExams,
+    'LESSON_CARDS' => l10n.notifPrefLessonCards,
+    'ACCOUNT' => l10n.notifPrefAccount,
+    _ => category,
   };
 }
 

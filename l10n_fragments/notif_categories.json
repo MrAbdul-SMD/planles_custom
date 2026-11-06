@@ -1,0 +1,8 @@
+{
+  "notifPrefLessons": {"nl": "Lessen", "en": "Lessons"},
+  "notifPrefPayments": {"nl": "Betalingen", "en": "Payments"},
+  "notifPrefExams": {"nl": "Examens", "en": "Exams"},
+  "notifPrefLessonCards": {"nl": "Leskaarten", "en": "Lesson cards"},
+  "notifPrefAccount": {"nl": "Account", "en": "Account"},
+  "notifPrefLocked": {"nl": "Altijd aan (kan niet worden uitgezet)", "en": "Always on (cannot be turned off)"}
+}

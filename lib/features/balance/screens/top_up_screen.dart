@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/deep_links.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../l10n/l10n.dart';
@@ -47,7 +48,7 @@ class _TopUpScreenState extends ConsumerState<TopUpScreen> {
     try {
       final url = await ref
           .read(ordersRepositoryProvider)
-          .purchaseBalance(amount: amount, redirectUrl: 'planles://topup');
+          .purchaseBalance(amount: amount, redirectUrl: paymentRedirectUrl(kind: topupRedirectKind));
       final uri = Uri.tryParse(url);
       if (uri != null) {
         await launchUrl(uri, mode: LaunchMode.externalApplication);

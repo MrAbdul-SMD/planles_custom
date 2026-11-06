@@ -1,9 +1,12 @@
+import 'package:app_links/app_links.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app/app.dart';
 import 'app/router.dart';
+import 'core/deep_links.dart';
 import 'core/network/api_client.dart';
 import 'core/providers.dart';
 import 'core/storage/token_storage.dart';
@@ -43,10 +46,22 @@ Future<void> main() async {
   // flashes the login screen for an already signed-in user.
   await container.read(authControllerProvider.notifier).restore();
 
+  final router = container.read(routerProvider);
+
+  // Handle payment redirects coming back into the app (mobile / desktop).
+  if (!kIsWeb) {
+    final appLinks = AppLinks();
+    appLinks.uriLinkStream.listen((uri) {
+      handleDeepLink(uri, router);
+    });
+    final initial = await appLinks.getInitialLink();
+    if (initial != null) handleDeepLink(initial, router);
+  }
+
   runApp(
     UncontrolledProviderScope(
       container: container,
-      child: PlanlesApp(router: container.read(routerProvider)),
+      child: PlanlesApp(router: router),
     ),
   );
 }

@@ -1068,4 +1068,28 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get notifPrefAccountSecurity => 'Accountbeveiliging';
+
+  @override
+  String get notifPrefLessons => 'Lessen';
+
+  @override
+  String get notifPrefPayments => 'Betalingen';
+
+  @override
+  String get notifPrefExams => 'Examens';
+
+  @override
+  String get notifPrefLessonCards => 'Leskaarten';
+
+  @override
+  String get notifPrefAccount => 'Account';
+
+  @override
+  String get notifPrefLocked => 'Altijd aan (kan niet worden uitgezet)';
+
+  @override
+  String get paymentReturnProcessing => 'Betaling verwerken…';
+
+  @override
+  String get paymentReturnSuccess => 'Betaling ontvangen';
 }
