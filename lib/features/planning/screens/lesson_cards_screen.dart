@@ -49,8 +49,7 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
     super.dispose();
   }
 
-  bool get _isInstructor =>
-      ref.read(currentUserProvider)?.isInstructor == true;
+  bool get _isInstructor => ref.read(currentUserProvider)?.isInstructor == true;
 
   Future<void> _load() async {
     setState(() {
@@ -70,12 +69,11 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
         ..clear()
         ..addAll(mine.map(_Answer.new));
       for (final a in _answers) {
-        _controllers[a.question.id] =
-            TextEditingController(text: a.text)
-              ..addListener(() {
-                a.text = _controllers[a.question.id]!.text;
-                a.dirty = true;
-              });
+        _controllers[a.question.id] = TextEditingController(text: a.text)
+          ..addListener(() {
+            a.text = _controllers[a.question.id]!.text;
+            a.dirty = true;
+          });
       }
       if (mounted) setState(() => _loading = false);
     } catch (e) {
@@ -140,36 +138,35 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
-              ? ErrorView(message: _error!, onRetry: _load)
-              : _answers.isEmpty
-                  ? const EmptyState(
-                      icon: Icons.fact_check_outlined,
-                      title: 'Geen vragen',
-                      subtitle:
-                          'Voor deze les zijn nog geen vragen ingesteld.',
-                    )
-                  : ListView(
-                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
-                      children: [
-                        Text(
-                          _isInstructor
-                              ? 'Beoordeel je leerling per onderdeel.'
-                              : 'Vul in hoe het ging tijdens je les.',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        for (final (i, answer) in _answers.indexed) ...[
-                          _QuestionCard(
-                            index: i + 1,
-                            answer: answer,
-                            controller: _controllers[answer.question.id]!,
-                          ),
-                          const SizedBox(height: 12),
-                        ],
-                      ],
-                    ),
+          ? ErrorView(message: _error!, onRetry: _load)
+          : _answers.isEmpty
+          ? const EmptyState(
+              icon: Icons.fact_check_outlined,
+              title: 'Geen vragen',
+              subtitle: 'Voor deze les zijn nog geen vragen ingesteld.',
+            )
+          : ListView(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+              children: [
+                Text(
+                  _isInstructor
+                      ? 'Beoordeel je leerling per onderdeel.'
+                      : 'Vul in hoe het ging tijdens je les.',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                for (final (i, answer) in _answers.indexed) ...[
+                  _QuestionCard(
+                    index: i + 1,
+                    answer: answer,
+                    controller: _controllers[answer.question.id]!,
+                  ),
+                  const SizedBox(height: 12),
+                ],
+              ],
+            ),
       bottomNavigationBar: _answers.isEmpty
           ? null
           : SafeArea(
@@ -181,8 +178,7 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
                       ? const SizedBox(
                           width: 22,
                           height: 22,
-                          child:
-                              CircularProgressIndicator(strokeWidth: 2.4),
+                          child: CircularProgressIndicator(strokeWidth: 2.4),
                         )
                       : const Text('Leskaart opslaan'),
                 ),
@@ -236,8 +232,9 @@ class _QuestionCard extends StatelessWidget {
                     children: [
                       Text(
                         answer.question.title,
-                        style: theme.textTheme.titleSmall
-                            ?.copyWith(fontWeight: FontWeight.w700),
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                       if (sub != null && sub != answer.question.title)
                         Text(
@@ -263,8 +260,9 @@ class _QuestionCard extends StatelessWidget {
             const SizedBox(height: 14),
             Text(
               'Beoordeling',
-              style: theme.textTheme.labelMedium
-                  ?.copyWith(fontWeight: FontWeight.w600),
+              style: theme.textTheme.labelMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
             ),
             const SizedBox(height: 8),
             Wrap(

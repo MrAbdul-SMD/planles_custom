@@ -72,4 +72,18 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Herstel je wachtwoord'), findsOneWidget);
   });
+
+  testWidgets('wide windows centre the app in a max-width column',
+      (tester) async {
+    // A typical desktop window; the app must not stretch to 1280px.
+    tester.view.physicalSize = const Size(1280 * 2, 800 * 2);
+    tester.view.devicePixelRatio = 2;
+    addTearDown(tester.view.reset);
+
+    await _pumpSignedOutApp(tester);
+
+    final loginWidth = tester.getSize(find.byType(Scaffold)).width;
+    expect(loginWidth, 760);
+    expect(tester.takeException(), isNull);
+  });
 }

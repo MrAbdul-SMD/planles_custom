@@ -28,14 +28,17 @@ class DashboardScreen extends ConsumerWidget {
     final user = ref.watch(currentUserProvider);
     final planning = ref.watch(planningListProvider);
     final unread = ref.watch(unreadCountProvider).value ?? 0;
-    final notifications =
-        ref.watch(notificationsProvider).items.take(2).toList();
+    final notifications = ref
+        .watch(notificationsProvider)
+        .items
+        .take(2)
+        .toList();
 
     final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_greeting()),
+        title: Text(_greeting(user)),
         actions: [
           IconButton(
             tooltip: 'Meldingen',
@@ -146,8 +149,11 @@ class DashboardScreen extends ConsumerWidget {
                       color: theme.colorScheme.primary,
                     ),
                   ),
-                  title: Text(n.title ?? 'Melding',
-                      maxLines: 1, overflow: TextOverflow.ellipsis),
+                  title: Text(
+                    n.title ?? 'Melding',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                   subtitle: Text(
                     n.body ?? '',
                     maxLines: 2,
@@ -167,11 +173,15 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
-  String _greeting() {
+  String _greeting(User? user) {
     final hour = DateTime.now().hour;
-    if (hour < 12) return 'Goedemorgen';
-    if (hour < 18) return 'Goedemiddag';
-    return 'Goedenavond';
+    final base = hour < 12
+        ? 'Goedemorgen'
+        : hour < 18
+        ? 'Goedemiddag'
+        : 'Goedenavond';
+    final name = user?.firstName;
+    return (name == null || name.isEmpty) ? base : '$base, $name';
   }
 }
 
@@ -207,17 +217,13 @@ class _BalanceCard extends ConsumerWidget {
                   ),
                 ),
               ),
-              AppAvatar(
-                initials: user?.initials ?? '?',
-                size: 40,
-              ),
+              AppAvatar(initials: user?.initials ?? '?', size: 40),
             ],
           ),
           const SizedBox(height: 18),
           Text(
             'Saldo',
-            style: theme.textTheme.bodySmall
-                ?.copyWith(color: Colors.white70),
+            style: theme.textTheme.bodySmall?.copyWith(color: Colors.white70),
           ),
           const SizedBox(height: 4),
           Text(
@@ -257,16 +263,20 @@ class _NoLessons extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Icon(Icons.event_available_outlined,
-              size: 34, color: theme.colorScheme.outline),
+          Icon(
+            Icons.event_available_outlined,
+            size: 34,
+            color: theme.colorScheme.outline,
+          ),
           const SizedBox(height: 12),
           const Text('Nog geen lessen gepland'),
           const SizedBox(height: 4),
           Text(
             'Koop een lespakket om je eerste les in te plannen.',
             textAlign: TextAlign.center,
-            style: theme.textTheme.bodySmall
-                ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
           ),
           const SizedBox(height: 16),
           OutlinedButton.icon(
@@ -296,6 +306,7 @@ class _ActionCard extends StatelessWidget {
     final theme = Theme.of(context);
     return InkWell(
       borderRadius: BorderRadius.circular(16),
+      mouseCursor: SystemMouseCursors.click,
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 10),
@@ -312,8 +323,9 @@ class _ActionCard extends StatelessWidget {
               textAlign: TextAlign.center,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.labelSmall
-                  ?.copyWith(fontWeight: FontWeight.w600),
+              style: theme.textTheme.labelSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ],
         ),
@@ -338,6 +350,7 @@ class PlanningTile extends StatelessWidget {
     return Card(
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
+        mouseCursor: SystemMouseCursors.click,
         onTap: () => context.push('/planning/${planning.id}'),
         child: Padding(
           padding: const EdgeInsets.all(14),
@@ -378,8 +391,9 @@ class PlanningTile extends StatelessWidget {
                       planning.drivingClass?.name ?? 'Les',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleSmall
-                          ?.copyWith(fontWeight: FontWeight.w700),
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -391,8 +405,9 @@ class PlanningTile extends StatelessWidget {
                       ].join(' · '),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodySmall
-                          ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ],
                 ),
@@ -403,6 +418,11 @@ class PlanningTile extends StatelessWidget {
                     label: planning.statusLabel,
                     tone: PlanningTone.forStatus(planning.status),
                   ),
+              const SizedBox(width: 4),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: theme.colorScheme.outline,
+              ),
             ],
           ),
         ),

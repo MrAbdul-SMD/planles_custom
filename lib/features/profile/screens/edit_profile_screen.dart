@@ -38,16 +38,25 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   @override
   void initState() {
     super.initState();
-    _initial = ref.read(currentUserProvider) ??
-        const User(id: 0, profile: 'STUDENT');
+    _initial =
+        ref.read(currentUserProvider) ?? const User(id: 0, profile: 'STUDENT');
     _gender = _initial.gender;
   }
 
   @override
   void dispose() {
     for (final c in [
-      _firstName, _lastName, _email, _phone, _birthdate, _street,
-      _houseNumber, _zipCode, _city, _pickup, _plate,
+      _firstName,
+      _lastName,
+      _email,
+      _phone,
+      _birthdate,
+      _street,
+      _houseNumber,
+      _zipCode,
+      _city,
+      _pickup,
+      _plate,
     ]) {
       c.dispose();
     }
@@ -72,7 +81,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     setState(() => _busy = true);
     try {
-      await ref.read(profileRepositoryProvider).updateProfile(
+      await ref
+          .read(profileRepositoryProvider)
+          .updateProfile(
             profile: {
               'firstName': _firstName.text.trim(),
               'lastName': _lastName.text.trim(),
@@ -123,8 +134,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     Expanded(
                       child: TextFormField(
                         controller: _firstName,
-                        decoration:
-                            const InputDecoration(labelText: 'Voornaam'),
+                        decoration: const InputDecoration(
+                          labelText: 'Voornaam',
+                        ),
                         validator: (v) => (v == null || v.trim().isEmpty)
                             ? 'Verplicht veld'
                             : null,
@@ -134,8 +146,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     Expanded(
                       child: TextFormField(
                         controller: _lastName,
-                        decoration:
-                            const InputDecoration(labelText: 'Achternaam'),
+                        decoration: const InputDecoration(
+                          labelText: 'Achternaam',
+                        ),
                         validator: (v) => (v == null || v.trim().isEmpty)
                             ? 'Verplicht veld'
                             : null,
@@ -183,16 +196,19 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 TextFormField(
                   controller: _phone,
                   keyboardType: TextInputType.phone,
-                  decoration:
-                      const InputDecoration(labelText: 'Telefoonnummer'),
-                  validator: (v) => (v == null || v.trim().isEmpty)
-                      ? 'Verplicht veld'
-                      : null,
+                  decoration: const InputDecoration(
+                    labelText: 'Telefoonnummer',
+                  ),
+                  validator: (v) =>
+                      (v == null || v.trim().isEmpty) ? 'Verplicht veld' : null,
                 ),
                 const SizedBox(height: 24),
-                Text('Adres',
-                    style: theme.textTheme.titleSmall
-                        ?.copyWith(fontWeight: FontWeight.w700)),
+                Text(
+                  'Adres',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
                 const SizedBox(height: 14),
                 Row(
                   children: [
@@ -210,8 +226,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     Expanded(
                       child: TextFormField(
                         controller: _houseNumber,
-                        decoration:
-                            const InputDecoration(labelText: 'Huisnr.'),
+                        decoration: const InputDecoration(labelText: 'Huisnr.'),
                         validator: (v) => (v == null || v.trim().isEmpty)
                             ? 'Verplicht veld'
                             : null,
@@ -226,8 +241,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                       child: TextFormField(
                         controller: _zipCode,
                         textCapitalization: TextCapitalization.characters,
-                        decoration:
-                            const InputDecoration(labelText: 'Postcode'),
+                        decoration: const InputDecoration(
+                          labelText: 'Postcode',
+                        ),
                         validator: (v) => (v == null || v.trim().isEmpty)
                             ? 'Verplicht veld'
                             : null,
@@ -249,8 +265,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 const SizedBox(height: 14),
                 TextFormField(
                   controller: _pickup,
-                  decoration:
-                      const InputDecoration(labelText: 'Ophaallocatie'),
+                  decoration: const InputDecoration(labelText: 'Ophaallocatie'),
                 ),
                 const SizedBox(height: 14),
                 TextFormField(

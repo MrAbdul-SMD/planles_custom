@@ -25,17 +25,47 @@ class AsyncView<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     return value.when(
       skipLoadingOnReload: true,
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => ErrorView(
-        message: error.toString(),
-        onRetry: onRetry,
-      ),
+      loading: () => const Center(child: LoadingView()),
+      error: (error, _) =>
+          ErrorView(message: error.toString(), onRetry: onRetry),
       data: (value) {
         if (isEmpty?.call(value) ?? false) {
           return empty ?? const SizedBox.shrink();
         }
         return data(value);
       },
+    );
+  }
+}
+
+/// Centred spinner with a short label so slow requests don't look frozen.
+class LoadingView extends StatelessWidget {
+  const LoadingView({super.key, this.label});
+
+  final String? label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CircularProgressIndicator(strokeWidth: 3),
+            if (label != null) ...[
+              const SizedBox(height: 16),
+              Text(
+                label!,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }
@@ -107,16 +137,20 @@ class EmptyState extends StatelessWidget {
               child: Icon(icon, size: 34, color: theme.colorScheme.primary),
             ),
             const SizedBox(height: 18),
-            Text(title,
-                style: theme.textTheme.titleMedium
-                    ?.copyWith(fontWeight: FontWeight.w700)),
+            Text(
+              title,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
             if (subtitle != null) ...[
               const SizedBox(height: 6),
               Text(
                 subtitle!,
                 textAlign: TextAlign.center,
-                style: theme.textTheme.bodyMedium
-                    ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
               ),
             ],
           ],
@@ -141,9 +175,7 @@ class SectionHeader extends StatelessWidget {
           Expanded(
             child: Text(
               title,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleSmall
+              style: Theme.of(context).textTheme.titleSmall
                   ?.copyWith(fontWeight: FontWeight.w700),
             ),
           ),
@@ -177,14 +209,18 @@ class InfoRow extends StatelessWidget {
             width: 128,
             child: Text(
               label,
-              style: theme.textTheme.bodyMedium
-                  ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ),
           ),
           Expanded(
-            child: Text(value, style: theme.textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-            )),
+            child: Text(
+              value,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
         ],
       ),
@@ -201,27 +237,30 @@ class StatusChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     final (bg, fg) = switch (tone) {
-      StatusTone.success => (
-          const Color(0xFFDCFCE7),
-          const Color(0xFF15803D),
-        ),
-      StatusTone.warning => (
-          const Color(0xFFFEF3C7),
-          const Color(0xFFB45309),
-        ),
-      StatusTone.danger => (
-          const Color(0xFFFEE2E2),
-          const Color(0xFFB91C1C),
-        ),
-      StatusTone.neutral => (
-          const Color(0xFFF1F5F9),
-          const Color(0xFF475569),
-        ),
-      StatusTone.info => (
-          const Color(0xFFDBEAFE),
-          const Color(0xFF1D4ED8),
-        ),
+      StatusTone.success =>
+        isDark
+            ? (const Color(0xFF14532D), const Color(0xFF86EFAC))
+            : (const Color(0xFFDCFCE7), const Color(0xFF15803D)),
+      StatusTone.warning =>
+        isDark
+            ? (const Color(0xFF78350F), const Color(0xFFFCD34D))
+            : (const Color(0xFFFEF3C7), const Color(0xFFB45309)),
+      StatusTone.danger =>
+        isDark
+            ? (const Color(0xFF7F1D1D), const Color(0xFFFCA5A5))
+            : (const Color(0xFFFEE2E2), const Color(0xFFB91C1C)),
+      StatusTone.neutral =>
+        isDark
+            ? (scheme.surfaceContainerHighest, scheme.onSurfaceVariant)
+            : (const Color(0xFFF1F5F9), const Color(0xFF475569)),
+      StatusTone.info =>
+        isDark
+            ? (const Color(0xFF1E3A8A), const Color(0xFF93C5FD))
+            : (const Color(0xFFDBEAFE), const Color(0xFF1D4ED8)),
     };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -245,11 +284,11 @@ enum StatusTone { success, warning, danger, neutral, info }
 
 extension PlanningTone on StatusTone {
   static StatusTone forStatus(String status) => switch (status) {
-        'confirmed' => StatusTone.info,
-        'completed' => StatusTone.success,
-        'cancelled' => StatusTone.danger,
-        _ => StatusTone.warning,
-      };
+    'confirmed' => StatusTone.info,
+    'completed' => StatusTone.success,
+    'cancelled' => StatusTone.danger,
+    _ => StatusTone.warning,
+  };
 }
 
 class AppAvatar extends StatelessWidget {
@@ -288,8 +327,21 @@ void showAppSnack(BuildContext context, String message, {bool error = false}) {
     ..hideCurrentSnackBar()
     ..showSnackBar(
       SnackBar(
-        content: Text(message),
-        backgroundColor: error ? scheme.error : null,
+        content: Row(
+          children: [
+            Icon(
+              error
+                  ? Icons.error_outline_rounded
+                  : Icons.check_circle_outline_rounded,
+              color: scheme.onInverseSurface,
+              size: 20,
+            ),
+            const SizedBox(width: 10),
+            Expanded(child: Text(message)),
+          ],
+        ),
+        backgroundColor: error ? scheme.error : scheme.inverseSurface,
+        duration: Duration(seconds: error ? 4 : 2),
       ),
     );
 }
@@ -315,7 +367,8 @@ Future<bool> confirmAction(
           onPressed: () => Navigator.of(context).pop(true),
           style: destructive
               ? FilledButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.error)
+                  backgroundColor: Theme.of(context).colorScheme.error,
+                )
               : null,
           child: Text(confirmLabel),
         ),

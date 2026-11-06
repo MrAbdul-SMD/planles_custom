@@ -76,6 +76,7 @@ class _OrderCard extends StatelessWidget {
     return Card(
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
+        mouseCursor: SystemMouseCursors.click,
         onTap: () => context.push('/orders/${order.id}'),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -87,8 +88,9 @@ class _OrderCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       'Bestelling #${order.id}',
-                      style: theme.textTheme.titleSmall
-                          ?.copyWith(fontWeight: FontWeight.w700),
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                   StatusChip(label: label, tone: tone),
@@ -100,8 +102,9 @@ class _OrderCard extends StatelessWidget {
                   if (order.createdAt != null) F.dateTime(order.createdAt),
                   if (order.student != null) order.student!.fullName,
                 ].join(' · '),
-                style: theme.textTheme.bodySmall
-                    ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
               ),
               const SizedBox(height: 12),
               Row(
@@ -109,8 +112,9 @@ class _OrderCard extends StatelessWidget {
                   if (payment?.finalAmountValue != null) ...[
                     Text(
                       F.money(payment!.finalAmountValue),
-                      style: theme.textTheme.titleMedium
-                          ?.copyWith(fontWeight: FontWeight.w800),
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                     const SizedBox(width: 12),
                   ],

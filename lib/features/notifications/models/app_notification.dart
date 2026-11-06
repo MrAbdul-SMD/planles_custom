@@ -13,7 +13,8 @@ class AppNotification {
     this.dedupeKey,
   });
 
-  factory AppNotification.fromJson(Map<String, dynamic> json) => AppNotification(
+  factory AppNotification.fromJson(Map<String, dynamic> json) =>
+      AppNotification(
         id: int.tryParse(json['id'].toString()) ?? 0,
         userId: int.tryParse(json['userId'].toString()),
         type: json['type']?.toString(),
@@ -57,33 +58,33 @@ class NotificationPreference {
   bool pushEnabled;
 
   Map<String, dynamic> toJson() => {
-        'type': type,
-        'inAppEnabled': inAppEnabled,
-        'pushEnabled': pushEnabled,
-      };
+    'type': type,
+    'inAppEnabled': inAppEnabled,
+    'pushEnabled': pushEnabled,
+  };
 
   String get label => switch (type) {
-        'LESSON_BOOKED' => 'Les geboekt',
-        'LESSON_REMINDER_24H' => 'Herinnering les (24 uur)',
-        'LESSON_REMINDER_1H' => 'Herinnering les (1 uur)',
-        'LESSON_CANCELLED' => 'Les geannuleerd',
-        'LESSON_CHANGED' => 'Les gewijzigd',
-        'LESSON_COMPLETED' => 'Les afgerond',
-        'PAYMENT_SUCCESSFUL' => 'Betaling geslaagd',
-        'PAYMENT_FAILED' => 'Betaling mislukt',
-        'PAYMENT_REFUNDED' => 'Betaling terugbetaald',
-        'PAYMENT_REQUESTED' => 'Betalingsverzoek',
-        'LOW_LESSON_CREDIT' => 'Weinig lesuren over',
-        'EXAM_BOOKED' => 'Examen geboekt',
-        'EXAM_REMINDER_7D' => 'Herinnering examen (7 dagen)',
-        'EXAM_REMINDER_24H' => 'Herinnering examen (24 uur)',
-        'EXAM_CHANGED' => 'Examen gewijzigd',
-        'EXAM_CANCELLED' => 'Examen geannuleerd',
-        'LESSON_CARD_UPDATED' => 'Leskaart bijgewerkt',
-        'INSTRUCTOR_FEEDBACK' => 'Instructeur feedback',
-        'ACCOUNT_SECURITY' => 'Accountbeveiliging',
-        _ => type,
-      };
+    'LESSON_BOOKED' => 'Les geboekt',
+    'LESSON_REMINDER_24H' => 'Herinnering les (24 uur)',
+    'LESSON_REMINDER_1H' => 'Herinnering les (1 uur)',
+    'LESSON_CANCELLED' => 'Les geannuleerd',
+    'LESSON_CHANGED' => 'Les gewijzigd',
+    'LESSON_COMPLETED' => 'Les afgerond',
+    'PAYMENT_SUCCESSFUL' => 'Betaling geslaagd',
+    'PAYMENT_FAILED' => 'Betaling mislukt',
+    'PAYMENT_REFUNDED' => 'Betaling terugbetaald',
+    'PAYMENT_REQUESTED' => 'Betalingsverzoek',
+    'LOW_LESSON_CREDIT' => 'Weinig lesuren over',
+    'EXAM_BOOKED' => 'Examen geboekt',
+    'EXAM_REMINDER_7D' => 'Herinnering examen (7 dagen)',
+    'EXAM_REMINDER_24H' => 'Herinnering examen (24 uur)',
+    'EXAM_CHANGED' => 'Examen gewijzigd',
+    'EXAM_CANCELLED' => 'Examen geannuleerd',
+    'LESSON_CARD_UPDATED' => 'Leskaart bijgewerkt',
+    'INSTRUCTOR_FEEDBACK' => 'Instructeur feedback',
+    'ACCOUNT_SECURITY' => 'Accountbeveiliging',
+    _ => type,
+  };
 }
 
 class QuietHours {
@@ -95,18 +96,19 @@ class QuietHours {
   });
 
   factory QuietHours.fromJson(Map<String, dynamic> json) => QuietHours(
-        enabled: json['enabled'] as bool? ?? true,
-        start: json['start']?.toString() ?? '22:00',
-        end: json['end']?.toString() ?? '07:00',
-        timeZone: json['timeZone']?.toString() ?? 'Europe/Amsterdam',
-      );
+    enabled: json['enabled'] as bool? ?? true,
+    start: json['start']?.toString() ?? '22:00',
+    end: json['end']?.toString() ?? '07:00',
+    timeZone: json['timeZone']?.toString() ?? 'Europe/Amsterdam',
+  );
 
   final bool enabled;
   final String start;
   final String end;
   final String timeZone;
 
-  QuietHours copyWith({bool? enabled, String? start, String? end}) => QuietHours(
+  QuietHours copyWith({bool? enabled, String? start, String? end}) =>
+      QuietHours(
         enabled: enabled ?? this.enabled,
         start: start ?? this.start,
         end: end ?? this.end,
@@ -114,11 +116,11 @@ class QuietHours {
       );
 
   Map<String, dynamic> toJson() => {
-        'enabled': enabled,
-        'start': start,
-        'end': end,
-        if (timeZone.isNotEmpty) 'timeZone': timeZone,
-      };
+    'enabled': enabled,
+    'start': start,
+    'end': end,
+    if (timeZone.isNotEmpty) 'timeZone': timeZone,
+  };
 }
 
 class NotificationSettings {
@@ -134,10 +136,13 @@ class NotificationSettings {
             : const QuietHours(),
         preferences: json['preferences'] is List
             ? (json['preferences'] as List)
-                .whereType<Map>()
-                .map((e) =>
-                    NotificationPreference.fromJson(Map<String, dynamic>.from(e)))
-                .toList()
+                  .whereType<Map>()
+                  .map(
+                    (e) => NotificationPreference.fromJson(
+                      Map<String, dynamic>.from(e),
+                    ),
+                  )
+                  .toList()
             : const [],
       );
 
@@ -145,7 +150,7 @@ class NotificationSettings {
   final List<NotificationPreference> preferences;
 
   Map<String, dynamic> toJson() => {
-        'quietHours': quietHours.toJson(),
-        'preferences': preferences.map((e) => e.toJson()).toList(),
-      };
+    'quietHours': quietHours.toJson(),
+    'preferences': preferences.map((e) => e.toJson()).toList(),
+  };
 }

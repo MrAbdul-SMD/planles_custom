@@ -29,30 +29,27 @@ class NotificationsState {
     int? Function()? nextCursor,
     bool? loadingMore,
     bool? refreshing,
-  }) =>
-      NotificationsState(
-        items: items ?? this.items,
-        nextCursor: nextCursor != null ? nextCursor() : this.nextCursor,
-        loadingMore: loadingMore ?? this.loadingMore,
-        refreshing: refreshing ?? this.refreshing,
-      );
+  }) => NotificationsState(
+    items: items ?? this.items,
+    nextCursor: nextCursor != null ? nextCursor() : this.nextCursor,
+    loadingMore: loadingMore ?? this.loadingMore,
+    refreshing: refreshing ?? this.refreshing,
+  );
 }
 
 class NotificationsController extends Notifier<NotificationsState> {
   @override
   NotificationsState build() => const NotificationsState();
 
-  NotificationsRepository get _repo => ref.read(notificationsRepositoryProvider);
+  NotificationsRepository get _repo =>
+      ref.read(notificationsRepositoryProvider);
 
   Future<void> refresh() async {
     if (state.refreshing) return;
     _set(state.copyWith(refreshing: true));
     try {
       final page = await _repo.list();
-      _set(NotificationsState(
-        items: page.items,
-        nextCursor: page.nextCursor,
-      ));
+      _set(NotificationsState(items: page.items, nextCursor: page.nextCursor));
     } catch (_) {
       _set(state.copyWith(refreshing: false));
       rethrow;
@@ -65,10 +62,12 @@ class NotificationsController extends Notifier<NotificationsState> {
     _set(state.copyWith(loadingMore: true));
     try {
       final page = await _repo.list(cursor: cursor);
-      _set(NotificationsState(
-        items: [...state.items, ...page.items],
-        nextCursor: page.nextCursor,
-      ));
+      _set(
+        NotificationsState(
+          items: [...state.items, ...page.items],
+          nextCursor: page.nextCursor,
+        ),
+      );
     } catch (_) {
       _set(state.copyWith(loadingMore: false));
       rethrow;
@@ -77,47 +76,51 @@ class NotificationsController extends Notifier<NotificationsState> {
 
   Future<void> markRead(int id) async {
     await _repo.markRead(id);
-    _set(state.copyWith(
-      items: [
-        for (final n in state.items)
-          n.id == id
-              ? AppNotification(
-                  id: n.id,
-                  userId: n.userId,
-                  type: n.type,
-                  title: n.title,
-                  body: n.body,
-                  data: n.data,
-                  readAt: DateTime.now(),
-                  createdAt: n.createdAt,
-                  dedupeKey: n.dedupeKey,
-                )
-              : n,
-      ],
-      nextCursor: () => state.nextCursor,
-    ));
+    _set(
+      state.copyWith(
+        items: [
+          for (final n in state.items)
+            n.id == id
+                ? AppNotification(
+                    id: n.id,
+                    userId: n.userId,
+                    type: n.type,
+                    title: n.title,
+                    body: n.body,
+                    data: n.data,
+                    readAt: DateTime.now(),
+                    createdAt: n.createdAt,
+                    dedupeKey: n.dedupeKey,
+                  )
+                : n,
+        ],
+        nextCursor: () => state.nextCursor,
+      ),
+    );
   }
 
   Future<void> markAllRead() async {
     await _repo.markAllRead();
     final now = DateTime.now();
-    _set(state.copyWith(
-      items: [
-        for (final n in state.items)
-          AppNotification(
-            id: n.id,
-            userId: n.userId,
-            type: n.type,
-            title: n.title,
-            body: n.body,
-            data: n.data,
-            readAt: n.readAt ?? now,
-            createdAt: n.createdAt,
-            dedupeKey: n.dedupeKey,
-          ),
-      ],
-      nextCursor: () => state.nextCursor,
-    ));
+    _set(
+      state.copyWith(
+        items: [
+          for (final n in state.items)
+            AppNotification(
+              id: n.id,
+              userId: n.userId,
+              type: n.type,
+              title: n.title,
+              body: n.body,
+              data: n.data,
+              readAt: n.readAt ?? now,
+              createdAt: n.createdAt,
+              dedupeKey: n.dedupeKey,
+            ),
+        ],
+        nextCursor: () => state.nextCursor,
+      ),
+    );
     ref.invalidate(unreadCountProvider);
   }
 
@@ -128,14 +131,15 @@ class NotificationsController extends Notifier<NotificationsState> {
 
 final notificationsProvider =
     NotifierProvider<NotificationsController, NotificationsState>(
-  NotificationsController.new,
-);
+      NotificationsController.new,
+    );
 
 final unreadCountProvider = FutureProvider<int>((ref) {
   return ref.watch(notificationsRepositoryProvider).unreadCount();
 });
 
-final notificationSettingsProvider =
-    FutureProvider<NotificationSettings>((ref) {
+final notificationSettingsProvider = FutureProvider<NotificationSettings>((
+  ref,
+) {
   return ref.watch(notificationsRepositoryProvider).settings();
 });

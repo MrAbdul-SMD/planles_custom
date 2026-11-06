@@ -78,9 +78,9 @@ class AuthRepository {
   }
 
   Future<void> forgetPassword(String email) => _api.post(
-        '/auth/forget-password',
-        body: {'email': email.trim().toLowerCase()},
-      );
+    '/auth/forget-password',
+    body: {'email': email.trim().toLowerCase()},
+  );
 
   /// Verifies the OTP; when [password] is given it also resets it.
   /// Returns the refreshed user when the API provides one.

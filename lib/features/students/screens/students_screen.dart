@@ -31,12 +31,16 @@ class _StudentsScreenState extends ConsumerState<StudentsScreen> {
           final filtered = _query.isEmpty
               ? list
               : list
-                  .where((s) =>
-                      s.fullName.toLowerCase().contains(_query.toLowerCase()) ||
-                      (s.email ?? '')
-                          .toLowerCase()
-                          .contains(_query.toLowerCase()))
-                  .toList();
+                    .where(
+                      (s) =>
+                          s.fullName.toLowerCase().contains(
+                            _query.toLowerCase(),
+                          ) ||
+                          (s.email ?? '').toLowerCase().contains(
+                            _query.toLowerCase(),
+                          ),
+                    )
+                    .toList();
 
           return Column(
             children: [
@@ -55,7 +59,8 @@ class _StudentsScreenState extends ConsumerState<StudentsScreen> {
                     ? const EmptyState(
                         icon: Icons.groups_outlined,
                         title: 'Geen leerlingen',
-                        subtitle: 'Er zijn nog geen leerlingen aan je gekoppeld.',
+                        subtitle:
+                            'Er zijn nog geen leerlingen aan je gekoppeld.',
                       )
                     : RefreshIndicator(
                         onRefresh: () async =>
@@ -63,8 +68,7 @@ class _StudentsScreenState extends ConsumerState<StudentsScreen> {
                         child: ListView.separated(
                           padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
                           itemCount: filtered.length,
-                          separatorBuilder: (_, _) =>
-                              const SizedBox(height: 8),
+                          separatorBuilder: (_, _) => const SizedBox(height: 8),
                           itemBuilder: (context, index) =>
                               _StudentTile(student: filtered[index]),
                         ),
@@ -98,8 +102,9 @@ class _StudentTile extends StatelessWidget {
         trailing: student.balance != null
             ? Text(
                 '€ ${student.balance!.toStringAsFixed(2)}',
-                style: theme.textTheme.titleSmall
-                    ?.copyWith(fontWeight: FontWeight.w700),
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
               )
             : null,
         onTap: () => showModalBottomSheet<void>(
@@ -114,12 +119,21 @@ class _StudentTile extends StatelessWidget {
                 children: [
                   Text(
                     student.fullName,
-                    style: theme.textTheme.titleLarge
-                        ?.copyWith(fontWeight: FontWeight.w800),
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                   const SizedBox(height: 16),
-                  InfoRow('E-mail', student.email ?? '–', icon: Icons.mail_outline),
-                  InfoRow('Telefoon', student.phone ?? '–', icon: Icons.phone_outlined),
+                  InfoRow(
+                    'E-mail',
+                    student.email ?? '–',
+                    icon: Icons.mail_outline,
+                  ),
+                  InfoRow(
+                    'Telefoon',
+                    student.phone ?? '–',
+                    icon: Icons.phone_outlined,
+                  ),
                   InfoRow(
                     'Adres',
                     [
@@ -132,10 +146,16 @@ class _StudentTile extends StatelessWidget {
                   ),
                   if (student.pickupLocation != null &&
                       student.pickupLocation!.isNotEmpty)
-                    InfoRow('Ophaallocatie', student.pickupLocation!,
-                        icon: Icons.location_on_outlined),
-                  InfoRow('Saldo', student.balance?.toStringAsFixed(2) ?? '–',
-                      icon: Icons.account_balance_wallet_outlined),
+                    InfoRow(
+                      'Ophaallocatie',
+                      student.pickupLocation!,
+                      icon: Icons.location_on_outlined,
+                    ),
+                  InfoRow(
+                    'Saldo',
+                    student.balance?.toStringAsFixed(2) ?? '–',
+                    icon: Icons.account_balance_wallet_outlined,
+                  ),
                 ],
               ),
             ),

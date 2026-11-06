@@ -45,9 +45,20 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   @override
   void dispose() {
     for (final c in [
-      _firstName, _lastName, _email, _phone, _birthdate, _street,
-      _houseNumber, _zipCode, _city, _pickupLocation, _licensePlate,
-      _password, _password2, _otp,
+      _firstName,
+      _lastName,
+      _email,
+      _phone,
+      _birthdate,
+      _street,
+      _houseNumber,
+      _zipCode,
+      _city,
+      _pickupLocation,
+      _licensePlate,
+      _password,
+      _password2,
+      _otp,
     ]) {
       c.dispose();
     }
@@ -55,23 +66,23 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   }
 
   Map<String, dynamic> _payload() => {
-        'profile': _profile,
-        'email': _email.text.trim().toLowerCase(),
-        'password': _password.text,
-        'firstName': _firstName.text.trim(),
-        'lastName': _lastName.text.trim(),
-        'birthdate': _birthdate.text.trim(),
-        'phone': _phone.text.trim(),
-        'street': _street.text.trim(),
-        'houseNumber': _houseNumber.text.trim(),
-        'zipCode': _zipCode.text.trim(),
-        'city': _city.text.trim(),
-        if (_pickupLocation.text.trim().isNotEmpty)
-          'pickupLocation': _pickupLocation.text.trim(),
-        if (_licensePlate.text.trim().isNotEmpty)
-          'licensePlate': _licensePlate.text.trim(),
-        if (_otp.text.trim().isNotEmpty) 'otp': _otp.text.trim(),
-      };
+    'profile': _profile,
+    'email': _email.text.trim().toLowerCase(),
+    'password': _password.text,
+    'firstName': _firstName.text.trim(),
+    'lastName': _lastName.text.trim(),
+    'birthdate': _birthdate.text.trim(),
+    'phone': _phone.text.trim(),
+    'street': _street.text.trim(),
+    'houseNumber': _houseNumber.text.trim(),
+    'zipCode': _zipCode.text.trim(),
+    'city': _city.text.trim(),
+    if (_pickupLocation.text.trim().isNotEmpty)
+      'pickupLocation': _pickupLocation.text.trim(),
+    if (_licensePlate.text.trim().isNotEmpty)
+      'licensePlate': _licensePlate.text.trim(),
+    if (_otp.text.trim().isNotEmpty) 'otp': _otp.text.trim(),
+  };
 
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
@@ -135,8 +146,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text('Accounttype', style: theme.textTheme.titleSmall
-                        ?.copyWith(fontWeight: FontWeight.w700)),
+                    Text(
+                      'Accounttype',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                     const SizedBox(height: 10),
                     SegmentedButton<String>(
                       segments: const [
@@ -157,8 +172,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     ),
                     const SizedBox(height: 24),
 
-                    Text('Persoonlijke gegevens', style: theme.textTheme.titleSmall
-                        ?.copyWith(fontWeight: FontWeight.w700)),
+                    Text(
+                      'Persoonlijke gegevens',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                     const SizedBox(height: 12),
                     Row(
                       children: [
@@ -166,7 +185,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           child: TextFormField(
                             controller: _firstName,
                             textInputAction: TextInputAction.next,
-                            decoration: const InputDecoration(labelText: 'Voornaam'),
+                            decoration: const InputDecoration(
+                              labelText: 'Voornaam',
+                            ),
                             validator: _required,
                           ),
                         ),
@@ -175,8 +196,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           child: TextFormField(
                             controller: _lastName,
                             textInputAction: TextInputAction.next,
-                            decoration:
-                                const InputDecoration(labelText: 'Achternaam'),
+                            decoration: const InputDecoration(
+                              labelText: 'Achternaam',
+                            ),
                             validator: _required,
                           ),
                         ),
@@ -187,8 +209,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       controller: _email,
                       keyboardType: TextInputType.emailAddress,
                       textInputAction: TextInputAction.next,
-                      decoration:
-                          const InputDecoration(labelText: 'E-mailadres'),
+                      decoration: const InputDecoration(
+                        labelText: 'E-mailadres',
+                      ),
                       validator: (v) {
                         final value = v?.trim() ?? '';
                         if (value.isEmpty) return 'Verplicht veld';
@@ -203,8 +226,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       controller: _phone,
                       keyboardType: TextInputType.phone,
                       textInputAction: TextInputAction.next,
-                      decoration:
-                          const InputDecoration(labelText: 'Telefoonnummer'),
+                      decoration: const InputDecoration(
+                        labelText: 'Telefoonnummer',
+                      ),
                       validator: _required,
                     ),
                     const SizedBox(height: 12),
@@ -217,13 +241,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         suffixIcon: Icon(Icons.calendar_today_outlined),
                         hintText: 'jjjj-mm-dd',
                       ),
-                      validator: (v) =>
-                          (v == null || v.trim().isEmpty) ? 'Verplicht veld' : null,
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? 'Verplicht veld'
+                          : null,
                     ),
                     const SizedBox(height: 24),
 
-                    Text('Adres', style: theme.textTheme.titleSmall
-                        ?.copyWith(fontWeight: FontWeight.w700)),
+                    Text(
+                      'Adres',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                     const SizedBox(height: 12),
                     Row(
                       children: [
@@ -232,8 +261,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           child: TextFormField(
                             controller: _street,
                             textInputAction: TextInputAction.next,
-                            decoration:
-                                const InputDecoration(labelText: 'Straat'),
+                            decoration: const InputDecoration(
+                              labelText: 'Straat',
+                            ),
                             validator: _required,
                           ),
                         ),
@@ -243,7 +273,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             controller: _houseNumber,
                             textInputAction: TextInputAction.next,
                             decoration: const InputDecoration(
-                                labelText: 'Huisnr.'),
+                              labelText: 'Huisnr.',
+                            ),
                             validator: _required,
                           ),
                         ),
@@ -257,8 +288,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             controller: _zipCode,
                             textInputAction: TextInputAction.next,
                             textCapitalization: TextCapitalization.characters,
-                            decoration:
-                                const InputDecoration(labelText: 'Postcode'),
+                            decoration: const InputDecoration(
+                              labelText: 'Postcode',
+                            ),
                             validator: _required,
                           ),
                         ),
@@ -268,7 +300,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           child: TextFormField(
                             controller: _city,
                             textInputAction: TextInputAction.next,
-                            decoration: const InputDecoration(labelText: 'Plaats'),
+                            decoration: const InputDecoration(
+                              labelText: 'Plaats',
+                            ),
                             validator: _required,
                           ),
                         ),
@@ -276,27 +310,36 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     ),
                     const SizedBox(height: 24),
 
-                    Text('Lesdetails (optioneel)',
-                        style: theme.textTheme.titleSmall
-                            ?.copyWith(fontWeight: FontWeight.w700)),
+                    Text(
+                      'Lesdetails (optioneel)',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: _pickupLocation,
                       textInputAction: TextInputAction.next,
                       decoration: const InputDecoration(
-                          labelText: 'Ophaallocatie'),
+                        labelText: 'Ophaallocatie',
+                      ),
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: _licensePlate,
                       textCapitalization: TextCapitalization.characters,
                       decoration: const InputDecoration(
-                          labelText: 'Kenteken (bij eigen voertuig)'),
+                        labelText: 'Kenteken (bij eigen voertuig)',
+                      ),
                     ),
                     const SizedBox(height: 24),
 
-                    Text('Wachtwoord', style: theme.textTheme.titleSmall
-                        ?.copyWith(fontWeight: FontWeight.w700)),
+                    Text(
+                      'Wachtwoord',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: _password,
@@ -326,8 +369,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       obscureText: true,
                       textInputAction: TextInputAction.done,
                       onFieldSubmitted: (_) => _submit(),
-                      decoration:
-                          const InputDecoration(labelText: 'Herhaal wachtwoord'),
+                      decoration: const InputDecoration(
+                        labelText: 'Herhaal wachtwoord',
+                      ),
                       validator: (v) => v != _password.text
                           ? 'Wachtwoorden komen niet overeen'
                           : null,
@@ -335,15 +379,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                     if (_otpSent) ...[
                       const SizedBox(height: 24),
-                      Text('Bevestigingscode',
-                          style: theme.textTheme.titleSmall
-                              ?.copyWith(fontWeight: FontWeight.w700)),
+                      Text(
+                        'Bevestigingscode',
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                       const SizedBox(height: 6),
                       Text(
                         _otpMessage ??
                             'We hebben een code naar je e-mailadres gestuurd.',
-                        style: theme.textTheme.bodySmall
-                            ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
@@ -354,8 +402,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           labelText: 'Code uit e-mail',
                           counterText: '',
                         ),
-                        validator: (v) => _otpSent &&
-                                (v == null || v.trim().length < 4)
+                        validator: (v) =>
+                            _otpSent && (v == null || v.trim().length < 4)
                             ? 'Vul de 4-cijferige code in'
                             : null,
                       ),
@@ -368,9 +416,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           ? const SizedBox(
                               width: 22,
                               height: 22,
-                              child: CircularProgressIndicator(strokeWidth: 2.4),
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.4,
+                              ),
                             )
-                          : Text(_otpSent ? 'Account aanmaken' : 'Code aanvragen'),
+                          : Text(
+                              _otpSent ? 'Account aanmaken' : 'Code aanvragen',
+                            ),
                     ),
                     const SizedBox(height: 12),
                     TextButton(

@@ -59,14 +59,14 @@ class _NotificationSettingsScreenState
                         title: const Text('Begin'),
                         trailing: Text(
                           _timeLabel(draft.quietHours.start),
-                          style: theme.textTheme.titleSmall
-                              ?.copyWith(fontWeight: FontWeight.w700),
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                         onTap: () => _pickTime(
                           initial: draft.quietHours.start,
-                          onPicked: (v) => _updateQuiet(
-                            draft.quietHours.copyWith(start: v),
-                          ),
+                          onPicked: (v) =>
+                              _updateQuiet(draft.quietHours.copyWith(start: v)),
                         ),
                       ),
                       ListTile(
@@ -74,14 +74,14 @@ class _NotificationSettingsScreenState
                         title: const Text('Einde'),
                         trailing: Text(
                           _timeLabel(draft.quietHours.end),
-                          style: theme.textTheme.titleSmall
-                             ?.copyWith(fontWeight: FontWeight.w700),
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                         onTap: () => _pickTime(
                           initial: draft.quietHours.end,
-                          onPicked: (v) => _updateQuiet(
-                            draft.quietHours.copyWith(end: v),
-                          ),
+                          onPicked: (v) =>
+                              _updateQuiet(draft.quietHours.copyWith(end: v)),
                         ),
                       ),
                     ],

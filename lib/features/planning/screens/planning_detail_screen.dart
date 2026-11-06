@@ -25,8 +25,10 @@ class _PlanningDetailScreenState extends ConsumerState<PlanningDetailScreen> {
 
   PlanningRepository get _repo => ref.read(planningRepositoryProvider);
 
-  Future<void> _run(Future<void> Function() action,
-      {String success = 'Gelukt'}) async {
+  Future<void> _run(
+    Future<void> Function() action, {
+    String success = 'Gelukt',
+  }) async {
     setState(() => _busy = true);
     try {
       await action();
@@ -63,8 +65,7 @@ class _PlanningDetailScreenState extends ConsumerState<PlanningDetailScreen> {
         content: TextField(
           controller: controller,
           maxLines: 3,
-          decoration:
-              const InputDecoration(labelText: 'Reden (optioneel)'),
+          decoration: const InputDecoration(labelText: 'Reden (optioneel)'),
         ),
         actions: [
           TextButton(
@@ -129,9 +130,7 @@ class _PlanningDetailScreenState extends ConsumerState<PlanningDetailScreen> {
     final ok = await confirmAction(
       context,
       title: confirmed ? 'Bevestigen' : 'Afwezigheid melden',
-      message: confirmed
-          ? 'Bevestig dat deze les heeft plaatsgevonden.'
-          : 'Meld je afwezigheid. Je instructeur en de administratie worden op de hoogte gebracht.',
+      message: confirmed ? 'Bevestig dat deze les heeft plaatsgevonden.' : 'Meld je afwezigheid. Je instructeur en de administratie worden op de hoogte gebracht.',
       confirmLabel: 'Bevestigen',
       destructive: !confirmed,
     );
@@ -182,8 +181,9 @@ class _PlanningDetailScreenState extends ConsumerState<PlanningDetailScreen> {
                   Expanded(
                     child: Text(
                       planning.drivingClass?.name ?? 'Les',
-                      style: theme.textTheme.titleLarge
-                          ?.copyWith(fontWeight: FontWeight.w800),
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ),
                   StatusChip(
@@ -195,8 +195,9 @@ class _PlanningDetailScreenState extends ConsumerState<PlanningDetailScreen> {
               const SizedBox(height: 12),
               Text(
                 start == null ? 'Datum niet ingesteld' : F.dateMedium(start),
-                style: theme.textTheme.bodyLarge
-                    ?.copyWith(fontWeight: FontWeight.w600),
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               const SizedBox(height: 4),
               Text(
@@ -206,8 +207,9 @@ class _PlanningDetailScreenState extends ConsumerState<PlanningDetailScreen> {
                   if (planning.durationMinutes > 0)
                     F.minutesLabel(planning.durationMinutes),
                 ].join(' · '),
-                style: theme.textTheme.bodyMedium
-                    ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
               ),
             ],
           ),
@@ -222,16 +224,13 @@ class _PlanningDetailScreenState extends ConsumerState<PlanningDetailScreen> {
             child: Column(
               children: [
                 InfoRow('Les', planning.drivingClass?.name ?? '–'),
-                InfoRow(
-                  'Lesvorm',
-                  switch (planning.drivingClass?.lessonType) {
-                    'trial' => 'Proefles',
-                    'base' => 'Basisles',
-                    'pack' => 'Lespakket',
-                    'exam' => 'Examen',
-                    _ => '–',
-                  },
-                ),
+                InfoRow('Lesvorm', switch (planning.drivingClass?.lessonType) {
+                  'trial' => 'Proefles',
+                  'base' => 'Basisles',
+                  'pack' => 'Lespakket',
+                  'exam' => 'Examen',
+                  _ => '–',
+                }),
                 InfoRow(
                   isStudent ? 'Instructeur' : 'Leerling',
                   isStudent
@@ -242,7 +241,10 @@ class _PlanningDetailScreenState extends ConsumerState<PlanningDetailScreen> {
                   InfoRow('Telefoon', planning.student!.phone!),
                 InfoRow('Bestelling', '#${planning.order?.id ?? '–'}'),
                 if (planning.payment?.finalAmountValue != null)
-                  InfoRow('Betaald', F.money(planning.payment!.finalAmountValue)),
+                  InfoRow(
+                    'Betaald',
+                    F.money(planning.payment!.finalAmountValue),
+                  ),
               ],
             ),
           ),
@@ -284,10 +286,7 @@ class _PlanningDetailScreenState extends ConsumerState<PlanningDetailScreen> {
         if (actions.isNotEmpty) ...[
           const SizedBox(height: 24),
           SectionHeader('Acties'),
-          for (final action in actions) ...[
-            action,
-            const SizedBox(height: 10),
-          ],
+          for (final action in actions) ...[action, const SizedBox(height: 10)],
         ],
 
         // ----------------------------------------------------------- logs
@@ -300,17 +299,14 @@ class _PlanningDetailScreenState extends ConsumerState<PlanningDetailScreen> {
                 for (final (i, log) in planning.logs.indexed) ...[
                   if (i > 0) const Divider(),
                   ListTile(
-                    leading: Icon(
-                      switch (log.action) {
-                        'created' => Icons.add_circle_outline,
-                        'confirmed' => Icons.check_circle_outline,
-                        'cancelled' => Icons.cancel_outlined,
-                        'completed' => Icons.task_alt,
-                        'rescheduled' => Icons.event_repeat_outlined,
-                        _ => Icons.history,
-                      },
-                      color: theme.colorScheme.primary,
-                    ),
+                    leading: Icon(switch (log.action) {
+                      'created' => Icons.add_circle_outline,
+                      'confirmed' => Icons.check_circle_outline,
+                      'cancelled' => Icons.cancel_outlined,
+                      'completed' => Icons.task_alt,
+                      'rescheduled' => Icons.event_repeat_outlined,
+                      _ => Icons.history,
+                    }, color: theme.colorScheme.primary),
                     title: Text(_logLabel(log.action)),
                     subtitle: Text(
                       [
@@ -329,13 +325,13 @@ class _PlanningDetailScreenState extends ConsumerState<PlanningDetailScreen> {
   }
 
   String _logLabel(String? action) => switch (action) {
-        'created' => 'Les ingepland',
-        'confirmed' => 'Les bevestigd',
-        'cancelled' => 'Les geannuleerd',
-        'completed' => 'Les afgerond',
-        'rescheduled' => 'Les verplaatst',
-        _ => 'Wijziging',
-      };
+    'created' => 'Les ingepland',
+    'confirmed' => 'Les bevestigd',
+    'cancelled' => 'Les geannuleerd',
+    'completed' => 'Les afgerond',
+    'rescheduled' => 'Les verplaatst',
+    _ => 'Wijziging',
+  };
 
   List<Widget> _actions(Planning planning, bool isStudent) {
     if (_busy) {
@@ -351,88 +347,112 @@ class _PlanningDetailScreenState extends ConsumerState<PlanningDetailScreen> {
 
     final actions = <Widget>[];
     final canReschedule =
-        planning.isConfirmed && (planning.startDate?.isAfter(
-                    DateTime.now().add(const Duration(hours: 24))) ??
-                false);
+        planning.isConfirmed &&
+        (planning.startDate?.isAfter(
+              DateTime.now().add(const Duration(hours: 24)),
+            ) ??
+            false);
 
     if (isStudent) {
       if (planning.isPending) {
-        actions.add(FilledButton.icon(
-          onPressed: _confirm,
-          icon: const Icon(Icons.check_rounded),
-          label: const Text('Les bevestigen'),
-        ));
+        actions.add(
+          FilledButton.icon(
+            onPressed: _confirm,
+            icon: const Icon(Icons.check_rounded),
+            label: const Text('Les bevestigen'),
+          ),
+        );
       }
       if (planning.isPending || planning.isConfirmed) {
-        actions.add(OutlinedButton.icon(
-          onPressed: _cancel,
-          icon: const Icon(Icons.close_rounded),
-          label: const Text('Les annuleren'),
-        ));
+        actions.add(
+          OutlinedButton.icon(
+            onPressed: _cancel,
+            icon: const Icon(Icons.close_rounded),
+            label: const Text('Les annuleren'),
+          ),
+        );
       }
       if (canReschedule) {
-        actions.add(OutlinedButton.icon(
-          onPressed: () => context.push('/planning/${widget.id}/reschedule'),
-          icon: const Icon(Icons.event_repeat_outlined),
-          label: const Text('Les verplaatsen'),
-        ));
+        actions.add(
+          OutlinedButton.icon(
+            onPressed: () => context.push('/planning/${widget.id}/reschedule'),
+            icon: const Icon(Icons.event_repeat_outlined),
+            label: const Text('Les verplaatsen'),
+          ),
+        );
       }
       if (planning.isCompleted && planning.studentConfirmation == null) {
-        actions.add(FilledButton.icon(
-          onPressed: () => _studentConfirmation(true),
-          icon: const Icon(Icons.how_to_reg_outlined),
-          label: const Text('Ik was aanwezig'),
-        ));
-        actions.add(OutlinedButton.icon(
-          onPressed: () => _studentConfirmation(false),
-          icon: const Icon(Icons.person_off_outlined),
-          label: const Text('Ik was afwezig'),
-        ));
+        actions.add(
+          FilledButton.icon(
+            onPressed: () => _studentConfirmation(true),
+            icon: const Icon(Icons.how_to_reg_outlined),
+            label: const Text('Ik was aanwezig'),
+          ),
+        );
+        actions.add(
+          OutlinedButton.icon(
+            onPressed: () => _studentConfirmation(false),
+            icon: const Icon(Icons.person_off_outlined),
+            label: const Text('Ik was afwezig'),
+          ),
+        );
       }
       if (planning.studentConfirmation != null) {
-        actions.add(Card(
-          child: ListTile(
-            leading: Icon(
-              planning.studentConfirmation!
-                  ? Icons.how_to_reg_outlined
-                  : Icons.person_off_outlined,
-              color: planning.studentConfirmation!
-                  ? Theme.of(context).colorScheme.primary
-                  : Theme.of(context).colorScheme.error,
+        actions.add(
+          Card(
+            child: ListTile(
+              leading: Icon(
+                planning.studentConfirmation!
+                    ? Icons.how_to_reg_outlined
+                    : Icons.person_off_outlined,
+                color: planning.studentConfirmation!
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.error,
+              ),
+              title: Text(
+                planning.studentConfirmation!
+                    ? 'Aanwezigheid bevestigd'
+                    : 'Afwezigheid gemeld',
+              ),
             ),
-            title: Text(planning.studentConfirmation!
-                ? 'Aanwezigheid bevestigd'
-                : 'Afwezigheid gemeld'),
           ),
-        ));
+        );
       }
     } else {
       if (planning.isConfirmed) {
-        actions.add(FilledButton.icon(
-          onPressed: _complete,
-          icon: const Icon(Icons.task_alt),
-          label: const Text('Les afronden'),
-        ));
+        actions.add(
+          FilledButton.icon(
+            onPressed: _complete,
+            icon: const Icon(Icons.task_alt),
+            label: const Text('Les afronden'),
+          ),
+        );
       }
-      actions.add(OutlinedButton.icon(
-        onPressed: () => _editNotes(planning),
-        icon: const Icon(Icons.edit_note_outlined),
-        label: const Text('Notities bijwerken'),
-      ));
+      actions.add(
+        OutlinedButton.icon(
+          onPressed: () => _editNotes(planning),
+          icon: const Icon(Icons.edit_note_outlined),
+          label: const Text('Notities bijwerken'),
+        ),
+      );
       if (planning.isPending || planning.isConfirmed) {
-        actions.add(OutlinedButton.icon(
-          onPressed: _cancel,
-          icon: const Icon(Icons.close_rounded),
-          label: const Text('Les annuleren'),
-        ));
+        actions.add(
+          OutlinedButton.icon(
+            onPressed: _cancel,
+            icon: const Icon(Icons.close_rounded),
+            label: const Text('Les annuleren'),
+          ),
+        );
       }
     }
 
-    actions.add(OutlinedButton.icon(
-      onPressed: () => context.push('/planning/${widget.id}/lesson-cards'),
-      icon: const Icon(Icons.fact_check_outlined),
-      label: const Text('Leskaart bekijken'),
-    ));
+    actions.add(
+      OutlinedButton.icon(
+        onPressed: () => context.push('/planning/${widget.id}/lesson-cards'),
+        icon: const Icon(Icons.fact_check_outlined),
+        label: const Text('Leskaart bekijken'),
+      ),
+    );
 
     return actions;
   }

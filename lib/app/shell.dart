@@ -19,7 +19,7 @@ class HomeShell extends ConsumerWidget {
       bottomNavigationBar: NavigationBar(
         selectedIndex: navigationShell.currentIndex,
         onDestinationSelected: _goBranch,
-        labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         destinations: [
           const NavigationDestination(
             icon: Icon(Icons.home_outlined),
@@ -60,8 +60,8 @@ class HomeShell extends ConsumerWidget {
   }
 
   void _goBranch(int index) => navigationShell.goBranch(
-        index,
-        // Returning to the root of a tab pops its stack.
-        initialLocation: index == navigationShell.currentIndex,
-      );
+    index,
+    // Returning to the root of a tab pops its stack.
+    initialLocation: index == navigationShell.currentIndex,
+  );
 }

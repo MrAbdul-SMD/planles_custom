@@ -75,8 +75,9 @@ class ProfileScreen extends ConsumerWidget {
                     Text(
                       user.fullName,
                       textAlign: TextAlign.center,
-                      style: theme.textTheme.titleLarge
-                          ?.copyWith(fontWeight: FontWeight.w800),
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -97,18 +98,25 @@ class ProfileScreen extends ConsumerWidget {
             const SizedBox(height: 16),
             Card(
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 child: Row(
                   children: [
-                    Icon(Icons.account_balance_wallet_outlined,
-                        color: theme.colorScheme.primary),
+                    Icon(
+                      Icons.account_balance_wallet_outlined,
+                      color: theme.colorScheme.primary,
+                    ),
                     const SizedBox(width: 12),
-                    Expanded(child: Text('Saldo', style: theme.textTheme.bodyLarge)),
+                    Expanded(
+                      child: Text('Saldo', style: theme.textTheme.bodyLarge),
+                    ),
                     Text(
                       F.money(user.balance),
-                      style: theme.textTheme.titleMedium
-                          ?.copyWith(fontWeight: FontWeight.w800),
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                     const SizedBox(width: 8),
                     IconButton(
@@ -126,12 +134,17 @@ class ProfileScreen extends ConsumerWidget {
             const SectionHeader('Persoonlijke gegevens'),
             Card(
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: Column(
                   children: [
                     InfoRow('Telefoon', user.phone ?? '–'),
-                    InfoRow('Geboortedatum', F.dateShort(F.date(user.birthdate))),
+                    InfoRow(
+                      'Geboortedatum',
+                      F.dateShort(F.date(user.birthdate)),
+                    ),
                     InfoRow(
                       'Adres',
                       [
@@ -209,8 +222,9 @@ class ProfileScreen extends ConsumerWidget {
             Center(
               child: Text(
                 'Planles',
-                style: theme.textTheme.bodySmall
-                    ?.copyWith(color: theme.colorScheme.outline),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.outline,
+                ),
               ),
             ),
           ],

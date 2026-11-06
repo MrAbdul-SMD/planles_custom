@@ -14,7 +14,10 @@ import 'api_exception.dart';
 ///  * notify the app when an *authenticated* request comes back 401 (the API
 ///    has no refresh token, so the session must end)
 class ApiClient {
-  ApiClient({required TokenStorage tokenStorage, String baseUrl = defaultBaseUrl}) {
+  ApiClient({
+    required TokenStorage tokenStorage,
+    String baseUrl = defaultBaseUrl,
+  }) {
     _tokenStorage = tokenStorage;
 
     _dio = Dio(
@@ -77,7 +80,11 @@ class ApiClient {
   Future<dynamic> get(String path, {Map<String, dynamic>? query}) =>
       _send(() => _dio.get<dynamic>(path, queryParameters: query));
 
-  Future<dynamic> post(String path, {Object? body, Map<String, dynamic>? query}) =>
+  Future<dynamic> post(
+    String path, {
+    Object? body,
+    Map<String, dynamic>? query,
+  }) =>
       _send(() => _dio.post<dynamic>(path, data: body, queryParameters: query));
 
   Future<dynamic> patch(String path, {Object? body}) =>
@@ -125,9 +132,7 @@ class ApiClient {
       case DioExceptionType.badCertificate:
         return const ApiException('Onveilige verbinding met de server.');
       default:
-        return const ApiException(
-          'Er is iets misgegaan. Probeer het opnieuw.',
-        );
+        return const ApiException('Er is iets misgegaan. Probeer het opnieuw.');
     }
   }
 
@@ -158,10 +163,7 @@ class ApiClient {
       return ApiException(data, statusCode: status);
     }
 
-    return ApiException(
-      _fallbackMessage(status),
-      statusCode: status,
-    );
+    return ApiException(_fallbackMessage(status), statusCode: status);
   }
 
   String _fallbackMessage(int? status) {

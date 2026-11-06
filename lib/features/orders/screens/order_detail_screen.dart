@@ -26,8 +26,10 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
   bool _busy = false;
   bool _invoiceBusy = false;
 
-  Future<void> _run(Future<void> Function() action,
-      {String success = 'Gelukt'}) async {
+  Future<void> _run(
+    Future<void> Function() action, {
+    String success = 'Gelukt',
+  }) async {
     setState(() => _busy = true);
     try {
       await action();
@@ -47,10 +49,9 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
 
   Future<void> _pay() async {
     final url = await _checkout(
-      () => ref.read(ordersRepositoryProvider).pay(
-            orderId: widget.id,
-            redirectUrl: 'planles://payment',
-          ),
+      () => ref
+          .read(ordersRepositoryProvider)
+          .pay(orderId: widget.id, redirectUrl: 'planles://payment'),
     );
     if (url != null) await _open(url);
   }
@@ -75,17 +76,18 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
     if (uri == null) return;
     final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!ok && mounted) {
-      showAppSnack(context, 'De betalingspagina kon niet worden geopend.',
-          error: true);
+      showAppSnack(
+        context,
+        'De betalingspagina kon niet worden geopend.',
+        error: true,
+      );
     }
   }
 
   Future<void> _invoice() async {
     setState(() => _invoiceBusy = true);
     try {
-      final bytes = await ref
-          .read(ordersRepositoryProvider)
-          .invoice(widget.id);
+      final bytes = await ref.read(ordersRepositoryProvider).invoice(widget.id);
       if (bytes.isEmpty) throw 'Lege factuur.';
       final pdf = Uint8List.fromList(bytes);
       await Printing.layoutPdf(
@@ -144,7 +146,8 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
                       payment?.finalAmountValue != null
                           ? F.money(payment!.finalAmountValue)
                           : '–',
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      style: Theme.of(context).textTheme.headlineMedium
+                          ?.copyWith(
                             fontWeight: FontWeight.w800,
                             color: Theme.of(context)
                                 .colorScheme
@@ -156,11 +159,11 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
                       Text(
                         'Geplaatst op ${F.dateTime(order.createdAt)}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onPrimaryContainer
-                                  .withValues(alpha: 0.75),
-                            ),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onPrimaryContainer
+                              .withValues(alpha: 0.75),
+                        ),
                       ),
                     ],
                   ],
@@ -171,32 +174,32 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
               SectionHeader('Gegevens'),
               Card(
                 child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   child: Column(
                     children: [
-                      InfoRow(
-                          'Leerling', order.student?.fullName ?? '–'),
-                      InfoRow(
-                          'Instructeur', order.instructor?.fullName ?? '–'),
+                      InfoRow('Leerling', order.student?.fullName ?? '–'),
+                      InfoRow('Instructeur', order.instructor?.fullName ?? '–'),
                       if (order.totalDuration != null)
-                        InfoRow('Totaal',
-                            F.minutesLabel(order.totalDuration!)),
+                        InfoRow('Totaal', F.minutesLabel(order.totalDuration!)),
                       if (order.reservedDuration != null)
-                        InfoRow('Gepland',
-                            F.minutesLabel(order.reservedDuration!)),
+                        InfoRow(
+                          'Gepland',
+                          F.minutesLabel(order.reservedDuration!),
+                        ),
                       if (order.availableDuration != null)
-                        InfoRow('Beschikbaar',
-                            F.minutesLabel(order.availableDuration!)),
-                      InfoRow(
-                        'Betaalwijze',
-                        switch (payment?.type) {
-                          'digital' => 'Online',
-                          'cash' => 'Contant',
-                          'balance' => 'Saldo',
-                          _ => '–',
-                        },
-                      ),
+                        InfoRow(
+                          'Beschikbaar',
+                          F.minutesLabel(order.availableDuration!),
+                        ),
+                      InfoRow('Betaalwijze', switch (payment?.type) {
+                        'digital' => 'Online',
+                        'cash' => 'Contant',
+                        'balance' => 'Saldo',
+                        _ => '–',
+                      }),
                     ],
                   ),
                 ),
@@ -212,8 +215,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
                 ),
                 error: (e, _) => ErrorView(
                   message: '$e',
-                  onRetry: () =>
-                      ref.invalidate(orderItemsProvider(widget.id)),
+                  onRetry: () => ref.invalidate(orderItemsProvider(widget.id)),
                 ),
                 data: (list) {
                   if (list.isEmpty) {
@@ -230,12 +232,14 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
                         for (final (i, item) in list.indexed) ...[
                           if (i > 0) const Divider(),
                           ListTile(
-                            contentPadding:
-                                const EdgeInsets.symmetric(horizontal: 16),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                            ),
                             title: Text(
                               item.drivingClass?.name ?? 'Les',
                               style: const TextStyle(
-                                  fontWeight: FontWeight.w600),
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -246,7 +250,8 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
                                     '${item.quantity ?? 0} lessen',
                                     if (item.drivingClass?.duration != null)
                                       F.durationLabel(
-                                          item.drivingClass!.duration),
+                                        item.drivingClass!.duration,
+                                      ),
                                     if (item.drivingClass?.priceValue != null)
                                       F.money(item.drivingClass!.priceValue),
                                   ].join(' · '),
@@ -292,9 +297,9 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
                   FilledButton.icon(
                     onPressed: _pay,
                     icon: const Icon(Icons.payment_rounded),
-                    label: Text(isStudent
-                        ? 'Nu betalen'
-                        : 'Markeer als betaald'),
+                    label: Text(
+                      isStudent ? 'Nu betalen' : 'Markeer als betaald',
+                    ),
                   ),
                   const SizedBox(height: 10),
                 ],

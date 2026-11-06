@@ -85,17 +85,18 @@ class _RescheduleScreenState extends ConsumerState<RescheduleScreen> {
       return;
     }
     if (start.isBefore(DateTime.now())) {
-      showAppSnack(context, 'De nieuwe datum moet in de toekomst liggen.',
-          error: true);
+      showAppSnack(
+        context,
+        'De nieuwe datum moet in de toekomst liggen.',
+        error: true,
+      );
       return;
     }
     setState(() => _busy = true);
     try {
-      await ref.read(planningRepositoryProvider).reschedule(
-            id: widget.id,
-            startDate: start,
-            endDate: end,
-          );
+      await ref
+          .read(planningRepositoryProvider)
+          .reschedule(id: widget.id, startDate: start, endDate: end);
       ref.invalidate(planningDetailProvider(widget.id));
       ref.invalidate(planningListProvider);
       if (!mounted) return;
@@ -124,15 +125,17 @@ class _RescheduleScreenState extends ConsumerState<RescheduleScreen> {
             children: [
               Text(
                 'Kies een nieuw moment',
-                style: theme.textTheme.titleLarge
-                    ?.copyWith(fontWeight: FontWeight.w800),
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
               ),
               const SizedBox(height: 6),
               Text(
                 'De les duurt ${F.minutesLabel(_duration)} en moet minstens '
                 '24 uur vooruit worden verplaatst.',
-                style: theme.textTheme.bodyMedium
-                    ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
               ),
               const SizedBox(height: 24),
               Card(
@@ -144,8 +147,10 @@ class _RescheduleScreenState extends ConsumerState<RescheduleScreen> {
                       subtitle: Text(
                         _date == null
                             ? 'Nog niet gekozen'
-                            : DateFormat('EEEE d MMMM yyyy', 'nl_NL')
-                                .format(_date!),
+                            : DateFormat(
+                                'EEEE d MMMM yyyy',
+                                'nl_NL',
+                              ).format(_date!),
                       ),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: _pickDate,
@@ -174,10 +179,13 @@ class _RescheduleScreenState extends ConsumerState<RescheduleScreen> {
                   child: Column(
                     children: [
                       Text(
-                        DateFormat('EEEE d MMMM yyyy', 'nl_NL')
-                            .format(_newStart!),
-                        style: theme.textTheme.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.w700),
+                        DateFormat(
+                          'EEEE d MMMM yyyy',
+                          'nl_NL',
+                        ).format(_newStart!),
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(

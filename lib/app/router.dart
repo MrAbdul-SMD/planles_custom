@@ -39,7 +39,8 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final signedIn = auth.value is Authenticated;
       final location = state.matchedLocation;
-      final isAuthRoute = location == '/login' ||
+      final isAuthRoute =
+          location == '/login' ||
           location == '/register' ||
           location == '/forgot-password';
 
@@ -58,30 +59,43 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state, navigationShell) =>
             HomeShell(navigationShell: navigationShell),
         branches: [
-          StatefulShellBranch(routes: [
-            GoRoute(path: '/home', builder: (_, _) => const DashboardScreen()),
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(
-              path: '/planning',
-              builder: (_, _) => const PlanningListScreen(),
-            ),
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(path: '/orders', builder: (_, _) => const OrdersScreen()),
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(
-              path: '/notifications',
-              builder: (_, _) => const NotificationsScreen(),
-            ),
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(
-              path: '/profile',
-              builder: (_, _) => const ProfileScreen(),
-            ),
-          ]),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/home',
+                builder: (_, _) => const DashboardScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/planning',
+                builder: (_, _) => const PlanningListScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(path: '/orders', builder: (_, _) => const OrdersScreen()),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/notifications',
+                builder: (_, _) => const NotificationsScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/profile',
+                builder: (_, _) => const ProfileScreen(),
+              ),
+            ],
+          ),
         ],
       ),
 
@@ -98,8 +112,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/planning/:id/lesson-cards',
-        builder: (_, state) =>
-            LessonCardsScreen(planningId: int.parse(state.pathParameters['id']!)),
+        builder: (_, state) => LessonCardsScreen(
+          planningId: int.parse(state.pathParameters['id']!),
+        ),
       ),
       GoRoute(path: '/orders/new', builder: (_, _) => const BuyLessonsScreen()),
       GoRoute(

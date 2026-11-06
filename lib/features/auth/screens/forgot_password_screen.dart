@@ -39,9 +39,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     }
     setState(() => _busy = true);
     try {
-      await ref
-          .read(authRepositoryProvider)
-          .forgetPassword(_email.text);
+      await ref.read(authRepositoryProvider).forgetPassword(_email.text);
       if (!mounted) return;
       setState(() => _codeSent = true);
       showAppSnack(context, 'We hebben een code naar je e-mail gestuurd.');
@@ -97,27 +95,28 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
-                      _codeSent
-                          ? 'Voer de code in'
-                          : 'Herstel je wachtwoord',
-                      style: theme.textTheme.headlineSmall
-                          ?.copyWith(fontWeight: FontWeight.w800),
+                      _codeSent ? 'Voer de code in' : 'Herstel je wachtwoord',
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       _codeSent
                           ? 'We hebben een code gestuurd naar ${_email.text.trim()}.'
                           : 'Vul je e-mailadres in en we sturen je een herstelcode.',
-                      style: theme.textTheme.bodyMedium
-                          ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
                     ),
                     const SizedBox(height: 28),
                     TextFormField(
                       controller: _email,
                       readOnly: _codeSent,
                       keyboardType: TextInputType.emailAddress,
-                      decoration:
-                          const InputDecoration(labelText: 'E-mailadres'),
+                      decoration: const InputDecoration(
+                        labelText: 'E-mailadres',
+                      ),
                       validator: (v) {
                         final value = v?.trim() ?? '';
                         if (value.isEmpty) return 'Vul je e-mailadres in';
@@ -137,10 +136,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                           labelText: 'Herstelcode',
                           counterText: '',
                         ),
-                        validator: (v) =>
-                            (v == null || v.trim().length < 4)
-                                ? 'Vul de code in'
-                                : null,
+                        validator: (v) => (v == null || v.trim().length < 4)
+                            ? 'Vul de code in'
+                            : null,
                       ),
                       const SizedBox(height: 14),
                       TextFormField(
@@ -148,8 +146,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                         obscureText: true,
                         decoration: const InputDecoration(
                           labelText: 'Nieuw wachtwoord (optioneel)',
-                          helperText:
-                              'Minimaal 8 tekens met een kleine letter, hoofdletter en cijfer',
+                          helperText: 'Minimaal 8 tekens met een kleine letter, hoofdletter en cijfer',
                           helperMaxLines: 2,
                         ),
                         validator: (v) {
@@ -174,11 +171,15 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                           ? const SizedBox(
                               width: 22,
                               height: 22,
-                              child: CircularProgressIndicator(strokeWidth: 2.4),
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.4,
+                              ),
                             )
-                          : Text(_codeSent
-                              ? 'Wachtwoord resetten'
-                              : 'Code versturen'),
+                          : Text(
+                              _codeSent
+                                  ? 'Wachtwoord resetten'
+                                  : 'Code versturen',
+                            ),
                     ),
                     if (_codeSent)
                       TextButton(

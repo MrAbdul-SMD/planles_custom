@@ -44,7 +44,9 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     setState(() => _busy = true);
     try {
-      await ref.read(profileRepositoryProvider).changePassword(
+      await ref
+          .read(profileRepositoryProvider)
+          .changePassword(
             currentPassword: _current.text,
             newPassword: _next.text,
           );
@@ -75,8 +77,9 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                 TextFormField(
                   controller: _current,
                   obscureText: true,
-                  decoration:
-                      const InputDecoration(labelText: 'Huidig wachtwoord'),
+                  decoration: const InputDecoration(
+                    labelText: 'Huidig wachtwoord',
+                  ),
                   validator: (v) =>
                       (v == null || v.isEmpty) ? 'Vul je wachtwoord in' : null,
                 ),
@@ -86,8 +89,7 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                   obscureText: true,
                   decoration: const InputDecoration(
                     labelText: 'Nieuw wachtwoord',
-                    helperText:
-                        'Minimaal 8 tekens met een kleine letter, hoofdletter en cijfer',
+                    helperText: 'Minimaal 8 tekens met een kleine letter, hoofdletter en cijfer',
                     helperMaxLines: 2,
                   ),
                   validator: _validatePassword,
@@ -96,8 +98,9 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                 TextFormField(
                   controller: _confirm,
                   obscureText: true,
-                  decoration:
-                      const InputDecoration(labelText: 'Herhaal wachtwoord'),
+                  decoration: const InputDecoration(
+                    labelText: 'Herhaal wachtwoord',
+                  ),
                   validator: (v) => v != _next.text
                       ? 'Wachtwoorden komen niet overeen'
                       : null,

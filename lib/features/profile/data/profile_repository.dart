@@ -21,13 +21,13 @@ class ProfileRepository {
   }) async {
     final payload = <String, dynamic>{
       ...profile,
-      if (email != null && email.isNotEmpty) 'email': email.trim().toLowerCase(),
+      if (email != null && email.isNotEmpty)
+        'email': email.trim().toLowerCase(),
       if (password != null && password.isNotEmpty) 'password': password,
       'guardian': ?guardian,
     };
 
-    final form = FormData()
-      ..fields.add(MapEntry('data', jsonEncode(payload)));
+    final form = FormData()..fields.add(MapEntry('data', jsonEncode(payload)));
 
     if (carImage != null) {
       form.files.add(
@@ -47,11 +47,10 @@ class ProfileRepository {
   Future<void> changePassword({
     required String currentPassword,
     required String newPassword,
-  }) =>
-      _api.patch(
-        '/profile/change-password',
-        body: {'currentPassword': currentPassword, 'newPassword': newPassword},
-      );
+  }) => _api.patch(
+    '/profile/change-password',
+    body: {'currentPassword': currentPassword, 'newPassword': newPassword},
+  );
 
   Future<void> deactivate() => _api.patch('/profile/deactivate');
 }

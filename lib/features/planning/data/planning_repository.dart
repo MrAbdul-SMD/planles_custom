@@ -23,9 +23,9 @@ class PlanningRepository {
       total: int.tryParse(data['total'].toString()) ?? 0,
       items: raw is List
           ? raw
-              .whereType<Map>()
-              .map((e) => Planning.fromJson(Map<String, dynamic>.from(e)))
-              .toList()
+                .whereType<Map>()
+                .map((e) => Planning.fromJson(Map<String, dynamic>.from(e)))
+                .toList()
           : const <Planning>[],
     );
   }
@@ -41,14 +41,13 @@ class PlanningRepository {
     required int orderItemId,
     required DateTime startDate,
     required DateTime endDate,
-  }) =>
-      _api.post(
-        '/planning/$orderItemId',
-        body: {
-          'startDate': startDate.toUtc().toIso8601String(),
-          'endDate': endDate.toUtc().toIso8601String(),
-        },
-      );
+  }) => _api.post(
+    '/planning/$orderItemId',
+    body: {
+      'startDate': startDate.toUtc().toIso8601String(),
+      'endDate': endDate.toUtc().toIso8601String(),
+    },
+  );
 
   Future<void> confirm(int id) => _api.post('/planning/$id/confirm');
 
@@ -63,14 +62,13 @@ class PlanningRepository {
     required int id,
     required DateTime startDate,
     required DateTime endDate,
-  }) =>
-      _api.post(
-        '/planning/$id/reschedule',
-        body: {
-          'startDate': startDate.toUtc().toIso8601String(),
-          'endDate': endDate.toUtc().toIso8601String(),
-        },
-      );
+  }) => _api.post(
+    '/planning/$id/reschedule',
+    body: {
+      'startDate': startDate.toUtc().toIso8601String(),
+      'endDate': endDate.toUtc().toIso8601String(),
+    },
+  );
 
   Future<void> complete(int id) => _api.post('/planning/$id/complete');
 
@@ -97,6 +95,5 @@ class PlanningRepository {
   Future<void> answerLessonCards(
     int planningId,
     List<Map<String, dynamic>> answers,
-  ) =>
-      _api.post('/lesson-cards/$planningId', body: answers);
+  ) => _api.post('/lesson-cards/$planningId', body: answers);
 }

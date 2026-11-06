@@ -14,22 +14,23 @@ class PlanningPage {
   final int total;
   final List<Planning> items;
 
-  List<Planning> get upcoming => items
-      .where((p) => !p.isCancelled && (p.endDate == null || !p.isPast))
-      .toList()
-    ..sort(_byStartAsc);
+  List<Planning> get upcoming =>
+      items
+          .where((p) => !p.isCancelled && (p.endDate == null || !p.isPast))
+          .toList()
+        ..sort(_byStartAsc);
 
   List<Planning> get past {
-    final list = items
-        .where((p) => !p.isCancelled && p.endDate != null && p.isPast)
-        .toList()
-      ..sort(_byStartDesc);
+    final list =
+        items
+            .where((p) => !p.isCancelled && p.endDate != null && p.isPast)
+            .toList()
+          ..sort(_byStartDesc);
     return list;
   }
 
   List<Planning> get cancelled {
-    final list = items.where((p) => p.isCancelled).toList()
-      ..sort(_byStartDesc);
+    final list = items.where((p) => p.isCancelled).toList()..sort(_byStartDesc);
     return list;
   }
 
@@ -47,7 +48,8 @@ final planningListProvider = FutureProvider<PlanningPage>((ref) async {
   return PlanningPage(total: page.total, items: page.items);
 });
 
-final planningDetailProvider =
-    FutureProvider.autoDispose.family<Planning, int>((ref, id) {
-  return ref.watch(planningRepositoryProvider).getById(id);
-});
+final planningDetailProvider = FutureProvider.autoDispose.family<Planning, int>(
+  (ref, id) {
+    return ref.watch(planningRepositoryProvider).getById(id);
+  },
+);

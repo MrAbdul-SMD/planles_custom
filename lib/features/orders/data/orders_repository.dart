@@ -43,9 +43,9 @@ class OrdersRepository {
       total: int.tryParse(data['total'].toString()) ?? 0,
       items: raw is List
           ? raw
-              .whereType<Map>()
-              .map((e) => Order.fromJson(Map<String, dynamic>.from(e)))
-              .toList()
+                .whereType<Map>()
+                .map((e) => Order.fromJson(Map<String, dynamic>.from(e)))
+                .toList()
           : const <Order>[],
     );
   }
@@ -76,14 +76,18 @@ class OrdersRepository {
       '/order',
       body: {
         'paymentType': paymentType,
-        'items': items.map((e) => {'id': e.id, 'quantity': e.quantity}).toList(),
+        'items': items
+            .map((e) => {'id': e.id, 'quantity': e.quantity})
+            .toList(),
         if (planning != null && planning.isNotEmpty)
           'planning': planning
-              .map((e) => {
-                    'itemId': e.itemId,
-                    'startDate': e.start.toUtc().toIso8601String(),
-                    'endDate': e.end.toUtc().toIso8601String(),
-                  })
+              .map(
+                (e) => {
+                  'itemId': e.itemId,
+                  'startDate': e.start.toUtc().toIso8601String(),
+                  'endDate': e.end.toUtc().toIso8601String(),
+                },
+              )
               .toList(),
         'studentId': ?studentId,
         'redirectUrl': ?redirectUrl,
@@ -103,10 +107,7 @@ class OrdersRepository {
   }) async {
     final data = await _api.post(
       '/order/$orderId/pay',
-      body: {
-        'discount': ?discount,
-        'redirectUrl': ?redirectUrl,
-      },
+      body: {'discount': ?discount, 'redirectUrl': ?redirectUrl},
     );
     return data is Map ? data['checkoutUrl']?.toString() : null;
   }
@@ -123,10 +124,7 @@ class OrdersRepository {
   }) async {
     final data = await _api.post(
       '/balance',
-      body: {
-        'amount': amount,
-        'redirectUrl': ?redirectUrl,
-      },
+      body: {'amount': amount, 'redirectUrl': ?redirectUrl},
     );
     final url = data is Map ? data['checkoutUrl']?.toString() : null;
     if (url == null || url.isEmpty) {
@@ -138,5 +136,6 @@ class OrdersRepository {
   // -------------------------------------------------------------- invoice
 
   /// Presigned-free: the API returns the PDF bytes directly.
-  Future<List<int>> invoice(int orderId) => _api.getBytes('/invoice/order/$orderId');
+  Future<List<int>> invoice(int orderId) =>
+      _api.getBytes('/invoice/order/$orderId');
 }

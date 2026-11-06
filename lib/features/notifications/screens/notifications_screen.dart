@@ -91,8 +91,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
         onRefresh: _refresh,
         child: NotificationListener<ScrollNotification>(
           onNotification: (scroll) {
-            if (scroll.metrics.pixels >=
-                scroll.metrics.maxScrollExtent - 200) {
+            if (scroll.metrics.pixels >= scroll.metrics.maxScrollExtent - 200) {
               ref.read(notificationsProvider.notifier).loadMore();
             }
             return false;
@@ -135,10 +134,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
         return Card(
           color: n.isRead ? null : theme.colorScheme.primaryContainer,
           child: ListTile(
-            leading: Icon(
-              _iconFor(n.type),
-              color: theme.colorScheme.primary,
-            ),
+            leading: Icon(_iconFor(n.type), color: theme.colorScheme.primary),
             title: Text(
               n.title ?? 'Melding',
               style: TextStyle(
@@ -160,23 +156,23 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
   }
 
   IconData _iconFor(String? type) => switch (type) {
-        'LESSON_BOOKED' => Icons.event_available_outlined,
-        'LESSON_CANCELLED' => Icons.event_busy_outlined,
-        'LESSON_CHANGED' => Icons.event_repeat_outlined,
-        'LESSON_COMPLETED' => Icons.task_alt,
-        'LESSON_REMINDER_24H' || 'LESSON_REMINDER_1H' =>
-          Icons.alarm_outlined,
-        'PAYMENT_SUCCESSFUL' => Icons.check_circle_outline,
-        'PAYMENT_FAILED' => Icons.error_outline,
-        'PAYMENT_REFUNDED' => Icons.replay_rounded,
-        'PAYMENT_REQUESTED' => Icons.request_quote_outlined,
-        'LOW_LESSON_CREDIT' => Icons.warning_amber_outlined,
-        'EXAM_BOOKED' || 'EXAM_REMINDER_7D' || 'EXAM_REMINDER_24H' =>
-          Icons.grading_outlined,
-        'EXAM_CANCELLED' => Icons.block_rounded,
-        'LESSON_CARD_UPDATED' => Icons.fact_check_outlined,
-        'INSTRUCTOR_FEEDBACK' => Icons.forum_outlined,
-        'ACCOUNT_SECURITY' => Icons.shield_outlined,
-        _ => Icons.notifications_outlined,
-      };
+    'LESSON_BOOKED' => Icons.event_available_outlined,
+    'LESSON_CANCELLED' => Icons.event_busy_outlined,
+    'LESSON_CHANGED' => Icons.event_repeat_outlined,
+    'LESSON_COMPLETED' => Icons.task_alt,
+    'LESSON_REMINDER_24H' || 'LESSON_REMINDER_1H' => Icons.alarm_outlined,
+    'PAYMENT_SUCCESSFUL' => Icons.check_circle_outline,
+    'PAYMENT_FAILED' => Icons.error_outline,
+    'PAYMENT_REFUNDED' => Icons.replay_rounded,
+    'PAYMENT_REQUESTED' => Icons.request_quote_outlined,
+    'LOW_LESSON_CREDIT' => Icons.warning_amber_outlined,
+    'EXAM_BOOKED' ||
+    'EXAM_REMINDER_7D' ||
+    'EXAM_REMINDER_24H' => Icons.grading_outlined,
+    'EXAM_CANCELLED' => Icons.block_rounded,
+    'LESSON_CARD_UPDATED' => Icons.fact_check_outlined,
+    'INSTRUCTOR_FEEDBACK' => Icons.forum_outlined,
+    'ACCOUNT_SECURITY' => Icons.shield_outlined,
+    _ => Icons.notifications_outlined,
+  };
 }

@@ -51,7 +51,10 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
           child: FilledButton(
-            onPressed: (_busy || selectedClass == null || (isInstructor && _studentId == null))
+            onPressed:
+                (_busy ||
+                    selectedClass == null ||
+                    (isInstructor && _studentId == null))
                 ? null
                 : _submit,
             child: _busy
@@ -123,8 +126,7 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
                   ),
                   error: (e, _) => ErrorView(
                     message: '$e',
-                    onRetry: () =>
-                        ref.invalidate(classesProvider(_vehicleId!)),
+                    onRetry: () => ref.invalidate(classesProvider(_vehicleId!)),
                   ),
                   data: (list) {
                     if (list.isEmpty) {
@@ -154,14 +156,17 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
                 Card(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 8),
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     child: Row(
                       children: [
                         Expanded(
                           child: Text(
                             selectedClass.name ?? 'Les',
-                            style: theme.textTheme.titleSmall
-                                ?.copyWith(fontWeight: FontWeight.w700),
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
                         IconButton(
@@ -172,8 +177,9 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
                         ),
                         Text(
                           '$_quantity',
-                          style: theme.textTheme.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.w800),
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
                         IconButton(
                           onPressed: () => setState(() => _quantity++),
@@ -225,7 +231,7 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
               Text(
                 _paymentType == 'balance'
                     ? 'Het bedrag wordt van je saldo afgeschreven. Je saldo: '
-                        '${F.money(user?.balance ?? 0)}'
+                          '${F.money(user?.balance ?? 0)}'
                     : 'Je doorgestuurd naar de veilige betaalpagina van Mollie.',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
@@ -245,15 +251,16 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
     );
   }
 
-  double _total(DrivingClass c) =>
-      (c.priceValue ?? 0) * _quantity;
+  double _total(DrivingClass c) => (c.priceValue ?? 0) * _quantity;
 
   Future<void> _submit() async {
     final classId = _classId;
     if (classId == null) return;
     setState(() => _busy = true);
     try {
-      final result = await ref.read(ordersRepositoryProvider).create(
+      final result = await ref
+          .read(ordersRepositoryProvider)
+          .create(
             paymentType: _paymentType,
             items: [(id: classId, quantity: _quantity)],
             studentId: _studentId,
@@ -265,8 +272,7 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
 
       final url = result.checkoutUrl;
       if (url != null) {
-        await launchUrl(Uri.parse(url),
-            mode: LaunchMode.externalApplication);
+        await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
       }
 
       if (!mounted) return;
@@ -277,8 +283,10 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
         context.go('/orders');
       }
       if (mounted) {
-        showAppSnack(context,
-            url == null ? 'Bestelling geplaatst' : 'Rond de betaling af');
+        showAppSnack(
+          context,
+          url == null ? 'Bestelling geplaatst' : 'Rond de betaling af',
+        );
       }
     } on ApiException catch (e) {
       if (mounted) showAppSnack(context, e.validationMessage, error: true);
@@ -306,6 +314,7 @@ class _ClassOption extends StatelessWidget {
     final theme = Theme.of(context);
     return InkWell(
       borderRadius: BorderRadius.circular(16),
+      mouseCursor: SystemMouseCursors.click,
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(16),
@@ -315,18 +324,14 @@ class _ClassOption extends StatelessWidget {
               : theme.colorScheme.surfaceContainerLow,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: selected
-                ? theme.colorScheme.primary
-                : Colors.transparent,
+            color: selected ? theme.colorScheme.primary : Colors.transparent,
             width: 1.6,
           ),
         ),
         child: Row(
           children: [
             Icon(
-              selected
-                  ? Icons.radio_button_checked
-                  : Icons.radio_button_off,
+              selected ? Icons.radio_button_checked : Icons.radio_button_off,
               color: selected
                   ? theme.colorScheme.primary
                   : theme.colorScheme.outline,
@@ -338,8 +343,9 @@ class _ClassOption extends StatelessWidget {
                 children: [
                   Text(
                     drivingClass.name ?? 'Les',
-                    style: theme.textTheme.titleSmall
-                        ?.copyWith(fontWeight: FontWeight.w700),
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -363,8 +369,9 @@ class _ClassOption extends StatelessWidget {
             ),
             Text(
               F.money(drivingClass.priceValue),
-              style: theme.textTheme.titleMedium
-                  ?.copyWith(fontWeight: FontWeight.w800),
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w800,
+              ),
             ),
           ],
         ),
@@ -411,10 +418,7 @@ class _StudentPicker extends ConsumerWidget {
                 hint: const Text('Kies een leerling'),
                 items: [
                   for (final User s in list)
-                    DropdownMenuItem(
-                      value: s.id,
-                      child: Text(s.fullName),
-                    ),
+                    DropdownMenuItem(value: s.id, child: Text(s.fullName)),
                 ],
                 onChanged: onChanged,
               ),

@@ -8,19 +8,23 @@ class NotificationsRepository {
   final ApiClient _api;
 
   /// Cursor paginated (newest first). Pass `null` for the first page.
-  Future<({List<AppNotification> items, int? nextCursor})> list({int? cursor}) async {
-    final query = <String, dynamic>{
-      'cursor': ?cursor,
-    };
+  Future<({List<AppNotification> items, int? nextCursor})> list({
+    int? cursor,
+  }) async {
+    final query = <String, dynamic>{'cursor': ?cursor};
     final data = await _api.get('/notifications', query: query);
-    if (data is! Map) return (items: const <AppNotification>[], nextCursor: null);
+    if (data is! Map) {
+      return (items: const <AppNotification>[], nextCursor: null);
+    }
     final raw = data['notifications'];
     return (
       items: raw is List
           ? raw
-              .whereType<Map>()
-              .map((e) => AppNotification.fromJson(Map<String, dynamic>.from(e)))
-              .toList()
+                .whereType<Map>()
+                .map(
+                  (e) => AppNotification.fromJson(Map<String, dynamic>.from(e)),
+                )
+                .toList()
           : const <AppNotification>[],
       nextCursor: int.tryParse(data['nextCursor'].toString()),
     );
@@ -41,8 +45,13 @@ class NotificationsRepository {
     return NotificationSettings.fromJson(Map<String, dynamic>.from(data));
   }
 
-  Future<NotificationSettings> updateSettings(NotificationSettings settings) async {
-    final data = await _api.patch('/notifications/settings', body: settings.toJson());
+  Future<NotificationSettings> updateSettings(
+    NotificationSettings settings,
+  ) async {
+    final data = await _api.patch(
+      '/notifications/settings',
+      body: settings.toJson(),
+    );
     if (data is! Map) return settings;
     return NotificationSettings.fromJson(Map<String, dynamic>.from(data));
   }

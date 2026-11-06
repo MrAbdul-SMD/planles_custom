@@ -9,8 +9,9 @@ import '../models/user.dart';
 
 /// Repository providers — one line per data source, so features never build
 /// their own HTTP clients.
-final authRepositoryProvider =
-    Provider<AuthRepository>((ref) => AuthRepository(ref.watch(apiClientProvider)));
+final authRepositoryProvider = Provider<AuthRepository>(
+  (ref) => AuthRepository(ref.watch(apiClientProvider)),
+);
 
 sealed class AuthState {
   const AuthState();
@@ -44,9 +45,9 @@ class AuthController extends Notifier<AuthState> {
   bool get isAuthenticated => state is Authenticated;
 
   User? get user => switch (state) {
-        Authenticated(:final user) => user,
-        _ => null,
-      };
+    Authenticated(:final user) => user,
+    _ => null,
+  };
 
   /// Reads the stored token and, when present, resolves the current user.
   /// Called once from `main()` before the first frame.
@@ -127,9 +128,9 @@ class AuthController extends Notifier<AuthState> {
 /// Convenience view of the signed in user.
 final currentUserProvider = Provider<User?>(
   (ref) => switch (ref.watch(authControllerProvider)) {
-        Authenticated(:final user) => user,
-        _ => null,
-      },
+    Authenticated(:final user) => user,
+    _ => null,
+  },
 );
 
 /// `true` while the app still decides between login and the shell.

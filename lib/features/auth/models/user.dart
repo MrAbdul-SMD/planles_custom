@@ -29,31 +29,31 @@ class User {
   });
 
   factory User.fromJson(Map<String, dynamic> json) => User(
-        id: _asInt(json['id']) ?? 0,
-        profile: json['profile']?.toString() ?? 'STUDENT',
-        email: json['email']?.toString(),
-        firstName: json['firstName']?.toString(),
-        lastName: json['lastName']?.toString(),
-        name: json['name']?.toString(),
-        gender: json['gender']?.toString(),
-        birthdate: json['birthdate']?.toString(),
-        phone: json['phone']?.toString(),
-        street: json['street']?.toString(),
-        houseNumber: json['houseNumber']?.toString(),
-        zipCode: json['zipCode']?.toString(),
-        city: json['city']?.toString(),
-        pickupLocation: json['pickupLocation']?.toString(),
-        licensePlate: json['licensePlate']?.toString(),
-        carImage: json['carImage']?.toString(),
-        carImageUrl: json['carImageUrl']?.toString(),
-        balance: F.toDouble(json['balance']?.toString()),
-        instructorId: _asInt(json['instructorId']),
-        active: json['active'] as bool? ?? true,
-        createdAt: F.date(json['createdAt']?.toString()),
-        guardian: json['guardian'] is Map
-            ? Guardian.fromJson(json['guardian'] as Map<String, dynamic>)
-            : null,
-      );
+    id: _asInt(json['id']) ?? 0,
+    profile: json['profile']?.toString() ?? 'STUDENT',
+    email: json['email']?.toString(),
+    firstName: json['firstName']?.toString(),
+    lastName: json['lastName']?.toString(),
+    name: json['name']?.toString(),
+    gender: json['gender']?.toString(),
+    birthdate: json['birthdate']?.toString(),
+    phone: json['phone']?.toString(),
+    street: json['street']?.toString(),
+    houseNumber: json['houseNumber']?.toString(),
+    zipCode: json['zipCode']?.toString(),
+    city: json['city']?.toString(),
+    pickupLocation: json['pickupLocation']?.toString(),
+    licensePlate: json['licensePlate']?.toString(),
+    carImage: json['carImage']?.toString(),
+    carImageUrl: json['carImageUrl']?.toString(),
+    balance: F.toDouble(json['balance']?.toString()),
+    instructorId: _asInt(json['instructorId']),
+    active: json['active'] as bool? ?? true,
+    createdAt: F.date(json['createdAt']?.toString()),
+    guardian: json['guardian'] is Map
+        ? Guardian.fromJson(json['guardian'] as Map<String, dynamic>)
+        : null,
+  );
 
   final int id;
   final String profile;
@@ -100,7 +100,8 @@ class User {
     return '$a$b'.toUpperCase();
   }
 
-  User copyWith({double? balance, String? carImageUrl, String? profile}) => User(
+  User copyWith({double? balance, String? carImageUrl, String? profile}) =>
+      User(
         id: id,
         profile: profile ?? this.profile,
         email: email,
@@ -148,18 +149,18 @@ class Guardian {
   });
 
   factory Guardian.fromJson(Map<String, dynamic> json) => Guardian(
-        type: json['type']?.toString(),
-        lastName: json['lastName']?.toString(),
-        firstName: json['firstName']?.toString(),
-        email: json['email']?.toString(),
-        phone: json['phone']?.toString(),
-        street: json['street']?.toString(),
-        houseNumber: json['houseNumber']?.toString(),
-        zipCode: json['zipCode']?.toString(),
-        city: json['city']?.toString(),
-        companyName: json['companyName']?.toString(),
-        vatNumber: json['vatNumber']?.toString(),
-      );
+    type: json['type']?.toString(),
+    lastName: json['lastName']?.toString(),
+    firstName: json['firstName']?.toString(),
+    email: json['email']?.toString(),
+    phone: json['phone']?.toString(),
+    street: json['street']?.toString(),
+    houseNumber: json['houseNumber']?.toString(),
+    zipCode: json['zipCode']?.toString(),
+    city: json['city']?.toString(),
+    companyName: json['companyName']?.toString(),
+    vatNumber: json['vatNumber']?.toString(),
+  );
 
   final String? type;
   final String? lastName;
@@ -174,16 +175,16 @@ class Guardian {
   final String? vatNumber;
 
   Map<String, dynamic> toJson() => {
-        if (type != null) 'type': type,
-        if (lastName != null) 'lastName': lastName,
-        if (firstName != null) 'firstName': firstName,
-        if (email != null) 'email': email,
-        if (phone != null) 'phone': phone,
-        if (street != null) 'street': street,
-        if (houseNumber != null) 'houseNumber': houseNumber,
-        if (zipCode != null) 'zipCode': zipCode,
-        if (city != null) 'city': city,
-        if (companyName != null) 'companyName': companyName,
-        if (vatNumber != null) 'vatNumber': vatNumber,
-      };
+    if (type != null) 'type': type,
+    if (lastName != null) 'lastName': lastName,
+    if (firstName != null) 'firstName': firstName,
+    if (email != null) 'email': email,
+    if (phone != null) 'phone': phone,
+    if (street != null) 'street': street,
+    if (houseNumber != null) 'houseNumber': houseNumber,
+    if (zipCode != null) 'zipCode': zipCode,
+    if (city != null) 'city': city,
+    if (companyName != null) 'companyName': companyName,
+    if (vatNumber != null) 'vatNumber': vatNumber,
+  };
 }

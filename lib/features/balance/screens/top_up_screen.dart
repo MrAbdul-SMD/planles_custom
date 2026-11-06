@@ -44,10 +44,9 @@ class _TopUpScreenState extends ConsumerState<TopUpScreen> {
     }
     setState(() => _busy = true);
     try {
-      final url = await ref.read(ordersRepositoryProvider).purchaseBalance(
-            amount: amount,
-            redirectUrl: 'planles://topup',
-          );
+      final url = await ref
+          .read(ordersRepositoryProvider)
+          .purchaseBalance(amount: amount, redirectUrl: 'planles://topup');
       final uri = Uri.tryParse(url);
       if (uri != null) {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -108,8 +107,9 @@ class _TopUpScreenState extends ConsumerState<TopUpScreen> {
               const SizedBox(height: 24),
               Text(
                 'Kies een bedrag',
-                style: theme.textTheme.titleSmall
-                    ?.copyWith(fontWeight: FontWeight.w700),
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               const SizedBox(height: 12),
               Wrap(

@@ -34,9 +34,8 @@ class _ScheduleLessonScreenState extends ConsumerState<ScheduleLessonScreen> {
   bool _busy = false;
 
   int get _available {
-    final items = ref
-            .read(orderItemsProvider(widget.orderId))
-            .value ??
+    final items =
+        ref.read(orderItemsProvider(widget.orderId)).value ??
         const <OrderItem>[];
     for (final item in items) {
       if (item.id == widget.itemId) return item.availableDuration ?? 0;
@@ -47,7 +46,7 @@ class _ScheduleLessonScreenState extends ConsumerState<ScheduleLessonScreen> {
   OrderItem? get _item {
     final items =
         ref.read(orderItemsProvider(widget.orderId)).value ??
-            const <OrderItem>[];
+        const <OrderItem>[];
     for (final item in items) {
       if (item.id == widget.itemId) return item;
     }
@@ -97,11 +96,9 @@ class _ScheduleLessonScreenState extends ConsumerState<ScheduleLessonScreen> {
     }
     setState(() => _busy = true);
     try {
-      await ref.read(planningRepositoryProvider).create(
-            orderItemId: widget.itemId,
-            startDate: start,
-            endDate: end,
-          );
+      await ref
+          .read(planningRepositoryProvider)
+          .create(orderItemId: widget.itemId, startDate: start, endDate: end);
       ref.invalidate(orderItemsProvider(widget.orderId));
       ref.invalidate(planningListProvider);
       if (!mounted) return;
@@ -132,8 +129,9 @@ class _ScheduleLessonScreenState extends ConsumerState<ScheduleLessonScreen> {
             children: [
               Text(
                 item?.drivingClass?.name ?? 'Les',
-                style: theme.textTheme.titleLarge
-                    ?.copyWith(fontWeight: FontWeight.w800),
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
               ),
               const SizedBox(height: 6),
               Text(
@@ -156,8 +154,10 @@ class _ScheduleLessonScreenState extends ConsumerState<ScheduleLessonScreen> {
                       subtitle: Text(
                         _date == null
                             ? 'Nog niet gekozen'
-                            : DateFormat('EEEE d MMMM yyyy', 'nl_NL')
-                                .format(_date!),
+                            : DateFormat(
+                                'EEEE d MMMM yyyy',
+                                'nl_NL',
+                              ).format(_date!),
                       ),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: available > 0 ? _pickDate : null,
@@ -178,8 +178,9 @@ class _ScheduleLessonScreenState extends ConsumerState<ScheduleLessonScreen> {
               const SizedBox(height: 20),
               Text(
                 'Duur',
-                style: theme.textTheme.titleSmall
-                    ?.copyWith(fontWeight: FontWeight.w700),
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               const SizedBox(height: 10),
               Wrap(
