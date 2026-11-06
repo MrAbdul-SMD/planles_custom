@@ -1,4 +1,5 @@
 import '../../../core/network/api_client.dart';
+import '../../../core/network/api_exception.dart';
 import '../models/order.dart';
 
 /// Catalog + order endpoints (`/vehicle`, `/class`, `/order`, `/balance`).
@@ -52,7 +53,12 @@ class OrdersRepository {
 
   Future<Order> getById(int id) async {
     final data = await _api.get('/order/$id');
-    if (data is! Map) throw 'Bestelling niet gevonden.';
+    if (data is! Map) {
+      throw const ApiException(
+        'Bestelling niet gevonden.',
+        code: AppErrorCode.orderNotFound,
+      );
+    }
     return Order.fromJson(Map<String, dynamic>.from(data));
   }
 
@@ -128,7 +134,10 @@ class OrdersRepository {
     );
     final url = data is Map ? data['checkoutUrl']?.toString() : null;
     if (url == null || url.isEmpty) {
-      throw 'Het openen van de betaling is mislukt.';
+      throw const ApiException(
+        'Het openen van de betaling is mislukt.',
+        code: AppErrorCode.paymentFailed,
+      );
     }
     return url;
   }

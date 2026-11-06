@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../l10n/l10n.dart';
 import '../../../shared/widgets.dart';
 import '../../auth/models/user.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -31,6 +32,7 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final vehicles = ref.watch(vehiclesProvider);
     final user = ref.watch(currentUserProvider);
     final isInstructor = user?.isInstructor == true;
@@ -46,7 +48,7 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Lessen kopen')),
+      appBar: AppBar(title: Text(l10n.buyLessonsTitle)),
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
@@ -65,8 +67,10 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
                   )
                 : Text(
                     selectedClass == null
-                        ? 'Kies een lespakket'
-                        : 'Betalen — ${F.money(_total(selectedClass))}',
+                        ? l10n.buyLessonsChoosePackage
+                        : l10n.buyLessonsPayButton(
+                            F.money(_total(selectedClass)),
+                          ),
                   ),
           ),
         ),
@@ -77,14 +81,14 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
           child: ListView(
             padding: const EdgeInsets.all(20),
             children: [
-              SectionHeader('1. Voertuig'),
+              SectionHeader(l10n.buyLessonsStepVehicle),
               vehicles.when(
                 loading: () => const Padding(
                   padding: EdgeInsets.all(20),
                   child: Center(child: CircularProgressIndicator()),
                 ),
                 error: (e, _) => ErrorView(
-                  message: '$e',
+                  message: describeError(context, e),
                   onRetry: () => ref.invalidate(vehiclesProvider),
                 ),
                 data: (list) => Wrap(
@@ -93,7 +97,9 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
                   children: [
                     for (final v in list)
                       ChoiceChip(
-                        label: Text(v.name ?? 'Voertuig ${v.id}'),
+                        label: Text(
+                          v.name ?? l10n.buyLessonsVehicleFallback(v.id),
+                        ),
                         selected: _vehicleId == v.id,
                         onSelected: (_) {
                           setState(() {
@@ -108,10 +114,10 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
               ),
               const SizedBox(height: 24),
 
-              SectionHeader('2. Les'),
+              SectionHeader(l10n.buyLessonsStepLesson),
               if (_vehicleId == null)
                 Text(
-                  'Kies eerst een voertuigtype.',
+                  l10n.buyLessonsChooseVehicleFirst,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -125,12 +131,12 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
                     child: Center(child: CircularProgressIndicator()),
                   ),
                   error: (e, _) => ErrorView(
-                    message: '$e',
+                    message: describeError(context, e),
                     onRetry: () => ref.invalidate(classesProvider(_vehicleId!)),
                   ),
                   data: (list) {
                     if (list.isEmpty) {
-                      return const Text('Geen lespakketten beschikbaar.');
+                      return Text(l10n.buyLessonsNoPackages);
                     }
                     return Column(
                       children: [
@@ -152,7 +158,7 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
 
               if (selectedClass != null) ...[
                 const SizedBox(height: 16),
-                SectionHeader('3. Aantal'),
+                SectionHeader(l10n.buyLessonsStepQuantity),
                 Card(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
@@ -163,7 +169,7 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
                       children: [
                         Expanded(
                           child: Text(
-                            selectedClass.name ?? 'Les',
+                            selectedClass.name ?? l10n.orderDetailLesson,
                             style: theme.textTheme.titleSmall?.copyWith(
                               fontWeight: FontWeight.w700,
                             ),
@@ -191,8 +197,13 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  '${F.minutesLabel((selectedClass.durationMinutes ?? 0) * _quantity)} '
-                  'les — ${F.money(_total(selectedClass))}',
+                  l10n.buyLessonsTotalLine(
+                    F.minutesLabel(
+                      l10n,
+                      (selectedClass.durationMinutes ?? 0) * _quantity,
+                    ),
+                    F.money(_total(selectedClass)),
+                  ),
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -201,7 +212,7 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
 
               if (isInstructor) ...[
                 const SizedBox(height: 24),
-                SectionHeader('4. Leerling'),
+                SectionHeader(l10n.buyLessonsStepStudent),
                 _StudentPicker(
                   selectedId: _studentId,
                   onChanged: (id) => setState(() => _studentId = id),
@@ -209,18 +220,22 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
               ],
 
               const SizedBox(height: 24),
-              SectionHeader(isInstructor ? '5. Betaalwijze' : '4. Betaalwijze'),
+              SectionHeader(
+                isInstructor
+                    ? l10n.buyLessonsStepPaymentInstructor
+                    : l10n.buyLessonsStepPaymentStudent,
+              ),
               SegmentedButton<String>(
-                segments: const [
+                segments: [
                   ButtonSegment(
                     value: 'digital',
-                    label: Text('Online'),
-                    icon: Icon(Icons.credit_card_outlined),
+                    label: Text(l10n.buyLessonsPaymentOnline),
+                    icon: const Icon(Icons.credit_card_outlined),
                   ),
                   ButtonSegment(
                     value: 'balance',
-                    label: Text('Saldo'),
-                    icon: Icon(Icons.account_balance_wallet_outlined),
+                    label: Text(l10n.buyLessonsPaymentBalance),
+                    icon: const Icon(Icons.account_balance_wallet_outlined),
                   ),
                 ],
                 selected: {_paymentType},
@@ -230,16 +245,15 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
               const SizedBox(height: 12),
               Text(
                 _paymentType == 'balance'
-                    ? 'Het bedrag wordt van je saldo afgeschreven. Je saldo: '
-                          '${F.money(user?.balance ?? 0)}'
-                    : 'Je doorgestuurd naar de veilige betaalpagina van Mollie.',
+                    ? l10n.buyLessonsBalanceNote(F.money(user?.balance ?? 0))
+                    : l10n.buyLessonsMollieNote,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
               const SizedBox(height: 16),
               Text(
-                'Na de aankoop plan je je lessen in vanuit de bestelling.',
+                l10n.buyLessonsAfterPurchase,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -254,6 +268,7 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
   double _total(DrivingClass c) => (c.priceValue ?? 0) * _quantity;
 
   Future<void> _submit() async {
+    final l10n = context.l10n;
     final classId = _classId;
     if (classId == null) return;
     setState(() => _busy = true);
@@ -285,13 +300,19 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
       if (mounted) {
         showAppSnack(
           context,
-          url == null ? 'Bestelling geplaatst' : 'Rond de betaling af',
+          url == null
+              ? l10n.buyLessonsOrderPlaced
+              : l10n.buyLessonsCompletePayment,
         );
       }
     } on ApiException catch (e) {
-      if (mounted) showAppSnack(context, e.validationMessage, error: true);
+      if (mounted) {
+        showAppSnack(context, describeError(context, e), error: true);
+        }
     } catch (e) {
-      if (mounted) showAppSnack(context, '$e', error: true);
+      if (mounted) {
+        showAppSnack(context, describeError(context, e), error: true);
+        }
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -311,6 +332,7 @@ class _ClassOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     return InkWell(
       borderRadius: BorderRadius.circular(16),
@@ -342,7 +364,7 @@ class _ClassOption extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    drivingClass.name ?? 'Les',
+                    drivingClass.name ?? l10n.orderDetailLesson,
                     style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
@@ -351,12 +373,12 @@ class _ClassOption extends StatelessWidget {
                   Text(
                     [
                       if (drivingClass.duration != null)
-                        F.durationLabel(drivingClass.duration),
+                        F.durationLabel(l10n, drivingClass.duration),
                       switch (drivingClass.lessonType) {
-                        'trial' => 'Proefles',
-                        'base' => 'Basisles',
-                        'pack' => 'Lespakket',
-                        'exam' => 'Examen',
+                        'trial' => l10n.buyLessonsLessonTypeTrial,
+                        'base' => l10n.buyLessonsLessonTypeBase,
+                        'pack' => l10n.buyLessonsLessonTypePack,
+                        'exam' => l10n.buyLessonsLessonTypeExam,
                         _ => null,
                       },
                     ].where((e) => e != null).join(' · '),
@@ -388,6 +410,7 @@ class _StudentPicker extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final students = ref.watch(myStudentsProvider);
 
     return students.when(
@@ -396,15 +419,15 @@ class _StudentPicker extends ConsumerWidget {
         child: Center(child: CircularProgressIndicator()),
       ),
       error: (e, _) => ErrorView(
-        message: '$e',
+        message: describeError(context, e),
         onRetry: () => ref.invalidate(myStudentsProvider),
       ),
       data: (list) {
         if (list.isEmpty) {
-          return const Card(
+          return Card(
             child: Padding(
-              padding: EdgeInsets.all(16),
-              child: Text('Je hebt nog geen leerlingen toegewezen.'),
+              padding: const EdgeInsets.all(16),
+              child: Text(l10n.buyLessonsNoStudents),
             ),
           );
         }
@@ -415,10 +438,13 @@ class _StudentPicker extends ConsumerWidget {
               child: DropdownButton<int>(
                 isExpanded: true,
                 value: selectedId,
-                hint: const Text('Kies een leerling'),
+                hint: Text(l10n.buyLessonsChooseStudent),
                 items: [
                   for (final User s in list)
-                    DropdownMenuItem(value: s.id, child: Text(s.fullName)),
+                    DropdownMenuItem(
+                      value: s.id,
+                      child: Text(s.displayName(l10n)),
+                    ),
                 ],
                 onChanged: onChanged,
               ),

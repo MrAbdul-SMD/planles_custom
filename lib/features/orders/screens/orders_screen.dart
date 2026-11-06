@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/utils/formatters.dart';
+import '../../../l10n/l10n.dart';
 import '../../../shared/widgets.dart';
 import '../models/order.dart';
 import '../providers/orders_providers.dart';
@@ -12,14 +13,15 @@ class OrdersScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final orders = ref.watch(ordersListProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Bestellingen')),
+      appBar: AppBar(title: Text(l10n.ordersTitle)),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/orders/new'),
         icon: const Icon(Icons.add),
-        label: const Text('Kopen'),
+        label: Text(l10n.ordersBuyButton),
       ),
       body: RefreshIndicator(
         onRefresh: () async => ref.invalidate(ordersListProvider),
@@ -29,13 +31,12 @@ class OrdersScreen extends ConsumerWidget {
           data: (page) {
             if (page.items.isEmpty) {
               return ListView(
-                children: const [
-                  SizedBox(height: 80),
+                children: [
+                  const SizedBox(height: 80),
                   EmptyState(
                     icon: Icons.receipt_long_outlined,
-                    title: 'Nog geen bestellingen',
-                    subtitle:
-                        'Koop je eerste lespakket om lessen in te plannen.',
+                    title: l10n.ordersEmptyTitle,
+                    subtitle: l10n.ordersEmptySubtitle,
                   ),
                 ],
               );
@@ -61,16 +62,17 @@ class _OrderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final payment = order.payment;
     final (label, tone) = switch (payment?.status) {
-      'paid' => ('Betaald', StatusTone.success),
-      'open' => ('Open', StatusTone.warning),
-      'pending' => ('In behandeling', StatusTone.info),
-      'failed' => ('Mislukt', StatusTone.danger),
-      'canceled' => ('Geannuleerd', StatusTone.danger),
-      'expired' => ('Verlopen', StatusTone.danger),
-      _ => ('Nog niet betaald', StatusTone.neutral),
+      'paid' => (l10n.ordersPaymentPaid, StatusTone.success),
+      'open' => (l10n.ordersPaymentOpen, StatusTone.warning),
+      'pending' => (l10n.ordersPaymentPending, StatusTone.info),
+      'failed' => (l10n.ordersPaymentFailed, StatusTone.danger),
+      'canceled' => (l10n.ordersPaymentCanceled, StatusTone.danger),
+      'expired' => (l10n.ordersPaymentExpired, StatusTone.danger),
+      _ => (l10n.ordersPaymentUnpaid, StatusTone.neutral),
     };
 
     return Card(
@@ -87,7 +89,7 @@ class _OrderCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      'Bestelling #${order.id}',
+                      l10n.ordersOrderNumber(order.id),
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
@@ -100,7 +102,7 @@ class _OrderCard extends StatelessWidget {
               Text(
                 [
                   if (order.createdAt != null) F.dateTime(order.createdAt),
-                  if (order.student != null) order.student!.fullName,
+                  if (order.student != null) order.student!.displayName(l10n),
                 ].join(' · '),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
@@ -120,7 +122,9 @@ class _OrderCard extends StatelessWidget {
                   ],
                   if (order.totalDuration != null)
                     Text(
-                      '${F.minutesLabel(order.totalDuration!)} les',
+                      l10n.ordersTotalDuration(
+                        F.minutesLabel(l10n, order.totalDuration!),
+                      ),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),

@@ -1,4 +1,5 @@
 import '../../../core/utils/formatters.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// The Planles user. Returned by `/auth/me`, embedded in plannings, orders,
 /// students and instructors.
@@ -81,11 +82,14 @@ class User {
   bool get isInstructor => profile == 'INSTRUCTOR';
   bool get isAdmin => profile == 'ADMIN';
 
-  String get fullName {
+  /// Full name for display: first + last name, then the stored name, then the
+  /// email — falling back to a translated "no name" placeholder.
+  String displayName(AppLocalizations l10n) {
     final parts = [firstName, lastName].where((e) => e != null && e.isNotEmpty);
     if (parts.isNotEmpty) return parts.join(' ');
     if (name != null && name!.isNotEmpty) return name!;
-    return email ?? 'Geen naam';
+    final mail = email;
+    return (mail == null || mail.isEmpty) ? l10n.noName : mail;
   }
 
   String get initials {

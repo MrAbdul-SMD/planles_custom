@@ -118,3 +118,41 @@ Rules of thumb:
 
 `test/app_test.dart` contains widget smoke tests: signed-out redirect to
 login, empty-form validation, and navigation between auth screens.
+
+## Configuration (flutter_dotenv)
+
+Client-side configuration lives in a `.env` file that is bundled as a Flutter
+asset:
+
+```dotenv
+# .env (gitignored — copy from .env.example)
+API_BASE_URL=https://api.planles.nl/api
+```
+
+- Register the file under `flutter: assets:` in `pubspec.yaml` (already done).
+- `lib/main.dart` calls `await dotenv.load()` before creating the `ApiClient`.
+- `ApiClient.resolvedBaseUrl` reads `API_BASE_URL` and falls back to the
+  compiled-in default (`https://api.planles.nl/api`) when the file or the key
+  is missing, so the app still boots without a `.env`.
+- Never store secrets in `.env`: Flutter assets are part of the binary and
+  can be extracted by anyone. `.env` is gitignored; `.env.example` is the
+  committed template.
+
+## Internationalization (flutter gen-l10n)
+
+The app ships Dutch (`nl`, template) and English (`en`), following the system
+locale with Dutch as fallback.
+
+- Configuration: `l10n.yaml` (`arb-dir: lib/l10n`, template `app_nl.arb`).
+- ARB files: `lib/l10n/app_nl.arb` / `lib/l10n/app_en.arb`.
+- Generated: `lib/l10n/app_localizations.dart` (via `flutter gen-l10n`,
+  triggered by `generate: true` in `pubspec.yaml`).
+- Access in widgets: `final l10n = context.l10n;` (extension in
+  `lib/l10n/l10n.dart`), then `l10n.someKey`.
+- Shared helpers: `describeError(context, e)` maps `ApiException`s to
+  translated messages; `F.relativeDay(l10n, …)` / `F.minutesLabel(l10n, …)`
+  etc. take the localizations for word-based labels.
+- Parallel migration workflow: each feature writes its keys to
+  `l10n_fragments/<feature>.json`; `python3 tool/sync_l10n.py` merges them
+  into the ARB files under an advisory lock and regenerates the localizations.
+  See `docs/i18n-guide.md` for the conventions.

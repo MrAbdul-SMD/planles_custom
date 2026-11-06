@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-import '../../../core/network/api_exception.dart';
+import '../../../l10n/l10n.dart';
 import '../../../shared/widgets.dart';
 import '../../auth/models/user.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -104,12 +104,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           );
       await ref.read(authControllerProvider.notifier).refreshUser();
       if (!mounted) return;
-      showAppSnack(context, 'Profiel bijgewerkt');
+      showAppSnack(context, context.l10n.editProfileUpdated);
       context.pop();
-    } on ApiException catch (e) {
-      if (mounted) showAppSnack(context, e.validationMessage, error: true);
     } catch (e) {
-      if (mounted) showAppSnack(context, '$e', error: true);
+      if (mounted) {
+        showAppSnack(context, describeError(context, e), error: true);
+      }
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -117,10 +117,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Gegevens bewerken')),
+      appBar: AppBar(title: Text(l10n.editProfileTitle)),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 480),
@@ -134,11 +135,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     Expanded(
                       child: TextFormField(
                         controller: _firstName,
-                        decoration: const InputDecoration(
-                          labelText: 'Voornaam',
+                        decoration: InputDecoration(
+                          labelText: l10n.registerFirstName,
                         ),
                         validator: (v) => (v == null || v.trim().isEmpty)
-                            ? 'Verplicht veld'
+                            ? l10n.registerRequired
                             : null,
                       ),
                     ),
@@ -146,11 +147,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     Expanded(
                       child: TextFormField(
                         controller: _lastName,
-                        decoration: const InputDecoration(
-                          labelText: 'Achternaam',
+                        decoration: InputDecoration(
+                          labelText: l10n.registerLastName,
                         ),
                         validator: (v) => (v == null || v.trim().isEmpty)
-                            ? 'Verplicht veld'
+                            ? l10n.registerRequired
                             : null,
                       ),
                     ),
@@ -160,12 +161,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 TextFormField(
                   controller: _email,
                   keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(labelText: 'E-mailadres'),
+                  decoration: InputDecoration(labelText: l10n.loginEmailLabel),
                   validator: (v) {
                     final value = v?.trim() ?? '';
-                    if (value.isEmpty) return 'Verplicht veld';
+                    if (value.isEmpty) return l10n.registerRequired;
                     if (!value.contains('@')) {
-                      return 'Vul een geldig e-mailadres in';
+                      return l10n.loginEmailInvalid;
                     }
                     return null;
                   },
@@ -173,11 +174,22 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 const SizedBox(height: 14),
                 DropdownButtonFormField<String>(
                   initialValue: _gender,
-                  decoration: const InputDecoration(labelText: 'Geslacht'),
-                  items: const [
-                    DropdownMenuItem(value: 'MALE', child: Text('Man')),
-                    DropdownMenuItem(value: 'FEMALE', child: Text('Vrouw')),
-                    DropdownMenuItem(value: 'UNKNOWN', child: Text('Onbekend')),
+                  decoration: InputDecoration(
+                    labelText: l10n.editProfileGender,
+                  ),
+                  items: [
+                    DropdownMenuItem(
+                      value: 'MALE',
+                      child: Text(l10n.editProfileGenderMale),
+                    ),
+                    DropdownMenuItem(
+                      value: 'FEMALE',
+                      child: Text(l10n.editProfileGenderFemale),
+                    ),
+                    DropdownMenuItem(
+                      value: 'UNKNOWN',
+                      child: Text(l10n.editProfileGenderUnknown),
+                    ),
                   ],
                   onChanged: (v) => setState(() => _gender = v),
                 ),
@@ -186,25 +198,24 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   controller: _birthdate,
                   readOnly: true,
                   onTap: _pickBirthdate,
-                  decoration: const InputDecoration(
-                    labelText: 'Geboortedatum',
-                    hintText: 'jjjj-mm-dd',
-                    suffixIcon: Icon(Icons.calendar_today_outlined),
+                  decoration: InputDecoration(
+                    labelText: l10n.registerBirthdate,
+                    hintText: l10n.registerBirthdateHint,
+                    suffixIcon: const Icon(Icons.calendar_today_outlined),
                   ),
                 ),
                 const SizedBox(height: 14),
                 TextFormField(
                   controller: _phone,
                   keyboardType: TextInputType.phone,
-                  decoration: const InputDecoration(
-                    labelText: 'Telefoonnummer',
-                  ),
-                  validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'Verplicht veld' : null,
+                  decoration: InputDecoration(labelText: l10n.registerPhone),
+                  validator: (v) => (v == null || v.trim().isEmpty)
+                      ? l10n.registerRequired
+                      : null,
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'Adres',
+                  l10n.registerAddress,
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
@@ -216,9 +227,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                       flex: 3,
                       child: TextFormField(
                         controller: _street,
-                        decoration: const InputDecoration(labelText: 'Straat'),
+                        decoration: InputDecoration(
+                          labelText: l10n.registerStreet,
+                        ),
                         validator: (v) => (v == null || v.trim().isEmpty)
-                            ? 'Verplicht veld'
+                            ? l10n.registerRequired
                             : null,
                       ),
                     ),
@@ -226,9 +239,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     Expanded(
                       child: TextFormField(
                         controller: _houseNumber,
-                        decoration: const InputDecoration(labelText: 'Huisnr.'),
+                        decoration: InputDecoration(
+                          labelText: l10n.registerHouseNumber,
+                        ),
                         validator: (v) => (v == null || v.trim().isEmpty)
-                            ? 'Verplicht veld'
+                            ? l10n.registerRequired
                             : null,
                       ),
                     ),
@@ -241,11 +256,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                       child: TextFormField(
                         controller: _zipCode,
                         textCapitalization: TextCapitalization.characters,
-                        decoration: const InputDecoration(
-                          labelText: 'Postcode',
+                        decoration: InputDecoration(
+                          labelText: l10n.registerZipCode,
                         ),
                         validator: (v) => (v == null || v.trim().isEmpty)
-                            ? 'Verplicht veld'
+                            ? l10n.registerRequired
                             : null,
                       ),
                     ),
@@ -254,9 +269,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                       flex: 2,
                       child: TextFormField(
                         controller: _city,
-                        decoration: const InputDecoration(labelText: 'Plaats'),
+                        decoration: InputDecoration(
+                          labelText: l10n.registerCity,
+                        ),
                         validator: (v) => (v == null || v.trim().isEmpty)
-                            ? 'Verplicht veld'
+                            ? l10n.registerRequired
                             : null,
                       ),
                     ),
@@ -265,13 +282,17 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 const SizedBox(height: 14),
                 TextFormField(
                   controller: _pickup,
-                  decoration: const InputDecoration(labelText: 'Ophaallocatie'),
+                  decoration: InputDecoration(
+                    labelText: l10n.studentsPickupLabel,
+                  ),
                 ),
                 const SizedBox(height: 14),
                 TextFormField(
                   controller: _plate,
                   textCapitalization: TextCapitalization.characters,
-                  decoration: const InputDecoration(labelText: 'Kenteken'),
+                  decoration: InputDecoration(
+                    labelText: l10n.profileLicensePlate,
+                  ),
                 ),
                 const SizedBox(height: 28),
                 FilledButton(
@@ -282,7 +303,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                           height: 22,
                           child: CircularProgressIndicator(strokeWidth: 2.4),
                         )
-                      : const Text('Opslaan'),
+                      : Text(l10n.save),
                 ),
               ],
             ),

@@ -1,22 +1,40 @@
 import 'package:intl/intl.dart';
 
+import '../../l10n/app_localizations.dart';
+
 /// Central place for every user facing conversion (currency, dates, durations).
 ///
 /// The Planles API returns a handful of values as strings that are actually
 /// numbers or intervals (`"45.00"`, `"01:00:00"`), so the helpers below are
 /// deliberately tolerant.
+///
+/// ## Locale
+///
+/// Pure formatting ([money], [dateShort], [time], …) resolves its locale from
+/// `Intl.defaultLocale`, which the app keeps in sync with the active Flutter
+/// locale (see `_IntlLocaleDelegate` in `lib/app/app.dart`).
+///
+/// Helpers that render *words* ("Vandaag", "45 min") take the
+/// [AppLocalizations] of the current context instead, because those strings
+/// come from the ARB files:
+///
+/// ```dart
+/// final l10n = context.l10n;
+/// F.relativeDay(l10n, planning.startDate);
+/// ```
 class F {
   F._();
 
-  static final NumberFormat _currency = NumberFormat.currency(
-    locale: 'nl_NL',
-    symbol: '€',
-    decimalDigits: 2,
-  );
+  /// Effective locale tag; Dutch until the app has resolved its locale.
+  static String get _locale => Intl.defaultLocale ?? 'nl';
 
   static String money(num? value) {
     if (value == null) return '–';
-    return _currency.format(value);
+    return NumberFormat.currency(
+      locale: _locale,
+      symbol: '€',
+      decimalDigits: 2,
+    ).format(value);
   }
 
   /// Parses `"45.00"` / `45` / `null` into a `double`.
@@ -35,18 +53,19 @@ class F {
     return h * 60 + m;
   }
 
-  static String durationLabel(String? raw) {
+  static String durationLabel(AppLocalizations l10n, String? raw) {
     final minutes = durationMinutes(raw);
     if (minutes == null) return '–';
-    return minutesLabel(minutes);
+    return minutesLabel(l10n, minutes);
   }
 
-  static String minutesLabel(int minutes) {
+  /// `45 min` / `2 uur` / `1 uur 30 min`.
+  static String minutesLabel(AppLocalizations l10n, int minutes) {
     final h = minutes ~/ 60;
     final m = minutes % 60;
-    if (h == 0) return '$m min';
-    if (m == 0) return '$h uur';
-    return '$h uur $m min';
+    if (h == 0) return l10n.minutesShort(m);
+    if (m == 0) return l10n.hoursShort(h);
+    return l10n.hoursMinutesShort(h, m);
   }
 
   static DateTime? date(String? raw) {
@@ -54,49 +73,52 @@ class F {
     return DateTime.tryParse(raw)?.toLocal();
   }
 
-  static String dateShort(DateTime? value) {
-    if (value == null) return '–';
-    return DateFormat('dd-MM-yyyy').format(value);
-  }
+  static String dateShort(DateTime? value) =>
+      value == null ? '–' : DateFormat('dd-MM-yyyy', _locale).format(value);
 
-  static String dateMedium(DateTime? value) {
-    if (value == null) return '–';
-    return DateFormat('EEEE d MMMM yyyy', 'nl_NL').format(value);
-  }
+  static String dateMedium(DateTime? value) => value == null
+      ? '–'
+      : DateFormat('EEEE d MMMM yyyy', _locale).format(value);
 
-  static String dateTime(DateTime? value) {
-    if (value == null) return '–';
-    return DateFormat('dd-MM-yyyy HH:mm').format(value);
-  }
+  static String dateTime(DateTime? value) =>
+      value == null ? '–' : DateFormat('dd-MM-yyyy HH:mm', _locale).format(value);
 
-  static String time(DateTime? value) {
-    if (value == null) return '–';
-    return DateFormat('HH:mm').format(value);
-  }
+  static String time(DateTime? value) =>
+      value == null ? '–' : DateFormat('HH:mm', _locale).format(value);
 
-  static String relativeDay(DateTime? value) {
+  /// "Vandaag" / "Morgen" / "Gisteren" / "maandag 9 november".
+  static String relativeDay(AppLocalizations l10n, DateTime? value) {
     if (value == null) return '–';
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final day = DateTime(value.year, value.month, value.day);
-    final diff = day.difference(today).inDays;
-    if (diff == 0) return 'Vandaag';
-    if (diff == 1) return 'Morgen';
-    if (diff == -1) return 'Gisteren';
-    return DateFormat('EEEE d MMMM', 'nl_NL').format(value);
+    switch (_dayDiff(value)) {
+      case 0:
+        return l10n.today;
+      case 1:
+        return l10n.tomorrow;
+      case -1:
+        return l10n.yesterday;
+    }
+    return DateFormat('EEEE d MMMM', _locale).format(value);
   }
 
   /// Compact variant of [relativeDay] that falls back to `dd/MM` for dates
   /// further away, so it never overflows a small box.
-  static String dayLabel(DateTime? value) {
+  static String dayLabel(AppLocalizations l10n, DateTime? value) {
     if (value == null) return '–';
+    switch (_dayDiff(value)) {
+      case 0:
+        return l10n.today;
+      case 1:
+        return l10n.tomorrow;
+      case -1:
+        return l10n.yesterday;
+    }
+    return DateFormat('dd/MM', _locale).format(value);
+  }
+
+  static int _dayDiff(DateTime value) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final day = DateTime(value.year, value.month, value.day);
-    final diff = day.difference(today).inDays;
-    if (diff == 0) return 'Vandaag';
-    if (diff == 1) return 'Morgen';
-    if (diff == -1) return 'Gisteren';
-    return DateFormat('dd/MM').format(day);
+    return day.difference(today).inDays;
   }
 }

@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 import '../storage/token_storage.dart';
@@ -16,13 +17,13 @@ import 'api_exception.dart';
 class ApiClient {
   ApiClient({
     required TokenStorage tokenStorage,
-    String baseUrl = defaultBaseUrl,
+    String? baseUrl,
   }) {
     _tokenStorage = tokenStorage;
 
     _dio = Dio(
       BaseOptions(
-        baseUrl: baseUrl,
+        baseUrl: baseUrl ?? resolvedBaseUrl,
         connectTimeout: const Duration(seconds: 20),
         receiveTimeout: const Duration(seconds: 30),
         headers: const {'Accept': 'application/json'},
@@ -65,6 +66,15 @@ class ApiClient {
   }
 
   static const defaultBaseUrl = 'https://api.planles.nl/api';
+
+  /// `API_BASE_URL` from the bundled `.env` file, falling back to
+  /// [defaultBaseUrl] when the file or the key is missing (and in tests,
+  /// where `dotenv.load()` is never called).
+  static String get resolvedBaseUrl {
+    if (!dotenv.isInitialized) return defaultBaseUrl;
+    return dotenv.maybeGet('API_BASE_URL') ?? defaultBaseUrl;
+  }
+
   static const _hadTokenKey = 'planles.hadToken';
 
   late final TokenStorage _tokenStorage;
@@ -119,20 +129,31 @@ class ApiClient {
       case DioExceptionType.receiveTimeout:
         return const ApiException(
           'De verbinding met de server duurde te lang. Probeer het opnieuw.',
+          code: AppErrorCode.timeout,
         );
       case DioExceptionType.connectionError:
       case DioExceptionType.unknown:
         return const ApiException(
           'Geen verbinding met de server. Controleer je internetverbinding.',
+          code: AppErrorCode.offline,
         );
       case DioExceptionType.cancel:
-        return const ApiException('Aanvraag geannuleerd.');
+        return const ApiException(
+          'Aanvraag geannuleerd.',
+          code: AppErrorCode.cancelled,
+        );
       case DioExceptionType.badResponse:
         return _mapBadResponse(error);
       case DioExceptionType.badCertificate:
-        return const ApiException('Onveilige verbinding met de server.');
+        return const ApiException(
+          'Onveilige verbinding met de server.',
+          code: AppErrorCode.insecure,
+        );
       default:
-        return const ApiException('Er is iets misgegaan. Probeer het opnieuw.');
+        return const ApiException(
+          'Er is iets misgegaan. Probeer het opnieuw.',
+          code: AppErrorCode.transport,
+        );
     }
   }
 
@@ -144,6 +165,7 @@ class ApiClient {
       return const ApiException(
         'Te veel aanvragen. Wacht even en probeer het opnieuw.',
         statusCode: 429,
+        code: AppErrorCode.tooManyRequests,
       );
     }
 
@@ -163,7 +185,24 @@ class ApiClient {
       return ApiException(data, statusCode: status);
     }
 
-    return ApiException(_fallbackMessage(status), statusCode: status);
+    return ApiException(
+      _fallbackMessage(status),
+      statusCode: status,
+      code: _fallbackCode(status),
+    );
+  }
+
+  AppErrorCode _fallbackCode(int? status) {
+    if (status == null) return AppErrorCode.transport;
+    return switch (status) {
+      400 => AppErrorCode.invalidData,
+      401 => AppErrorCode.sessionExpired,
+      403 => AppErrorCode.forbidden,
+      404 => AppErrorCode.notFound,
+      409 => AppErrorCode.emailTaken,
+      >= 500 => AppErrorCode.serverError,
+      _ => AppErrorCode.transport,
+    };
   }
 
   String _fallbackMessage(int? status) {

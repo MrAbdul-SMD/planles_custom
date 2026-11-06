@@ -30,6 +30,7 @@ dependencies:
   url_launcher: ^6.3.3
   cached_network_image: ^4.0.6
   printing: ^5.15.1
+  flutter_dotenv: ^6.0.1
 
 dev_dependencies:
   flutter_test:
@@ -38,3 +39,10 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  # Enables `flutter gen-l10n` during pub get / build / test.
+  generate: true
+
+  assets:
+    # Client-side configuration loaded with flutter_dotenv.
+    - .env

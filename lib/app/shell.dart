@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/notifications/providers/notifications_providers.dart';
+import '../l10n/l10n.dart';
 
 /// Bottom navigation shell shared by the five primary tabs.
 class HomeShell extends ConsumerWidget {
@@ -13,6 +14,7 @@ class HomeShell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final unread = ref.watch(unreadCountProvider).value ?? 0;
+    final l10n = context.l10n;
 
     return Scaffold(
       body: navigationShell,
@@ -21,20 +23,20 @@ class HomeShell extends ConsumerWidget {
         onDestinationSelected: _goBranch,
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         destinations: [
-          const NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home_rounded),
-            label: 'Home',
+          NavigationDestination(
+            icon: const Icon(Icons.home_outlined),
+            selectedIcon: const Icon(Icons.home_rounded),
+            label: l10n.navHome,
           ),
-          const NavigationDestination(
-            icon: Icon(Icons.event_outlined),
-            selectedIcon: Icon(Icons.event_rounded),
-            label: 'Planning',
+          NavigationDestination(
+            icon: const Icon(Icons.event_outlined),
+            selectedIcon: const Icon(Icons.event_rounded),
+            label: l10n.navPlanning,
           ),
-          const NavigationDestination(
-            icon: Icon(Icons.receipt_long_outlined),
-            selectedIcon: Icon(Icons.receipt_long_rounded),
-            label: 'Bestellingen',
+          NavigationDestination(
+            icon: const Icon(Icons.receipt_long_outlined),
+            selectedIcon: const Icon(Icons.receipt_long_rounded),
+            label: l10n.navOrders,
           ),
           NavigationDestination(
             icon: Badge(
@@ -47,12 +49,12 @@ class HomeShell extends ConsumerWidget {
               label: Text('$unread'),
               child: const Icon(Icons.notifications_rounded),
             ),
-            label: 'Meldingen',
+            label: l10n.navNotifications,
           ),
-          const NavigationDestination(
-            icon: Icon(Icons.person_outline_rounded),
-            selectedIcon: Icon(Icons.person_rounded),
-            label: 'Profiel',
+          NavigationDestination(
+            icon: const Icon(Icons.person_outline_rounded),
+            selectedIcon: const Icon(Icons.person_rounded),
+            label: l10n.navProfile,
           ),
         ],
       ),

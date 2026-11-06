@@ -1,0 +1,114 @@
+{
+  "notificationsTitle": {
+    "nl": "Meldingen",
+    "en": "Notifications",
+    "description": "AppBar title of the notifications screen"
+  },
+  "notificationsMarkAllRead": {
+    "nl": "Alles gelezen",
+    "en": "Mark all as read",
+    "description": "Tooltip of the mark-all-read button"
+  },
+  "notificationsOpenSettings": {
+    "nl": "Instellingen",
+    "en": "Settings",
+    "description": "Tooltip of the button opening the notification settings"
+  },
+  "notificationsRefreshFailed": {
+    "nl": "Vernieuwen is mislukt.",
+    "en": "Refreshing failed.",
+    "description": "Error snack when refreshing the notification list fails"
+  },
+  "notificationsEmptyTitle": {
+    "nl": "Geen meldingen",
+    "en": "No notifications",
+    "description": "Empty-state title on the notifications screen"
+  },
+  "notificationsEmptySubtitle": {
+    "nl": "Updates over je lessen en betalingen komen hier.",
+    "en": "Updates about your lessons and payments will show up here.",
+    "description": "Empty-state subtitle on the notifications screen"
+  },
+  "notifSettingsTitle": {
+    "nl": "Meldingsinstellingen",
+    "en": "Notification settings",
+    "description": "AppBar title of the notification settings screen"
+  },
+  "notifSettingsQuietSection": {
+    "nl": "Niet storen",
+    "en": "Do not disturb",
+    "description": "Section header with the quiet-hours settings"
+  },
+  "notifSettingsQuietHours": {
+    "nl": "Stille uren",
+    "en": "Quiet hours",
+    "description": "Switch title for the quiet hours"
+  },
+  "notifSettingsQuietRange": {
+    "nl": "Geen meldingen tussen {start} en {end}",
+    "en": "No notifications between {start} and {end}",
+    "description": "Subtitle of the quiet-hours switch, {start} and {end} are times",
+    "placeholders": {
+      "start": { "type": "String" },
+      "end": { "type": "String" }
+    }
+  },
+  "notifSettingsQuietStart": {
+    "nl": "Begin",
+    "en": "Start",
+    "description": "List-tile label for the quiet-hours start time"
+  },
+  "notifSettingsQuietEnd": {
+    "nl": "Einde",
+    "en": "End",
+    "description": "List-tile label for the quiet-hours end time"
+  },
+  "notifSettingsTypesSection": {
+    "nl": "Soorten meldingen",
+    "en": "Notification types",
+    "description": "Section header with the notification-type switches"
+  },
+  "notifSettingsSaved": {
+    "nl": "Instellingen opgeslagen",
+    "en": "Settings saved",
+    "description": "Success snack after saving the notification settings"
+  },
+  "topUpCurrentBalance": {
+    "nl": "Huidig saldo",
+    "en": "Current balance",
+    "description": "Label above the current balance on the top-up screen"
+  },
+  "topUpChooseAmount": {
+    "nl": "Kies een bedrag",
+    "en": "Choose an amount",
+    "description": "Section header above the amount presets, also the pay button while no amount is chosen"
+  },
+  "topUpCustomAmount": {
+    "nl": "Eigen bedrag",
+    "en": "Custom amount",
+    "description": "Label of the free-form amount field"
+  },
+  "topUpPayButton": {
+    "nl": "Betalen — {amount}",
+    "en": "Pay {amount}",
+    "description": "Pay button with the chosen amount, {amount} is formatted as currency",
+    "placeholders": {
+      "amount": { "type": "String" }
+    }
+  },
+  "topUpMollieNote": {
+    "nl": "Betaling via Mollie. Je saldo wordt bijgeschreven zodra de betaling is bevestigd.",
+    "en": "Payment via Mollie. Your balance is credited once the payment is confirmed.",
+    "description": "Footer note on the top-up screen"
+  },
+  "topUpInvalidAmount": {
+    "nl": "Vul een geldig bedrag in.",
+    "en": "Enter a valid amount.",
+    "description": "Error snack when the chosen amount is missing or invalid"
+  },
+  "topUpCompletePayment": {
+    "nl": "Rond de betaling af om je saldo te verhogen.",
+    "en": "Complete the payment to top up your balance.",
+    "description": "Snack shown after the payment page has been opened"
+  }
+}

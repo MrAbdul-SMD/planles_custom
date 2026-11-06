@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../l10n/l10n.dart';
 import '../../../shared/widgets.dart';
 import '../providers/planning_providers.dart';
 
@@ -65,6 +65,7 @@ class _RescheduleScreenState extends ConsumerState<RescheduleScreen> {
       initialDate: _date ?? now.add(const Duration(days: 1)),
       firstDate: now,
       lastDate: now.add(const Duration(days: 365)),
+      locale: Localizations.localeOf(context),
     );
     if (picked != null) setState(() => _date = picked);
   }
@@ -78,18 +79,15 @@ class _RescheduleScreenState extends ConsumerState<RescheduleScreen> {
   }
 
   Future<void> _submit() async {
+    final l10n = context.l10n;
     final start = _newStart;
     final end = _newEnd;
     if (start == null || end == null) {
-      showAppSnack(context, 'Kies een datum en starttijd.', error: true);
+      showAppSnack(context, l10n.reschedulePickDateTime, error: true);
       return;
     }
     if (start.isBefore(DateTime.now())) {
-      showAppSnack(
-        context,
-        'De nieuwe datum moet in de toekomst liggen.',
-        error: true,
-      );
+      showAppSnack(context, l10n.rescheduleFutureDate, error: true);
       return;
     }
     setState(() => _busy = true);
@@ -100,12 +98,16 @@ class _RescheduleScreenState extends ConsumerState<RescheduleScreen> {
       ref.invalidate(planningDetailProvider(widget.id));
       ref.invalidate(planningListProvider);
       if (!mounted) return;
-      showAppSnack(context, 'Les verplaatst');
+      showAppSnack(context, l10n.planningLessonRescheduled);
       context.pop();
     } on ApiException catch (e) {
-      if (mounted) showAppSnack(context, e.validationMessage, error: true);
+      if (mounted) {
+        showAppSnack(context, describeError(context, e), error: true);
+      }
     } catch (e) {
-      if (mounted) showAppSnack(context, '$e', error: true);
+      if (mounted) {
+        showAppSnack(context, describeError(context, e), error: true);
+      }
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -113,10 +115,11 @@ class _RescheduleScreenState extends ConsumerState<RescheduleScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Les verplaatsen')),
+      appBar: AppBar(title: Text(l10n.planningRescheduleLesson)),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 480),
@@ -124,15 +127,14 @@ class _RescheduleScreenState extends ConsumerState<RescheduleScreen> {
             padding: const EdgeInsets.all(24),
             children: [
               Text(
-                'Kies een nieuw moment',
+                l10n.reschedulePickMoment,
                 style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w800,
                 ),
               ),
               const SizedBox(height: 6),
               Text(
-                'De les duurt ${F.minutesLabel(_duration)} en moet minstens '
-                '24 uur vooruit worden verplaatst.',
+                l10n.rescheduleDurationHint(F.minutesLabel(l10n, _duration)),
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -143,14 +145,11 @@ class _RescheduleScreenState extends ConsumerState<RescheduleScreen> {
                   children: [
                     ListTile(
                       leading: const Icon(Icons.calendar_today_outlined),
-                      title: const Text('Datum'),
+                      title: Text(l10n.rescheduleDateLabel),
                       subtitle: Text(
                         _date == null
-                            ? 'Nog niet gekozen'
-                            : DateFormat(
-                                'EEEE d MMMM yyyy',
-                                'nl_NL',
-                              ).format(_date!),
+                            ? l10n.rescheduleNotChosen
+                            : F.dateMedium(_date!),
                       ),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: _pickDate,
@@ -158,9 +157,9 @@ class _RescheduleScreenState extends ConsumerState<RescheduleScreen> {
                     const Divider(),
                     ListTile(
                       leading: const Icon(Icons.schedule_outlined),
-                      title: const Text('Starttijd'),
+                      title: Text(l10n.rescheduleStartTimeLabel),
                       subtitle: Text(
-                        _start?.format(context) ?? 'Nog niet gekozen',
+                        _start?.format(context) ?? l10n.rescheduleNotChosen,
                       ),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: _pickTime,
@@ -179,10 +178,7 @@ class _RescheduleScreenState extends ConsumerState<RescheduleScreen> {
                   child: Column(
                     children: [
                       Text(
-                        DateFormat(
-                          'EEEE d MMMM yyyy',
-                          'nl_NL',
-                        ).format(_newStart!),
+                        F.dateMedium(_newStart!),
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w700,
                         ),
@@ -207,7 +203,7 @@ class _RescheduleScreenState extends ConsumerState<RescheduleScreen> {
                         height: 22,
                         child: CircularProgressIndicator(strokeWidth: 2.4),
                       )
-                    : const Text('Les verplaatsen'),
+                    : Text(l10n.planningRescheduleLesson),
               ),
             ],
           ),

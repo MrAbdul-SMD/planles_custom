@@ -1,0 +1,743 @@
+{
+  "retry": "Opnieuw proberen",
+  "cancel": "Annuleren",
+  "confirm": "Bevestigen",
+  "save": "Opslaan",
+  "close": "Sluiten",
+  "back": "Terug",
+  "next": "Volgende",
+  "delete": "Verwijderen",
+  "edit": "Bewerken",
+  "genericSuccess": "Gelukt",
+  "noName": "Geen naam",
+  "today": "Vandaag",
+  "tomorrow": "Morgen",
+  "yesterday": "Gisteren",
+  "minutesShort": "{count} min",
+  "@minutesShort": {
+    "description": "Duration in minutes, e.g. '45 min'",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursShort": "{count} uur",
+  "@hoursShort": {
+    "description": "Duration in whole hours, e.g. '2 uur'",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursMinutesShort": "{hours} uur {minutes} min",
+  "@hoursMinutesShort": {
+    "description": "Duration in hours and minutes, e.g. '1 uur 30 min'",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "navHome": "Home",
+  "navPlanning": "Planning",
+  "navOrders": "Bestellingen",
+  "navNotifications": "Meldingen",
+  "navProfile": "Profiel",
+  "statusConfirmed": "Bevestigd",
+  "statusCompleted": "Afgerond",
+  "statusCancelled": "Geannuleerd",
+  "statusPending": "In afwachting",
+  "errTimeout": "De verbinding met de server duurde te lang. Probeer het opnieuw.",
+  "errOffline": "Geen verbinding met de server. Controleer je internetverbinding.",
+  "errCancelled": "Aanvraag geannuleerd.",
+  "errInsecure": "Onveilige verbinding met de server.",
+  "errGeneric": "Er is iets misgegaan. Probeer het opnieuw.",
+  "errTooManyRequests": "Te veel aanvragen. Wacht even en probeer het opnieuw.",
+  "errInvalidData": "De ingevulde gegevens zijn ongeldig.",
+  "errSessionExpired": "Je sessie is verlopen. Log opnieuw in.",
+  "errForbidden": "Je hebt geen toegang tot deze actie.",
+  "errNotFound": "Dit item is niet gevonden.",
+  "errEmailTaken": "Er bestaat al een account met dit e-mailadres.",
+  "errServer": "Er is iets misgegaan op de server. Probeer het later opnieuw.",
+  "errInvalidCredentials": "Inloggen is mislukt. Probeer het opnieuw.",
+  "errUserNotFound": "Gebruiker niet gevonden.",
+  "errOrderNotFound": "Bestelling niet gevonden.",
+  "errLessonNotFound": "Les niet gevonden.",
+  "errPaymentFailed": "Het openen van de betaling is mislukt.",
+  "errEmptyInvoice": "De factuur is leeg.",
+  "dashboardGreetingMorning": "Goedemorgen",
+  "dashboardGreetingAfternoon": "Goedemiddag",
+  "dashboardGreetingEvening": "Goedenavond",
+  "dashboardHello": "Hallo",
+  "dashboardUpcomingLessons": "Eerstvolgende lessen",
+  "dashboardViewAll": "Alles bekijken",
+  "dashboardQuickActions": "Snel regelen",
+  "dashboardBuyLessons": "Lessen kopen",
+  "dashboardTopUpBalance": "Saldo opwaarderen",
+  "dashboardRecentNotifications": "Recente meldingen",
+  "dashboardAllNotifications": "Alle meldingen",
+  "dashboardNotificationFallback": "Melding",
+  "dashboardBalanceLabel": "Saldo",
+  "dashboardNoLessonsTitle": "Nog geen lessen gepland",
+  "dashboardNoLessonsSubtitle": "Koop een lespakket om je eerste les in te plannen.",
+  "dashboardLessonFallback": "Les",
+  "studentsTitle": "Mijn leerlingen",
+  "studentsSearchHint": "Zoek leerling",
+  "studentsEmptyTitle": "Geen leerlingen",
+  "studentsEmptySubtitle": "Er zijn nog geen leerlingen aan je gekoppeld.",
+  "studentsEmailLabel": "E-mail",
+  "studentsPhoneLabel": "Telefoon",
+  "studentsAddressLabel": "Adres",
+  "studentsPickupLabel": "Ophaallocatie",
+  "loginTitle": "Welkom terug",
+  "loginSubtitle": "Log in om je lessen te beheren",
+  "@loginSubtitle": {
+    "description": "Subtitle under the login screen heading"
+  },
+  "loginEmailLabel": "E-mailadres",
+  "loginEmailRequired": "Vul je e-mailadres in",
+  "@loginEmailRequired": {
+    "description": "Validator + snack shown when the email field is empty"
+  },
+  "loginEmailInvalid": "Vul een geldig e-mailadres in",
+  "@loginEmailInvalid": {
+    "description": "Validator for an email address without @"
+  },
+  "loginPasswordLabel": "Wachtwoord",
+  "loginPasswordRequired": "Vul je wachtwoord in",
+  "loginForgotPassword": "Wachtwoord vergeten?",
+  "@loginForgotPassword": {
+    "description": "Link from the login screen to the reset flow"
+  },
+  "loginSubmit": "Inloggen",
+  "loginNoAccount": "Nog geen account?",
+  "loginRegister": "Registreren",
+  "registerTitle": "Registreren",
+  "registerAccountType": "Accounttype",
+  "registerStudent": "Leerling",
+  "registerInstructor": "Instructeur",
+  "registerPersonalDetails": "Persoonlijke gegevens",
+  "registerFirstName": "Voornaam",
+  "registerLastName": "Achternaam",
+  "registerPhone": "Telefoonnummer",
+  "registerBirthdate": "Geboortedatum",
+  "registerBirthdateHint": "jjjj-mm-dd",
+  "registerAddress": "Adres",
+  "registerStreet": "Straat",
+  "registerHouseNumber": "Huisnr.",
+  "registerZipCode": "Postcode",
+  "registerCity": "Plaats",
+  "registerLessonDetails": "Lesdetails (optioneel)",
+  "registerPickupLocation": "Ophaallocatie",
+  "registerLicensePlate": "Kenteken (bij eigen voertuig)",
+  "registerPasswordLabel": "Wachtwoord",
+  "registerPasswordRules": "Minimaal 8 tekens met een kleine letter, hoofdletter en cijfer",
+  "@registerPasswordRules": {
+    "description": "Helper text under the password fields"
+  },
+  "registerPasswordMin8": "Minimaal 8 tekens",
+  "registerPasswordNeedsMix": "Gebruik een kleine letter, hoofdletter en cijfer",
+  "registerPasswordRepeat": "Herhaal wachtwoord",
+  "registerPasswordMismatch": "Wachtwoorden komen niet overeen",
+  "registerRequired": "Verplicht veld",
+  "registerOtpTitle": "Bevestigingscode",
+  "registerOtpFallback": "We hebben een code naar je e-mailadres gestuurd.",
+  "@registerOtpFallback": {
+    "description": "Shown when the API gives no message after requesting an OTP"
+  },
+  "registerOtpLabel": "Code uit e-mail",
+  "registerOtpRequired": "Vul de 4-cijferige code in",
+  "registerSubmitCreate": "Account aanmaken",
+  "registerSubmitCode": "Code aanvragen",
+  "registerHaveAccount": "Ik heb al een account",
+  "forgotTitle": "Wachtwoord vergeten",
+  "forgotEnterCode": "Voer de code in",
+  "forgotResetTitle": "Herstel je wachtwoord",
+  "forgotCodeSentTo": "We hebben een code gestuurd naar {email}.",
+  "@forgotCodeSentTo": {
+    "description": "Heading text once a reset code has been sent",
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "forgotEmailHint": "Vul je e-mailadres in en we sturen je een herstelcode.",
+  "forgotCodeLabel": "Herstelcode",
+  "forgotCodeRequired": "Vul de code in",
+  "forgotNewPassword": "Nieuw wachtwoord (optioneel)",
+  "forgotSubmitReset": "Wachtwoord resetten",
+  "forgotSubmitSend": "Code versturen",
+  "forgotResend": "Code opnieuw versturen",
+  "forgotBackToLogin": "Terug naar inloggen",
+  "forgotCodeSent": "We hebben een code naar je e-mail gestuurd.",
+  "forgotPasswordChanged": "Wachtwoord gewijzigd. Je kunt nu inloggen.",
+  "planningTitle": "Planning",
+  "planningTabUpcoming": "Aankomend",
+  "@planningTabUpcoming": {
+    "description": "Planning list tab: upcoming lessons"
+  },
+  "planningTabCompleted": "Afgerond",
+  "@planningTabCompleted": {
+    "description": "Planning list tab: past/completed lessons"
+  },
+  "planningTabCancelled": "Geannuleerd",
+  "@planningTabCancelled": {
+    "description": "Planning list tab: cancelled lessons"
+  },
+  "planningEmptyTitle": "Niets te vinden",
+  "@planningEmptyTitle": {
+    "description": "Empty-state title on the planning list"
+  },
+  "planningEmptySubtitle": "Er staan nog geen lessen in deze categorie.",
+  "@planningEmptySubtitle": {
+    "description": "Empty-state subtitle on the planning list"
+  },
+  "planningUnknownDate": "Datum onbekend",
+  "@planningUnknownDate": {
+    "description": "Day-group header when a lesson has no start date"
+  },
+  "planningLesson": "Les",
+  "@planningLesson": {
+    "description": "Generic 'lesson' word: detail-row label and fallback title when the lesson has no driving-class name"
+  },
+  "planningLessonScheduled": "Les ingepland",
+  "@planningLessonScheduled": {
+    "description": "History log entry for a newly created lesson, also a success snack"
+  },
+  "planningLessonConfirmed": "Les bevestigd",
+  "@planningLessonConfirmed": {
+    "description": "History log entry and success snack after confirming a lesson"
+  },
+  "planningLessonCancelled": "Les geannuleerd",
+  "@planningLessonCancelled": {
+    "description": "History log entry and success snack after cancelling a lesson"
+  },
+  "planningLessonCompleted": "Les afgerond",
+  "@planningLessonCompleted": {
+    "description": "History log entry and success snack after completing a lesson"
+  },
+  "planningLessonRescheduled": "Les verplaatst",
+  "@planningLessonRescheduled": {
+    "description": "History log entry and success snack after moving a lesson"
+  },
+  "planningLogChange": "Wijziging",
+  "@planningLogChange": {
+    "description": "Fallback label for an unknown history log action"
+  },
+  "planningDetailTitle": "Lesdetails",
+  "@planningDetailTitle": {
+    "description": "AppBar title of the lesson detail screen"
+  },
+  "planningDateNotSet": "Datum niet ingesteld",
+  "@planningDateNotSet": {
+    "description": "Shown instead of the date when the lesson has no start date"
+  },
+  "planningSectionDetails": "Gegevens",
+  "@planningSectionDetails": {
+    "description": "Section header with the lesson details"
+  },
+  "planningInfoLessonType": "Lesvorm",
+  "@planningInfoLessonType": {
+    "description": "Info-row label for the kind of lesson"
+  },
+  "planningTypeTrial": "Proefles",
+  "@planningTypeTrial": {
+    "description": "Lesson type: trial"
+  },
+  "planningTypeBase": "Basisles",
+  "@planningTypeBase": {
+    "description": "Lesson type: regular/base lesson"
+  },
+  "planningTypePack": "Lespakket",
+  "@planningTypePack": {
+    "description": "Lesson type: package of lessons"
+  },
+  "planningTypeExam": "Examen",
+  "@planningTypeExam": {
+    "description": "Lesson type: exam"
+  },
+  "planningInfoInstructor": "Instructeur",
+  "@planningInfoInstructor": {
+    "description": "Info-row label for the instructor"
+  },
+  "planningInfoStudent": "Leerling",
+  "@planningInfoStudent": {
+    "description": "Info-row label for the student"
+  },
+  "planningInfoPhone": "Telefoon",
+  "@planningInfoPhone": {
+    "description": "Info-row label for the phone number"
+  },
+  "planningInfoOrder": "Bestelling",
+  "@planningInfoOrder": {
+    "description": "Info-row label for the related order"
+  },
+  "planningInfoPaid": "Betaald",
+  "@planningInfoPaid": {
+    "description": "Info-row label for the amount paid"
+  },
+  "planningNotes": "Notities",
+  "@planningNotes": {
+    "description": "Section header and text-field label for the lesson notes"
+  },
+  "planningNotesSaved": "Notities opgeslagen",
+  "@planningNotesSaved": {
+    "description": "Success snack after saving notes"
+  },
+  "planningCancelReasonTitle": "Annuleringsreden",
+  "@planningCancelReasonTitle": {
+    "description": "Section header with the reason the lesson was cancelled"
+  },
+  "planningCancelReasonLabel": "Reden (optioneel)",
+  "@planningCancelReasonLabel": {
+    "description": "Text-field label in the cancel-lesson dialog"
+  },
+  "planningSectionActions": "Acties",
+  "@planningSectionActions": {
+    "description": "Section header with the available actions"
+  },
+  "planningSectionHistory": "Geschiedenis",
+  "@planningSectionHistory": {
+    "description": "Section header with the lesson history"
+  },
+  "planningConfirmLesson": "Les bevestigen",
+  "@planningConfirmLesson": {
+    "description": "Button for a student to confirm a pending lesson"
+  },
+  "planningCancelLesson": "Les annuleren",
+  "@planningCancelLesson": {
+    "description": "Button and dialog title for cancelling a lesson"
+  },
+  "planningRescheduleLesson": "Les verplaatsen",
+  "@planningRescheduleLesson": {
+    "description": "Button and AppBar title for moving a lesson to a new slot"
+  },
+  "planningCompleteLesson": "Les afronden",
+  "@planningCompleteLesson": {
+    "description": "Button and confirm-dialog title for finishing a lesson"
+  },
+  "planningCompleteConfirmMessage": "Weet je zeker dat je deze les wilt afronden?",
+  "@planningCompleteConfirmMessage": {
+    "description": "Confirm-dialog message before completing a lesson"
+  },
+  "planningCompleteAction": "Afronden",
+  "@planningCompleteAction": {
+    "description": "Confirm button label of the complete-lesson dialog"
+  },
+  "planningEditNotes": "Notities bijwerken",
+  "@planningEditNotes": {
+    "description": "Button and dialog title for editing the lesson notes"
+  },
+  "planningWasPresent": "Ik was aanwezig",
+  "@planningWasPresent": {
+    "description": "Button for a student to confirm they attended the lesson"
+  },
+  "planningWasAbsent": "Ik was afwezig",
+  "@planningWasAbsent": {
+    "description": "Button for a student to report they missed the lesson"
+  },
+  "planningReportAbsenceTitle": "Afwezigheid melden",
+  "@planningReportAbsenceTitle": {
+    "description": "Confirm-dialog title when reporting an absence"
+  },
+  "planningConfirmAttendedMessage": "Bevestig dat deze les heeft plaatsgevonden.",
+  "@planningConfirmAttendedMessage": {
+    "description": "Confirm-dialog message when confirming attendance"
+  },
+  "planningReportAbsentMessage": "Meld je afwezigheid. Je instructeur en de administratie worden op de hoogte gebracht.",
+  "@planningReportAbsentMessage": {
+    "description": "Confirm-dialog message when reporting an absence"
+  },
+  "planningAttendanceConfirmed": "Aanwezigheid bevestigd",
+  "@planningAttendanceConfirmed": {
+    "description": "Status line shown after the student confirmed attendance"
+  },
+  "planningAbsenceReported": "Afwezigheid gemeld",
+  "@planningAbsenceReported": {
+    "description": "Status line shown after the student reported an absence"
+  },
+  "reschedulePickDateTime": "Kies een datum en starttijd.",
+  "@reschedulePickDateTime": {
+    "description": "Error snack when no date or start time was chosen yet"
+  },
+  "rescheduleFutureDate": "De nieuwe datum moet in de toekomst liggen.",
+  "@rescheduleFutureDate": {
+    "description": "Error snack when the chosen slot is in the past"
+  },
+  "reschedulePickMoment": "Kies een nieuw moment",
+  "@reschedulePickMoment": {
+    "description": "Heading of the reschedule screen"
+  },
+  "rescheduleDurationHint": "De les duurt {duration} en moet minstens 24 uur vooruit worden verplaatst.",
+  "@rescheduleDurationHint": {
+    "description": "Hint under the reschedule heading, {duration} is the lesson length",
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "rescheduleDateLabel": "Datum",
+  "@rescheduleDateLabel": {
+    "description": "List-tile label for the new date"
+  },
+  "rescheduleStartTimeLabel": "Starttijd",
+  "@rescheduleStartTimeLabel": {
+    "description": "List-tile label for the new start time"
+  },
+  "rescheduleNotChosen": "Nog niet gekozen",
+  "@rescheduleNotChosen": {
+    "description": "Subtitle while date or time has not been picked"
+  },
+  "lessonCardTitle": "Leskaart",
+  "@lessonCardTitle": {
+    "description": "AppBar title of the lesson card screen"
+  },
+  "lessonCardView": "Leskaart bekijken",
+  "@lessonCardView": {
+    "description": "Button on the lesson detail screen opening the lesson card"
+  },
+  "lessonCardRefresh": "Vernieuwen",
+  "@lessonCardRefresh": {
+    "description": "Tooltip of the refresh button"
+  },
+  "lessonCardEmptyTitle": "Geen vragen",
+  "@lessonCardEmptyTitle": {
+    "description": "Empty-state title when the lesson card has no questions"
+  },
+  "lessonCardEmptySubtitle": "Voor deze les zijn nog geen vragen ingesteld.",
+  "@lessonCardEmptySubtitle": {
+    "description": "Empty-state subtitle when the lesson card has no questions"
+  },
+  "lessonCardInstructorIntro": "Beoordeel je leerling per onderdeel.",
+  "@lessonCardInstructorIntro": {
+    "description": "Intro line shown to instructors on the lesson card"
+  },
+  "lessonCardStudentIntro": "Vul in hoe het ging tijdens je les.",
+  "@lessonCardStudentIntro": {
+    "description": "Intro line shown to students on the lesson card"
+  },
+  "lessonCardSave": "Leskaart opslaan",
+  "@lessonCardSave": {
+    "description": "Save button of the lesson card"
+  },
+  "lessonCardSaved": "Leskaart opgeslagen",
+  "@lessonCardSaved": {
+    "description": "Success snack after saving the lesson card"
+  },
+  "lessonCardFillFirst": "Vul eerst minstens één vraag in.",
+  "@lessonCardFillFirst": {
+    "description": "Error snack when saving an empty lesson card"
+  },
+  "lessonCardAnswerLabel": "Antwoord / commentaar",
+  "@lessonCardAnswerLabel": {
+    "description": "Text-field label for a question answer"
+  },
+  "lessonCardScoreLabel": "Beoordeling",
+  "@lessonCardScoreLabel": {
+    "description": "Label above the score choice chips"
+  },
+  "profileTitle": "Profiel",
+  "profileSignOut": "Uitloggen",
+  "profileSignOutMessage": "Weet je zeker dat je wilt uitloggen?",
+  "profileDeactivate": "Account deactiveren",
+  "profileDeactivateMessage": "Je account wordt gedeactiveerd en je kunt niet meer inloggen. Dit kan niet ongedaan worden gemaakt.",
+  "profileDeactivateConfirm": "Deactiveren",
+  "profileAccountDeactivated": "Account gedeactiveerd",
+  "profileTopUp": "Opwaarderen",
+  "profileSectionAccount": "Account",
+  "profileLicensePlate": "Kenteken",
+  "profileNotificationSettings": "Meldingsinstellingen",
+  "editProfileTitle": "Gegevens bewerken",
+  "editProfileUpdated": "Profiel bijgewerkt",
+  "editProfileGender": "Geslacht",
+  "editProfileGenderMale": "Man",
+  "editProfileGenderFemale": "Vrouw",
+  "editProfileGenderUnknown": "Onbekend",
+  "changePasswordTitle": "Wachtwoord wijzigen",
+  "changePasswordCurrentLabel": "Huidig wachtwoord",
+  "changePasswordNewLabel": "Nieuw wachtwoord",
+  "changePasswordSuccess": "Wachtwoord gewijzigd",
+  "changePasswordSubmit": "Wachtwoord opslaan",
+  "notificationsTitle": "Meldingen",
+  "@notificationsTitle": {
+    "description": "AppBar title of the notifications screen"
+  },
+  "notificationsMarkAllRead": "Alles gelezen",
+  "@notificationsMarkAllRead": {
+    "description": "Tooltip of the mark-all-read button"
+  },
+  "notificationsOpenSettings": "Instellingen",
+  "@notificationsOpenSettings": {
+    "description": "Tooltip of the button opening the notification settings"
+  },
+  "notificationsRefreshFailed": "Vernieuwen is mislukt.",
+  "@notificationsRefreshFailed": {
+    "description": "Error snack when refreshing the notification list fails"
+  },
+  "notificationsEmptyTitle": "Geen meldingen",
+  "@notificationsEmptyTitle": {
+    "description": "Empty-state title on the notifications screen"
+  },
+  "notificationsEmptySubtitle": "Updates over je lessen en betalingen komen hier.",
+  "@notificationsEmptySubtitle": {
+    "description": "Empty-state subtitle on the notifications screen"
+  },
+  "notifSettingsTitle": "Meldingsinstellingen",
+  "@notifSettingsTitle": {
+    "description": "AppBar title of the notification settings screen"
+  },
+  "notifSettingsQuietSection": "Niet storen",
+  "@notifSettingsQuietSection": {
+    "description": "Section header with the quiet-hours settings"
+  },
+  "notifSettingsQuietHours": "Stille uren",
+  "@notifSettingsQuietHours": {
+    "description": "Switch title for the quiet hours"
+  },
+  "notifSettingsQuietRange": "Geen meldingen tussen {start} en {end}",
+  "@notifSettingsQuietRange": {
+    "description": "Subtitle of the quiet-hours switch, {start} and {end} are times",
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "notifSettingsQuietStart": "Begin",
+  "@notifSettingsQuietStart": {
+    "description": "List-tile label for the quiet-hours start time"
+  },
+  "notifSettingsQuietEnd": "Einde",
+  "@notifSettingsQuietEnd": {
+    "description": "List-tile label for the quiet-hours end time"
+  },
+  "notifSettingsTypesSection": "Soorten meldingen",
+  "@notifSettingsTypesSection": {
+    "description": "Section header with the notification-type switches"
+  },
+  "notifSettingsSaved": "Instellingen opgeslagen",
+  "@notifSettingsSaved": {
+    "description": "Success snack after saving the notification settings"
+  },
+  "topUpCurrentBalance": "Huidig saldo",
+  "@topUpCurrentBalance": {
+    "description": "Label above the current balance on the top-up screen"
+  },
+  "topUpChooseAmount": "Kies een bedrag",
+  "@topUpChooseAmount": {
+    "description": "Section header above the amount presets, also the pay button while no amount is chosen"
+  },
+  "topUpCustomAmount": "Eigen bedrag",
+  "@topUpCustomAmount": {
+    "description": "Label of the free-form amount field"
+  },
+  "topUpPayButton": "Betalen — {amount}",
+  "@topUpPayButton": {
+    "description": "Pay button with the chosen amount, {amount} is formatted as currency",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "topUpMollieNote": "Betaling via Mollie. Je saldo wordt bijgeschreven zodra de betaling is bevestigd.",
+  "@topUpMollieNote": {
+    "description": "Footer note on the top-up screen"
+  },
+  "topUpInvalidAmount": "Vul een geldig bedrag in.",
+  "@topUpInvalidAmount": {
+    "description": "Error snack when the chosen amount is missing or invalid"
+  },
+  "topUpCompletePayment": "Rond de betaling af om je saldo te verhogen.",
+  "@topUpCompletePayment": {
+    "description": "Snack shown after the payment page has been opened"
+  },
+  "ordersTitle": "Bestellingen",
+  "ordersBuyButton": "Kopen",
+  "ordersEmptyTitle": "Nog geen bestellingen",
+  "ordersEmptySubtitle": "Koop je eerste lespakket om lessen in te plannen.",
+  "ordersOrderNumber": "Bestelling #{id}",
+  "@ordersOrderNumber": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "ordersPaymentPaid": "Betaald",
+  "ordersPaymentOpen": "Open",
+  "ordersPaymentPending": "In behandeling",
+  "ordersPaymentFailed": "Mislukt",
+  "ordersPaymentCanceled": "Geannuleerd",
+  "ordersPaymentExpired": "Verlopen",
+  "ordersPaymentUnpaid": "Nog niet betaald",
+  "ordersTotalDuration": "{duration} les",
+  "@ordersTotalDuration": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "orderDetailTitle": "Bestelling #{id}",
+  "@orderDetailTitle": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "orderDetailPlacedOn": "Geplaatst op {date}",
+  "@orderDetailPlacedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "orderDetailSectionDetails": "Gegevens",
+  "orderDetailStudent": "Leerling",
+  "orderDetailInstructor": "Instructeur",
+  "orderDetailTotal": "Totaal",
+  "orderDetailScheduled": "Gepland",
+  "orderDetailAvailable": "Beschikbaar",
+  "orderDetailPaymentMethod": "Betaalwijze",
+  "orderDetailPaymentDigital": "Online",
+  "orderDetailPaymentCash": "Contant",
+  "orderDetailPaymentBalance": "Saldo",
+  "orderDetailSectionLessons": "Lessen",
+  "orderDetailNoLessons": "Geen lesonderdelen gevonden.",
+  "orderDetailLesson": "Les",
+  "orderDetailLessonCount": "{count} lessen",
+  "@orderDetailLessonCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "orderDetailMinutesAvailable": "{duration} vrij",
+  "@orderDetailMinutesAvailable": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "orderDetailScheduleButton": "Inplannen",
+  "orderDetailSectionActions": "Acties",
+  "orderDetailPayNow": "Nu betalen",
+  "orderDetailMarkPaid": "Markeer als betaald",
+  "orderDetailRequestPayment": "Betaling aanvragen",
+  "orderDetailPaymentRequested": "Betalingsverzoek verstuurd",
+  "orderDetailOpenInvoice": "Factuur openen",
+  "orderDetailPaymentPageFailed": "De betalingspagina kon niet worden geopend.",
+  "buyLessonsTitle": "Lessen kopen",
+  "buyLessonsChoosePackage": "Kies een lespakket",
+  "buyLessonsPayButton": "Betalen — {amount}",
+  "@buyLessonsPayButton": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "buyLessonsStepVehicle": "1. Voertuig",
+  "buyLessonsVehicleFallback": "Voertuig {id}",
+  "@buyLessonsVehicleFallback": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "buyLessonsStepLesson": "2. Les",
+  "buyLessonsChooseVehicleFirst": "Kies eerst een voertuigtype.",
+  "buyLessonsNoPackages": "Geen lespakketten beschikbaar.",
+  "buyLessonsStepQuantity": "3. Aantal",
+  "buyLessonsStepStudent": "4. Leerling",
+  "buyLessonsStepPaymentInstructor": "5. Betaalwijze",
+  "buyLessonsStepPaymentStudent": "4. Betaalwijze",
+  "buyLessonsPaymentOnline": "Online",
+  "buyLessonsPaymentBalance": "Saldo",
+  "buyLessonsBalanceNote": "Het bedrag wordt van je saldo afgeschreven. Je saldo: {balance}",
+  "@buyLessonsBalanceNote": {
+    "placeholders": {
+      "balance": {
+        "type": "String"
+      }
+    }
+  },
+  "buyLessonsMollieNote": "Je doorgestuurd naar de veilige betaalpagina van Mollie.",
+  "buyLessonsAfterPurchase": "Na de aankoop plan je je lessen in vanuit de bestelling.",
+  "buyLessonsOrderPlaced": "Bestelling geplaatst",
+  "buyLessonsCompletePayment": "Rond de betaling af",
+  "buyLessonsNoStudents": "Je hebt nog geen leerlingen toegewezen.",
+  "buyLessonsChooseStudent": "Kies een leerling",
+  "buyLessonsLessonTypeTrial": "Proefles",
+  "buyLessonsLessonTypeBase": "Basisles",
+  "buyLessonsLessonTypePack": "Lespakket",
+  "buyLessonsLessonTypeExam": "Examen",
+  "buyLessonsTotalLine": "{duration} les — {amount}",
+  "@buyLessonsTotalLine": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "scheduleLessonTitle": "Les inplannen",
+  "scheduleLessonChooseDateTime": "Kies een datum en starttijd.",
+  "scheduleLessonFutureDate": "De les moet in de toekomst liggen.",
+  "scheduleLessonScheduled": "Les ingepland",
+  "scheduleLessonAvailable": "Nog {duration} beschikbaar in dit pakket.",
+  "@scheduleLessonAvailable": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "scheduleLessonNoTimeLeft": "Er is geen beschikbare lestijd meer in dit pakket.",
+  "scheduleLessonDate": "Datum",
+  "scheduleLessonNotChosen": "Nog niet gekozen",
+  "scheduleLessonStartTime": "Starttijd",
+  "scheduleLessonDuration": "Duur",
+  "scheduleLessonScheduleButton": "Inplannen",
+  "languageLabel": "Taal",
+  "languageSystem": "Systeem (automatisch)",
+  "languageDutch": "Nederlands",
+  "languageEnglish": "Engels",
+  "notifPrefLessonBooked": "Les geboekt",
+  "notifPrefLessonReminder24h": "Herinnering les (24 uur)",
+  "notifPrefLessonReminder1h": "Herinnering les (1 uur)",
+  "notifPrefLessonCancelled": "Les geannuleerd",
+  "notifPrefLessonChanged": "Les gewijzigd",
+  "notifPrefLessonCompleted": "Les afgerond",
+  "notifPrefPaymentSuccessful": "Betaling geslaagd",
+  "notifPrefPaymentFailed": "Betaling mislukt",
+  "notifPrefPaymentRefunded": "Betaling terugbetaald",
+  "notifPrefPaymentRequested": "Betalingsverzoek",
+  "notifPrefLowLessonCredit": "Weinig lesuren over",
+  "notifPrefExamBooked": "Examen geboekt",
+  "notifPrefExamReminder7d": "Herinnering examen (7 dagen)",
+  "notifPrefExamReminder24h": "Herinnering examen (24 uur)",
+  "notifPrefExamChanged": "Examen gewijzigd",
+  "notifPrefExamCancelled": "Examen geannuleerd",
+  "notifPrefLessonCardUpdated": "Leskaart bijgewerkt",
+  "notifPrefInstructorFeedback": "Instructeur feedback",
+  "notifPrefAccountSecurity": "Accountbeveiliging"
+}

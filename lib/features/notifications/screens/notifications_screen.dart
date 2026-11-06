@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/utils/formatters.dart';
+import '../../../l10n/l10n.dart';
 import '../../../shared/widgets.dart';
 import '../models/app_notification.dart';
 import '../providers/notifications_providers.dart';
@@ -37,7 +38,11 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
       await ref.read(notificationsProvider.notifier).refresh();
     } catch (_) {
       if (mounted) {
-        showAppSnack(context, 'Vernieuwen is mislukt.', error: true);
+        showAppSnack(
+          context,
+          context.l10n.notificationsRefreshFailed,
+          error: true,
+        );
       }
     }
   }
@@ -62,13 +67,14 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(notificationsProvider);
     final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Meldingen'),
+        title: Text(l10n.notificationsTitle),
         actions: [
           IconButton(
-            tooltip: 'Alles gelezen',
+            tooltip: l10n.notificationsMarkAllRead,
             onPressed: state.items.isEmpty
                 ? null
                 : () async {
@@ -80,7 +86,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
             icon: const Icon(Icons.done_all_rounded),
           ),
           IconButton(
-            tooltip: 'Instellingen',
+            tooltip: l10n.notificationsOpenSettings,
             onPressed: () => context.push('/notifications/settings'),
             icon: const Icon(Icons.tune_rounded),
           ),
@@ -103,17 +109,18 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
   }
 
   Widget _buildBody(NotificationsState state, ThemeData theme) {
+    final l10n = context.l10n;
     if (state.items.isEmpty && state.refreshing) {
       return const Center(child: CircularProgressIndicator());
     }
     if (state.items.isEmpty) {
       return ListView(
-        children: const [
-          SizedBox(height: 80),
+        children: [
+          const SizedBox(height: 80),
           EmptyState(
             icon: Icons.notifications_none_rounded,
-            title: 'Geen meldingen',
-            subtitle: 'Updates over je lessen en betalingen komen hier.',
+            title: l10n.notificationsEmptyTitle,
+            subtitle: l10n.notificationsEmptySubtitle,
           ),
         ],
       );
@@ -134,9 +141,10 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
         return Card(
           color: n.isRead ? null : theme.colorScheme.primaryContainer,
           child: ListTile(
+            isThreeLine: n.body != null && n.body!.isNotEmpty,
             leading: Icon(_iconFor(n.type), color: theme.colorScheme.primary),
             title: Text(
-              n.title ?? 'Melding',
+              n.title ?? l10n.dashboardNotificationFallback,
               style: TextStyle(
                 fontWeight: n.isRead ? FontWeight.w500 : FontWeight.w700,
               ),
@@ -145,7 +153,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
             trailing: n.createdAt == null
                 ? null
                 : Text(
-                    F.relativeDay(n.createdAt),
+                    F.relativeDay(l10n, n.createdAt),
                     style: theme.textTheme.bodySmall,
                   ),
             onTap: () => _open(n),

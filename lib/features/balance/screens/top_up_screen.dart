@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../l10n/l10n.dart';
 import '../../../shared/widgets.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../orders/providers/orders_providers.dart';
@@ -39,7 +40,7 @@ class _TopUpScreenState extends ConsumerState<TopUpScreen> {
   Future<void> _submit() async {
     final amount = _effective;
     if (amount == null || amount <= 0) {
-      showAppSnack(context, 'Vul een geldig bedrag in.', error: true);
+      showAppSnack(context, context.l10n.topUpInvalidAmount, error: true);
       return;
     }
     setState(() => _busy = true);
@@ -54,12 +55,16 @@ class _TopUpScreenState extends ConsumerState<TopUpScreen> {
       // The webhook credits the balance; refresh in case it was instant.
       await ref.read(authControllerProvider.notifier).refreshUser();
       if (!mounted) return;
-      showAppSnack(context, 'Rond de betaling af om je saldo te verhogen.');
+      showAppSnack(context, context.l10n.topUpCompletePayment);
       context.pop();
     } on ApiException catch (e) {
-      if (mounted) showAppSnack(context, e.validationMessage, error: true);
+      if (mounted) {
+        showAppSnack(context, describeError(context, e), error: true);
+        }
     } catch (e) {
-      if (mounted) showAppSnack(context, '$e', error: true);
+      if (mounted) {
+        showAppSnack(context, describeError(context, e), error: true);
+        }
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -70,9 +75,10 @@ class _TopUpScreenState extends ConsumerState<TopUpScreen> {
     final theme = Theme.of(context);
     final user = ref.watch(currentUserProvider);
     final amount = _effective;
+    final l10n = context.l10n;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Saldo opwaarderen')),
+      appBar: AppBar(title: Text(l10n.dashboardTopUpBalance)),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 480),
@@ -88,7 +94,7 @@ class _TopUpScreenState extends ConsumerState<TopUpScreen> {
                 child: Column(
                   children: [
                     Text(
-                      'Huidig saldo',
+                      l10n.topUpCurrentBalance,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onPrimaryContainer,
                       ),
@@ -106,7 +112,7 @@ class _TopUpScreenState extends ConsumerState<TopUpScreen> {
               ),
               const SizedBox(height: 24),
               Text(
-                'Kies een bedrag',
+                l10n.topUpChooseAmount,
                 style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w700,
                 ),
@@ -133,8 +139,8 @@ class _TopUpScreenState extends ConsumerState<TopUpScreen> {
               TextField(
                 controller: _custom,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Eigen bedrag',
+                decoration: InputDecoration(
+                  labelText: l10n.topUpCustomAmount,
                   prefixText: '€ ',
                 ),
                 onChanged: (_) => setState(() {}),
@@ -150,14 +156,13 @@ class _TopUpScreenState extends ConsumerState<TopUpScreen> {
                       )
                     : Text(
                         amount == null
-                            ? 'Kies een bedrag'
-                            : 'Betalen — ${F.money(amount)}',
+                            ? l10n.topUpChooseAmount
+                            : l10n.topUpPayButton(F.money(amount)),
                       ),
               ),
               const SizedBox(height: 12),
               Text(
-                'Betaling via Mollie. Je saldo wordt bijgeschreven zodra de '
-                'betaling is bevestigd.',
+                l10n.topUpMollieNote,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,

@@ -1,4 +1,5 @@
 import '../../../core/network/api_client.dart';
+import '../../../core/network/api_exception.dart';
 import '../models/planning.dart';
 
 /// Endpoints under `/api/planning`.
@@ -32,7 +33,12 @@ class PlanningRepository {
 
   Future<Planning> getById(int id) async {
     final data = await _api.get('/planning/$id');
-    if (data is! Map) throw 'Les niet gevonden.';
+    if (data is! Map) {
+      throw const ApiException(
+        'Les niet gevonden.',
+        code: AppErrorCode.lessonNotFound,
+      );
+    }
     return Planning.fromJson(Map<String, dynamic>.from(data));
   }
 

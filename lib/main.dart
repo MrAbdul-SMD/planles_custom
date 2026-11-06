@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app/app.dart';
@@ -10,6 +11,15 @@ import 'features/auth/providers/auth_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Client-side configuration (API_BASE_URL, …) from the bundled .env asset.
+  // A missing file must not brick the app — ApiClient falls back to its
+  // compiled-in default in that case.
+  try {
+    await dotenv.load();
+  } catch (_) {
+    // Ignore: resolvedBaseUrl handles an unloaded dotenv.
+  }
 
   final tokenStorage = await TokenStorage.create();
   final apiClient = ApiClient(tokenStorage: tokenStorage);

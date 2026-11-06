@@ -1,0 +1,21 @@
+{
+  "notifPrefLessonBooked": {"nl": "Les geboekt", "en": "Lesson booked"},
+  "notifPrefLessonReminder24h": {"nl": "Herinnering les (24 uur)", "en": "Lesson reminder (24 hours)"},
+  "notifPrefLessonReminder1h": {"nl": "Herinnering les (1 uur)", "en": "Lesson reminder (1 hour)"},
+  "notifPrefLessonCancelled": {"nl": "Les geannuleerd", "en": "Lesson cancelled"},
+  "notifPrefLessonChanged": {"nl": "Les gewijzigd", "en": "Lesson changed"},
+  "notifPrefLessonCompleted": {"nl": "Les afgerond", "en": "Lesson completed"},
+  "notifPrefPaymentSuccessful": {"nl": "Betaling geslaagd", "en": "Payment successful"},
+  "notifPrefPaymentFailed": {"nl": "Betaling mislukt", "en": "Payment failed"},
+  "notifPrefPaymentRefunded": {"nl": "Betaling terugbetaald", "en": "Payment refunded"},
+  "notifPrefPaymentRequested": {"nl": "Betalingsverzoek", "en": "Payment request"},
+  "notifPrefLowLessonCredit": {"nl": "Weinig lesuren over", "en": "Low lesson credit"},
+  "notifPrefExamBooked": {"nl": "Examen geboekt", "en": "Exam booked"},
+  "notifPrefExamReminder7d": {"nl": "Herinnering examen (7 dagen)", "en": "Exam reminder (7 days)"},
+  "notifPrefExamReminder24h": {"nl": "Herinnering examen (24 uur)", "en": "Exam reminder (24 hours)"},
+  "notifPrefExamChanged": {"nl": "Examen gewijzigd", "en": "Exam changed"},
+  "notifPrefExamCancelled": {"nl": "Examen geannuleerd", "en": "Exam cancelled"},
+  "notifPrefLessonCardUpdated": {"nl": "Leskaart bijgewerkt", "en": "Lesson card updated"},
+  "notifPrefInstructorFeedback": {"nl": "Instructeur feedback", "en": "Instructor feedback"},
+  "notifPrefAccountSecurity": {"nl": "Accountbeveiliging", "en": "Account security"}
+}

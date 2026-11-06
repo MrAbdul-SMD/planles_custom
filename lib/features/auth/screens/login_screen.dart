@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/network/api_exception.dart';
+import '../../../l10n/language_picker.dart';
+import '../../../l10n/l10n.dart';
 import '../../../shared/widgets.dart';
 import '../providers/auth_provider.dart';
 
@@ -36,9 +38,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           .login(email: _email.text, password: _password.text);
       // The router redirect takes over from here.
     } on ApiException catch (e) {
-      if (mounted) showAppSnack(context, e.validationMessage, error: true);
+      if (mounted) {
+        showAppSnack(context, describeError(context, e), error: true);
+      }
     } catch (e) {
-      if (mounted) showAppSnack(context, 'Inloggen is mislukt.', error: true);
+      if (mounted) {
+        showAppSnack(context, describeError(context, e), error: true);
+      }
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -47,7 +53,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        actions: const [LanguageMenuButton()],
+      ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -106,7 +119,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                       const SizedBox(height: 26),
                       Text(
-                        'Welkom terug',
+                        l10n.loginTitle,
                         textAlign: TextAlign.center,
                         style: theme.textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.w800,
@@ -114,7 +127,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        'Log in om je lessen te beheren',
+                        l10n.loginSubtitle,
                         textAlign: TextAlign.center,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
@@ -126,15 +139,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         keyboardType: TextInputType.emailAddress,
                         textInputAction: TextInputAction.next,
                         autofillHints: const [AutofillHints.email],
-                        decoration: const InputDecoration(
-                          labelText: 'E-mailadres',
-                          prefixIcon: Icon(Icons.mail_outline_rounded),
+                        decoration: InputDecoration(
+                          labelText: l10n.loginEmailLabel,
+                          prefixIcon: const Icon(Icons.mail_outline_rounded),
                         ),
                         validator: (value) {
                           final v = value?.trim() ?? '';
-                          if (v.isEmpty) return 'Vul je e-mailadres in';
+                          if (v.isEmpty) return l10n.loginEmailRequired;
                           if (!v.contains('@')) {
-                            return 'Vul een geldig e-mailadres in';
+                            return l10n.loginEmailInvalid;
                           }
                           return null;
                         },
@@ -147,7 +160,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         autofillHints: const [AutofillHints.password],
                         onFieldSubmitted: (_) => _submit(),
                         decoration: InputDecoration(
-                          labelText: 'Wachtwoord',
+                          labelText: l10n.loginPasswordLabel,
                           prefixIcon: const Icon(Icons.lock_outline_rounded),
                           suffixIcon: IconButton(
                             onPressed: () =>
@@ -160,7 +173,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ),
                         ),
                         validator: (value) => (value ?? '').isEmpty
-                            ? 'Vul je wachtwoord in'
+                            ? l10n.loginPasswordRequired
                             : null,
                       ),
                       const SizedBox(height: 10),
@@ -168,7 +181,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         alignment: Alignment.centerRight,
                         child: TextButton(
                           onPressed: () => context.push('/forgot-password'),
-                          child: const Text('Wachtwoord vergeten?'),
+                          child: Text(l10n.loginForgotPassword),
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -182,19 +195,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   strokeWidth: 2.4,
                                 ),
                               )
-                            : const Text('Inloggen'),
+                            : Text(l10n.loginSubmit),
                       ),
                       const SizedBox(height: 24),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
                           Text(
-                            'Nog geen account?',
+                            l10n.loginNoAccount,
                             style: theme.textTheme.bodyMedium,
                           ),
                           TextButton(
                             onPressed: () => context.push('/register'),
-                            child: const Text('Registreren'),
+                            child: Text(l10n.loginRegister),
                           ),
                         ],
                       ),

@@ -29,7 +29,10 @@ class AuthRepository {
     );
     final token = data is Map ? data['token']?.toString() : null;
     if (token == null || token.isEmpty) {
-      throw const ApiException('Inloggen is mislukt. Probeer het opnieuw.');
+      throw const ApiException(
+        'Inloggen is mislukt. Probeer het opnieuw.',
+        code: AppErrorCode.invalidCredentials,
+      );
     }
     return token;
   }
@@ -73,7 +76,12 @@ class AuthRepository {
   Future<User> me() async {
     final data = await _api.get('/auth/me');
     final user = data is Map ? data['user'] : null;
-    if (user is! Map) throw const ApiException('Gebruiker niet gevonden.');
+    if (user is! Map) {
+      throw const ApiException(
+        'Gebruiker niet gevonden.',
+        code: AppErrorCode.userNotFound,
+      );
+    }
     return User.fromJson(Map<String, dynamic>.from(user));
   }
 

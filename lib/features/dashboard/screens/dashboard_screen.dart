@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/utils/formatters.dart';
+import '../../../l10n/l10n.dart';
 import '../../../shared/widgets.dart';
 import '../../auth/models/user.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -34,14 +35,15 @@ class DashboardScreen extends ConsumerWidget {
         .take(2)
         .toList();
 
+    final l10n = context.l10n;
     final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_greeting(user)),
+        title: Text(_greeting(l10n, user)),
         actions: [
           IconButton(
-            tooltip: 'Meldingen',
+            tooltip: l10n.navNotifications,
             onPressed: () => context.go('/notifications'),
             icon: Badge(
               isLabelVisible: unread > 0,
@@ -60,10 +62,10 @@ class DashboardScreen extends ConsumerWidget {
             _BalanceCard(user: user),
             const SizedBox(height: 20),
             SectionHeader(
-              'Eerstvolgende lessen',
+              l10n.dashboardUpcomingLessons,
               trailing: TextButton(
                 onPressed: () => context.go('/planning'),
-                child: const Text('Alles bekijken'),
+                child: Text(l10n.dashboardViewAll),
               ),
             ),
             planning.when(
@@ -73,7 +75,7 @@ class DashboardScreen extends ConsumerWidget {
                 child: Center(child: CircularProgressIndicator()),
               ),
               error: (e, _) => ErrorView(
-                message: e.toString(),
+                message: describeError(context, e),
                 onRetry: () => ref.invalidate(planningListProvider),
               ),
               data: (page) {
@@ -92,13 +94,13 @@ class DashboardScreen extends ConsumerWidget {
               },
             ),
             const SizedBox(height: 20),
-            const SectionHeader('Snel regelen'),
+            SectionHeader(l10n.dashboardQuickActions),
             Row(
               children: [
                 Expanded(
                   child: _ActionCard(
                     icon: Icons.add_shopping_cart_outlined,
-                    label: 'Lessen kopen',
+                    label: l10n.dashboardBuyLessons,
                     onTap: () => context.push('/orders/new'),
                   ),
                 ),
@@ -106,7 +108,7 @@ class DashboardScreen extends ConsumerWidget {
                 Expanded(
                   child: _ActionCard(
                     icon: Icons.account_balance_wallet_outlined,
-                    label: 'Saldo opwaarderen',
+                    label: l10n.dashboardTopUpBalance,
                     onTap: () => context.push('/balance/topup'),
                   ),
                 ),
@@ -114,7 +116,7 @@ class DashboardScreen extends ConsumerWidget {
                 Expanded(
                   child: _ActionCard(
                     icon: Icons.receipt_long_outlined,
-                    label: 'Bestellingen',
+                    label: l10n.navOrders,
                     onTap: () => context.go('/orders'),
                   ),
                 ),
@@ -124,17 +126,17 @@ class DashboardScreen extends ConsumerWidget {
               const SizedBox(height: 12),
               _ActionCard(
                 icon: Icons.groups_outlined,
-                label: 'Mijn leerlingen',
+                label: l10n.studentsTitle,
                 onTap: () => context.push('/students'),
               ),
             ],
             if (notifications.isNotEmpty) ...[
               const SizedBox(height: 24),
               SectionHeader(
-                'Recente meldingen',
+                l10n.dashboardRecentNotifications,
                 trailing: TextButton(
                   onPressed: () => context.go('/notifications'),
-                  child: const Text('Alle meldingen'),
+                  child: Text(l10n.dashboardAllNotifications),
                 ),
               ),
               for (final n in notifications)
@@ -150,7 +152,7 @@ class DashboardScreen extends ConsumerWidget {
                     ),
                   ),
                   title: Text(
-                    n.title ?? 'Melding',
+                    n.title ?? l10n.dashboardNotificationFallback,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -162,7 +164,7 @@ class DashboardScreen extends ConsumerWidget {
                   trailing: n.createdAt == null
                       ? null
                       : Text(
-                          F.relativeDay(n.createdAt),
+                          F.relativeDay(l10n, n.createdAt),
                           style: theme.textTheme.bodySmall,
                         ),
                 ),
@@ -173,13 +175,13 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
-  String _greeting(User? user) {
+  String _greeting(AppLocalizations l10n, User? user) {
     final hour = DateTime.now().hour;
     final base = hour < 12
-        ? 'Goedemorgen'
+        ? l10n.dashboardGreetingMorning
         : hour < 18
-        ? 'Goedemiddag'
-        : 'Goedenavond';
+        ? l10n.dashboardGreetingAfternoon
+        : l10n.dashboardGreetingEvening;
     final name = user?.firstName;
     return (name == null || name.isEmpty) ? base : '$base, $name';
   }
@@ -192,6 +194,7 @@ class _BalanceCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(22),
@@ -210,7 +213,7 @@ class _BalanceCard extends ConsumerWidget {
             children: [
               Expanded(
                 child: Text(
-                  'Hallo ${user?.firstName ?? ''}'.trim(),
+                  '${l10n.dashboardHello} ${user?.firstName ?? ''}'.trim(),
                   style: theme.textTheme.titleMedium?.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w700,
@@ -222,7 +225,7 @@ class _BalanceCard extends ConsumerWidget {
           ),
           const SizedBox(height: 18),
           Text(
-            'Saldo',
+            l10n.dashboardBalanceLabel,
             style: theme.textTheme.bodySmall?.copyWith(color: Colors.white70),
           ),
           const SizedBox(height: 4),
@@ -241,7 +244,7 @@ class _BalanceCard extends ConsumerWidget {
               foregroundColor: theme.colorScheme.primary,
               minimumSize: const Size.fromHeight(46),
             ),
-            child: const Text('Saldo opwaarderen'),
+            child: Text(l10n.dashboardTopUpBalance),
           ),
         ],
       ),
@@ -254,6 +257,7 @@ class _NoLessons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(24),
@@ -269,10 +273,10 @@ class _NoLessons extends StatelessWidget {
             color: theme.colorScheme.outline,
           ),
           const SizedBox(height: 12),
-          const Text('Nog geen lessen gepland'),
+          Text(l10n.dashboardNoLessonsTitle),
           const SizedBox(height: 4),
           Text(
-            'Koop een lespakket om je eerste les in te plannen.',
+            l10n.dashboardNoLessonsSubtitle,
             textAlign: TextAlign.center,
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
@@ -282,7 +286,7 @@ class _NoLessons extends StatelessWidget {
           OutlinedButton.icon(
             onPressed: () => context.push('/orders/new'),
             icon: const Icon(Icons.add),
-            label: const Text('Lessen kopen'),
+            label: Text(l10n.dashboardBuyLessons),
           ),
         ],
       ),
@@ -343,6 +347,7 @@ class PlanningTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final start = planning.startDate;
     final end = planning.endDate;
@@ -366,7 +371,7 @@ class PlanningTile extends StatelessWidget {
                 child: Column(
                   children: [
                     Text(
-                      start == null ? '–' : F.dayLabel(start),
+                      start == null ? '–' : F.dayLabel(l10n, start),
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: theme.colorScheme.onPrimaryContainer,
                         fontWeight: FontWeight.w700,
@@ -388,7 +393,8 @@ class PlanningTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      planning.drivingClass?.name ?? 'Les',
+                      planning.drivingClass?.name ??
+                          l10n.dashboardLessonFallback,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.titleSmall?.copyWith(
@@ -400,8 +406,8 @@ class PlanningTile extends StatelessWidget {
                       [
                         if (end != null && start != null)
                           '${F.time(start)} – ${F.time(end)}',
-                        if (planning.instructor?.fullName != null)
-                          planning.instructor!.fullName,
+                        if (planning.instructor != null)
+                          planning.instructor!.displayName(l10n),
                       ].join(' · '),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -415,7 +421,7 @@ class PlanningTile extends StatelessWidget {
               const SizedBox(width: 8),
               trailing ??
                   StatusChip(
-                    label: planning.statusLabel,
+                    label: planning.statusLabel(l10n),
                     tone: PlanningTone.forStatus(planning.status),
                   ),
               const SizedBox(width: 4),

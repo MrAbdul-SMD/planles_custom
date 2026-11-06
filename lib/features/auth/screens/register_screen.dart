@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/network/api_exception.dart';
+import '../../../l10n/language_picker.dart';
+import '../../../l10n/l10n.dart';
 import '../../../shared/widgets.dart';
 import '../providers/auth_provider.dart';
 
@@ -17,9 +19,6 @@ class RegisterScreen extends ConsumerStatefulWidget {
 }
 
 class _RegisterScreenState extends ConsumerState<RegisterScreen> {
-  static const _passwordRules =
-      'Minimaal 8 tekens met een kleine letter, hoofdletter en cijfer';
-
   final _formKey = GlobalKey<FormState>();
 
   String _profile = 'STUDENT';
@@ -104,18 +103,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       });
       if (!wantsOtp) showAppSnack(context, result.message, error: true);
     } on ApiException catch (e) {
-      if (mounted) showAppSnack(context, e.validationMessage, error: true);
-    } catch (_) {
       if (mounted) {
-        showAppSnack(context, 'Registreren is mislukt.', error: true);
+        showAppSnack(context, describeError(context, e), error: true);
+      }
+    } catch (e) {
+      if (mounted) {
+        showAppSnack(context, describeError(context, e), error: true);
       }
     } finally {
       if (mounted) setState(() => _busy = false);
     }
   }
-
-  String? _required(String? v) =>
-      (v == null || v.trim().isEmpty) ? 'Verplicht veld' : null;
 
   Future<void> _pickBirthdate() async {
     final now = DateTime.now();
@@ -133,8 +131,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
+    String? requiredValidator(String? v) =>
+        (v == null || v.trim().isEmpty) ? l10n.registerRequired : null;
     return Scaffold(
-      appBar: AppBar(title: const Text('Registreren')),
+      appBar: AppBar(
+        title: Text(l10n.registerTitle),
+        actions: const [LanguageMenuButton()],
+      ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -147,23 +151,23 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
-                      'Accounttype',
+                      l10n.registerAccountType,
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 10),
                     SegmentedButton<String>(
-                      segments: const [
+                      segments: [
                         ButtonSegment(
                           value: 'STUDENT',
-                          label: Text('Leerling'),
-                          icon: Icon(Icons.school_outlined),
+                          label: Text(l10n.registerStudent),
+                          icon: const Icon(Icons.school_outlined),
                         ),
                         ButtonSegment(
                           value: 'INSTRUCTOR',
-                          label: Text('Instructeur'),
-                          icon: Icon(Icons.directions_car_outlined),
+                          label: Text(l10n.registerInstructor),
+                          icon: const Icon(Icons.directions_car_outlined),
                         ),
                       ],
                       selected: {_profile},
@@ -173,7 +177,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     const SizedBox(height: 24),
 
                     Text(
-                      'Persoonlijke gegevens',
+                      l10n.registerPersonalDetails,
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
@@ -185,10 +189,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           child: TextFormField(
                             controller: _firstName,
                             textInputAction: TextInputAction.next,
-                            decoration: const InputDecoration(
-                              labelText: 'Voornaam',
+                            decoration: InputDecoration(
+                              labelText: l10n.registerFirstName,
                             ),
-                            validator: _required,
+                            validator: requiredValidator,
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -196,10 +200,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           child: TextFormField(
                             controller: _lastName,
                             textInputAction: TextInputAction.next,
-                            decoration: const InputDecoration(
-                              labelText: 'Achternaam',
+                            decoration: InputDecoration(
+                              labelText: l10n.registerLastName,
                             ),
-                            validator: _required,
+                            validator: requiredValidator,
                           ),
                         ),
                       ],
@@ -209,14 +213,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       controller: _email,
                       keyboardType: TextInputType.emailAddress,
                       textInputAction: TextInputAction.next,
-                      decoration: const InputDecoration(
-                        labelText: 'E-mailadres',
+                      decoration: InputDecoration(
+                        labelText: l10n.loginEmailLabel,
                       ),
                       validator: (v) {
                         final value = v?.trim() ?? '';
-                        if (value.isEmpty) return 'Verplicht veld';
+                        if (value.isEmpty) return l10n.registerRequired;
                         if (!value.contains('@')) {
-                          return 'Vul een geldig e-mailadres in';
+                          return l10n.loginEmailInvalid;
                         }
                         return null;
                       },
@@ -226,29 +230,29 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       controller: _phone,
                       keyboardType: TextInputType.phone,
                       textInputAction: TextInputAction.next,
-                      decoration: const InputDecoration(
-                        labelText: 'Telefoonnummer',
+                      decoration: InputDecoration(
+                        labelText: l10n.registerPhone,
                       ),
-                      validator: _required,
+                      validator: requiredValidator,
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: _birthdate,
                       readOnly: true,
                       onTap: _pickBirthdate,
-                      decoration: const InputDecoration(
-                        labelText: 'Geboortedatum',
-                        suffixIcon: Icon(Icons.calendar_today_outlined),
-                        hintText: 'jjjj-mm-dd',
+                      decoration: InputDecoration(
+                        labelText: l10n.registerBirthdate,
+                        suffixIcon: const Icon(Icons.calendar_today_outlined),
+                        hintText: l10n.registerBirthdateHint,
                       ),
                       validator: (v) => (v == null || v.trim().isEmpty)
-                          ? 'Verplicht veld'
+                          ? l10n.registerRequired
                           : null,
                     ),
                     const SizedBox(height: 24),
 
                     Text(
-                      'Adres',
+                      l10n.registerAddress,
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
@@ -261,10 +265,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           child: TextFormField(
                             controller: _street,
                             textInputAction: TextInputAction.next,
-                            decoration: const InputDecoration(
-                              labelText: 'Straat',
+                            decoration: InputDecoration(
+                              labelText: l10n.registerStreet,
                             ),
-                            validator: _required,
+                            validator: requiredValidator,
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -272,10 +276,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           child: TextFormField(
                             controller: _houseNumber,
                             textInputAction: TextInputAction.next,
-                            decoration: const InputDecoration(
-                              labelText: 'Huisnr.',
+                            decoration: InputDecoration(
+                              labelText: l10n.registerHouseNumber,
                             ),
-                            validator: _required,
+                            validator: requiredValidator,
                           ),
                         ),
                       ],
@@ -288,10 +292,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             controller: _zipCode,
                             textInputAction: TextInputAction.next,
                             textCapitalization: TextCapitalization.characters,
-                            decoration: const InputDecoration(
-                              labelText: 'Postcode',
+                            decoration: InputDecoration(
+                              labelText: l10n.registerZipCode,
                             ),
-                            validator: _required,
+                            validator: requiredValidator,
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -300,10 +304,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           child: TextFormField(
                             controller: _city,
                             textInputAction: TextInputAction.next,
-                            decoration: const InputDecoration(
-                              labelText: 'Plaats',
+                            decoration: InputDecoration(
+                              labelText: l10n.registerCity,
                             ),
-                            validator: _required,
+                            validator: requiredValidator,
                           ),
                         ),
                       ],
@@ -311,7 +315,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     const SizedBox(height: 24),
 
                     Text(
-                      'Lesdetails (optioneel)',
+                      l10n.registerLessonDetails,
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
@@ -320,22 +324,22 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     TextFormField(
                       controller: _pickupLocation,
                       textInputAction: TextInputAction.next,
-                      decoration: const InputDecoration(
-                        labelText: 'Ophaallocatie',
+                      decoration: InputDecoration(
+                        labelText: l10n.registerPickupLocation,
                       ),
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: _licensePlate,
                       textCapitalization: TextCapitalization.characters,
-                      decoration: const InputDecoration(
-                        labelText: 'Kenteken (bij eigen voertuig)',
+                      decoration: InputDecoration(
+                        labelText: l10n.registerLicensePlate,
                       ),
                     ),
                     const SizedBox(height: 24),
 
                     Text(
-                      'Wachtwoord',
+                      l10n.registerPasswordLabel,
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
@@ -345,20 +349,20 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       controller: _password,
                       obscureText: true,
                       textInputAction: TextInputAction.next,
-                      decoration: const InputDecoration(
-                        labelText: 'Wachtwoord',
-                        helperText: _passwordRules,
+                      decoration: InputDecoration(
+                        labelText: l10n.registerPasswordLabel,
+                        helperText: l10n.registerPasswordRules,
                         helperMaxLines: 2,
                       ),
                       validator: (v) {
                         final value = v ?? '';
                         if (value.length < 8) {
-                          return 'Minimaal 8 tekens';
+                          return l10n.registerPasswordMin8;
                         }
                         if (!value.contains(RegExp(r'[a-z]')) ||
                             !value.contains(RegExp(r'[A-Z]')) ||
                             !value.contains(RegExp(r'\d'))) {
-                          return 'Gebruik een kleine letter, hoofdletter en cijfer';
+                          return l10n.registerPasswordNeedsMix;
                         }
                         return null;
                       },
@@ -369,26 +373,25 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       obscureText: true,
                       textInputAction: TextInputAction.done,
                       onFieldSubmitted: (_) => _submit(),
-                      decoration: const InputDecoration(
-                        labelText: 'Herhaal wachtwoord',
+                      decoration: InputDecoration(
+                        labelText: l10n.registerPasswordRepeat,
                       ),
                       validator: (v) => v != _password.text
-                          ? 'Wachtwoorden komen niet overeen'
+                          ? l10n.registerPasswordMismatch
                           : null,
                     ),
 
                     if (_otpSent) ...[
                       const SizedBox(height: 24),
                       Text(
-                        'Bevestigingscode',
+                        l10n.registerOtpTitle,
                         style: theme.textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.w700,
                         ),
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        _otpMessage ??
-                            'We hebben een code naar je e-mailadres gestuurd.',
+                        _otpMessage ?? l10n.registerOtpFallback,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -398,13 +401,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         controller: _otp,
                         keyboardType: TextInputType.number,
                         maxLength: 6,
-                        decoration: const InputDecoration(
-                          labelText: 'Code uit e-mail',
+                        decoration: InputDecoration(
+                          labelText: l10n.registerOtpLabel,
                           counterText: '',
                         ),
                         validator: (v) =>
                             _otpSent && (v == null || v.trim().length < 4)
-                            ? 'Vul de 4-cijferige code in'
+                            ? l10n.registerOtpRequired
                             : null,
                       ),
                     ],
@@ -421,13 +424,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               ),
                             )
                           : Text(
-                              _otpSent ? 'Account aanmaken' : 'Code aanvragen',
+                              _otpSent
+                                  ? l10n.registerSubmitCreate
+                                  : l10n.registerSubmitCode,
                             ),
                     ),
                     const SizedBox(height: 12),
                     TextButton(
                       onPressed: () => context.pop(),
-                      child: const Text('Ik heb al een account'),
+                      child: Text(l10n.registerHaveAccount),
                     ),
                   ],
                 ),

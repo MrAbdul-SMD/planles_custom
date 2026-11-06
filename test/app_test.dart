@@ -11,7 +11,18 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// Boots the real app (router, theme, providers) with an empty token store,
 /// which is exactly what a first-time user sees. No network is touched.
-Future<ProviderContainer> _pumpSignedOutApp(WidgetTester tester) async {
+///
+/// The app follows the system locale, so [locale] pins it for assertions
+/// (the default UI strings are Dutch).
+Future<ProviderContainer> _pumpSignedOutApp(
+  WidgetTester tester, {
+  Locale locale = const Locale('nl'),
+}) async {
+  tester.platformDispatcher.localeTestValue = locale;
+  tester.platformDispatcher.localesTestValue = [locale];
+  addTearDown(tester.platformDispatcher.clearLocaleTestValue);
+  addTearDown(tester.platformDispatcher.clearLocalesTestValue);
+
   SharedPreferences.setMockInitialValues({});
 
   final storage = await TokenStorage.create();
@@ -85,5 +96,21 @@ void main() {
     final loginWidth = tester.getSize(find.byType(Scaffold)).width;
     expect(loginWidth, 760);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('the app follows the system locale', (tester) async {
+    await _pumpSignedOutApp(tester, locale: const Locale('en'));
+
+    final context = tester.element(find.byType(Scaffold));
+    expect(Localizations.localeOf(context), const Locale('en'));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('an unsupported locale falls back to Dutch', (tester) async {
+    await _pumpSignedOutApp(tester, locale: const Locale('fr'));
+
+    final context = tester.element(find.byType(Scaffold));
+    expect(Localizations.localeOf(context), const Locale('nl'));
+    expect(find.text('Welkom terug'), findsOneWidget);
   });
 }

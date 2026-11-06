@@ -1,0 +1,39 @@
+{
+  "profileTitle": {"nl": "Profiel", "en": "Profile"},
+  "profileSignOut": {"nl": "Uitloggen", "en": "Sign out"},
+  "profileSignOutMessage": {
+    "nl": "Weet je zeker dat je wilt uitloggen?",
+    "en": "Are you sure you want to sign out?"
+  },
+  "profileDeactivate": {"nl": "Account deactiveren", "en": "Deactivate account"},
+  "profileDeactivateMessage": {
+    "nl": "Je account wordt gedeactiveerd en je kunt niet meer inloggen. Dit kan niet ongedaan worden gemaakt.",
+    "en": "Your account will be deactivated and you will no longer be able to sign in. This cannot be undone."
+  },
+  "profileDeactivateConfirm": {"nl": "Deactiveren", "en": "Deactivate"},
+  "profileAccountDeactivated": {
+    "nl": "Account gedeactiveerd",
+    "en": "Account deactivated"
+  },
+  "profileTopUp": {"nl": "Opwaarderen", "en": "Top up"},
+  "profileSectionAccount": {"nl": "Account", "en": "Account"},
+  "profileLicensePlate": {"nl": "Kenteken", "en": "Licence plate"},
+  "profileNotificationSettings": {
+    "nl": "Meldingsinstellingen",
+    "en": "Notification settings"
+  },
+  "editProfileTitle": {"nl": "Gegevens bewerken", "en": "Edit details"},
+  "editProfileUpdated": {"nl": "Profiel bijgewerkt", "en": "Profile updated"},
+  "editProfileGender": {"nl": "Geslacht", "en": "Gender"},
+  "editProfileGenderMale": {"nl": "Man", "en": "Male"},
+  "editProfileGenderFemale": {"nl": "Vrouw", "en": "Female"},
+  "editProfileGenderUnknown": {"nl": "Onbekend", "en": "Unknown"},
+  "changePasswordTitle": {"nl": "Wachtwoord wijzigen", "en": "Change password"},
+  "changePasswordCurrentLabel": {
+    "nl": "Huidig wachtwoord",
+    "en": "Current password"
+  },
+  "changePasswordNewLabel": {"nl": "Nieuw wachtwoord", "en": "New password"},
+  "changePasswordSuccess": {"nl": "Wachtwoord gewijzigd", "en": "Password changed"},
+  "changePasswordSubmit": {"nl": "Wachtwoord opslaan", "en": "Save password"}
+}

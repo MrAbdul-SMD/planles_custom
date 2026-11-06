@@ -1,0 +1,32 @@
+{
+  "dashboardGreetingMorning": {"nl": "Goedemorgen", "en": "Good morning"},
+  "dashboardGreetingAfternoon": {"nl": "Goedemiddag", "en": "Good afternoon"},
+  "dashboardGreetingEvening": {"nl": "Goedenavond", "en": "Good evening"},
+  "dashboardHello": {"nl": "Hallo", "en": "Hello"},
+  "dashboardUpcomingLessons": {"nl": "Eerstvolgende lessen", "en": "Upcoming lessons"},
+  "dashboardViewAll": {"nl": "Alles bekijken", "en": "View all"},
+  "dashboardQuickActions": {"nl": "Snel regelen", "en": "Quick actions"},
+  "dashboardBuyLessons": {"nl": "Lessen kopen", "en": "Buy lessons"},
+  "dashboardTopUpBalance": {"nl": "Saldo opwaarderen", "en": "Top up balance"},
+  "dashboardRecentNotifications": {"nl": "Recente meldingen", "en": "Recent notifications"},
+  "dashboardAllNotifications": {"nl": "Alle meldingen", "en": "All notifications"},
+  "dashboardNotificationFallback": {"nl": "Melding", "en": "Notification"},
+  "dashboardBalanceLabel": {"nl": "Saldo", "en": "Balance"},
+  "dashboardNoLessonsTitle": {"nl": "Nog geen lessen gepland", "en": "No lessons scheduled yet"},
+  "dashboardNoLessonsSubtitle": {
+    "nl": "Koop een lespakket om je eerste les in te plannen.",
+    "en": "Buy a lesson package to schedule your first lesson."
+  },
+  "dashboardLessonFallback": {"nl": "Les", "en": "Lesson"},
+  "studentsTitle": {"nl": "Mijn leerlingen", "en": "My students"},
+  "studentsSearchHint": {"nl": "Zoek leerling", "en": "Search student"},
+  "studentsEmptyTitle": {"nl": "Geen leerlingen", "en": "No students"},
+  "studentsEmptySubtitle": {
+    "nl": "Er zijn nog geen leerlingen aan je gekoppeld.",
+    "en": "No students are linked to you yet."
+  },
+  "studentsEmailLabel": {"nl": "E-mail", "en": "Email"},
+  "studentsPhoneLabel": {"nl": "Telefoon", "en": "Phone"},
+  "studentsAddressLabel": {"nl": "Adres", "en": "Address"},
+  "studentsPickupLabel": {"nl": "Ophaallocatie", "en": "Pickup location"}
+}

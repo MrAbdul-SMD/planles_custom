@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_exception.dart';
+import '../../../l10n/l10n.dart';
 import '../../../shared/widgets.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../models/planning.dart';
@@ -33,7 +34,7 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
   final Map<int, TextEditingController> _controllers = {};
   bool _loading = true;
   bool _saving = false;
-  String? _error;
+  Object? _error;
 
   @override
   void initState() {
@@ -80,13 +81,14 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
       if (mounted) {
         setState(() {
           _loading = false;
-          _error = '$e';
+          _error = e;
         });
       }
     }
   }
 
   Future<void> _save() async {
+    final l10n = context.l10n;
     final payload = <Map<String, dynamic>>[
       for (final a in _answers)
         if (a.dirty || (a.text.isNotEmpty && a.question.text != a.text))
@@ -98,7 +100,7 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
     ];
 
     if (payload.isEmpty) {
-      showAppSnack(context, 'Vul eerst minstens één vraag in.', error: true);
+      showAppSnack(context, l10n.lessonCardFillFirst, error: true);
       return;
     }
 
@@ -108,13 +110,17 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
           .read(planningRepositoryProvider)
           .answerLessonCards(widget.planningId, payload);
       if (mounted) {
-        showAppSnack(context, 'Leskaart opgeslagen');
+        showAppSnack(context, l10n.lessonCardSaved);
         await _load();
       }
     } on ApiException catch (e) {
-      if (mounted) showAppSnack(context, e.validationMessage, error: true);
+      if (mounted) {
+        showAppSnack(context, describeError(context, e), error: true);
+      }
     } catch (e) {
-      if (mounted) showAppSnack(context, '$e', error: true);
+      if (mounted) {
+        showAppSnack(context, describeError(context, e), error: true);
+      }
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -122,14 +128,15 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Leskaart'),
+        title: Text(l10n.lessonCardTitle),
         actions: [
           IconButton(
-            tooltip: 'Vernieuwen',
+            tooltip: l10n.lessonCardRefresh,
             onPressed: _loading ? null : _load,
             icon: const Icon(Icons.refresh_rounded),
           ),
@@ -138,20 +145,20 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
-          ? ErrorView(message: _error!, onRetry: _load)
+          ? ErrorView(message: describeError(context, _error!), onRetry: _load)
           : _answers.isEmpty
-          ? const EmptyState(
+          ? EmptyState(
               icon: Icons.fact_check_outlined,
-              title: 'Geen vragen',
-              subtitle: 'Voor deze les zijn nog geen vragen ingesteld.',
+              title: l10n.lessonCardEmptyTitle,
+              subtitle: l10n.lessonCardEmptySubtitle,
             )
           : ListView(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
               children: [
                 Text(
                   _isInstructor
-                      ? 'Beoordeel je leerling per onderdeel.'
-                      : 'Vul in hoe het ging tijdens je les.',
+                      ? l10n.lessonCardInstructorIntro
+                      : l10n.lessonCardStudentIntro,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -180,7 +187,7 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
                           height: 22,
                           child: CircularProgressIndicator(strokeWidth: 2.4),
                         )
-                      : const Text('Leskaart opslaan'),
+                      : Text(l10n.lessonCardSave),
                 ),
               ),
             ),
@@ -201,6 +208,7 @@ class _QuestionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final sub = answer.question.subCategory?.name;
 
@@ -253,13 +261,13 @@ class _QuestionCard extends StatelessWidget {
               controller: controller,
               minLines: 2,
               maxLines: 4,
-              decoration: const InputDecoration(
-                labelText: 'Antwoord / commentaar',
+              decoration: InputDecoration(
+                labelText: l10n.lessonCardAnswerLabel,
               ),
             ),
             const SizedBox(height: 14),
             Text(
-              'Beoordeling',
+              l10n.lessonCardScoreLabel,
               style: theme.textTheme.labelMedium?.copyWith(
                 fontWeight: FontWeight.w600,
               ),

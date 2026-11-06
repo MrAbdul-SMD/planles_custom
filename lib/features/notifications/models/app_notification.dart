@@ -1,4 +1,5 @@
 import '../../../core/utils/formatters.dart';
+import '../../../l10n/app_localizations.dart';
 
 class AppNotification {
   const AppNotification({
@@ -63,26 +64,26 @@ class NotificationPreference {
     'pushEnabled': pushEnabled,
   };
 
-  String get label => switch (type) {
-    'LESSON_BOOKED' => 'Les geboekt',
-    'LESSON_REMINDER_24H' => 'Herinnering les (24 uur)',
-    'LESSON_REMINDER_1H' => 'Herinnering les (1 uur)',
-    'LESSON_CANCELLED' => 'Les geannuleerd',
-    'LESSON_CHANGED' => 'Les gewijzigd',
-    'LESSON_COMPLETED' => 'Les afgerond',
-    'PAYMENT_SUCCESSFUL' => 'Betaling geslaagd',
-    'PAYMENT_FAILED' => 'Betaling mislukt',
-    'PAYMENT_REFUNDED' => 'Betaling terugbetaald',
-    'PAYMENT_REQUESTED' => 'Betalingsverzoek',
-    'LOW_LESSON_CREDIT' => 'Weinig lesuren over',
-    'EXAM_BOOKED' => 'Examen geboekt',
-    'EXAM_REMINDER_7D' => 'Herinnering examen (7 dagen)',
-    'EXAM_REMINDER_24H' => 'Herinnering examen (24 uur)',
-    'EXAM_CHANGED' => 'Examen gewijzigd',
-    'EXAM_CANCELLED' => 'Examen geannuleerd',
-    'LESSON_CARD_UPDATED' => 'Leskaart bijgewerkt',
-    'INSTRUCTOR_FEEDBACK' => 'Instructeur feedback',
-    'ACCOUNT_SECURITY' => 'Accountbeveiliging',
+  String label(AppLocalizations l10n) => switch (type) {
+    'LESSON_BOOKED' => l10n.notifPrefLessonBooked,
+    'LESSON_REMINDER_24H' => l10n.notifPrefLessonReminder24h,
+    'LESSON_REMINDER_1H' => l10n.notifPrefLessonReminder1h,
+    'LESSON_CANCELLED' => l10n.notifPrefLessonCancelled,
+    'LESSON_CHANGED' => l10n.notifPrefLessonChanged,
+    'LESSON_COMPLETED' => l10n.notifPrefLessonCompleted,
+    'PAYMENT_SUCCESSFUL' => l10n.notifPrefPaymentSuccessful,
+    'PAYMENT_FAILED' => l10n.notifPrefPaymentFailed,
+    'PAYMENT_REFUNDED' => l10n.notifPrefPaymentRefunded,
+    'PAYMENT_REQUESTED' => l10n.notifPrefPaymentRequested,
+    'LOW_LESSON_CREDIT' => l10n.notifPrefLowLessonCredit,
+    'EXAM_BOOKED' => l10n.notifPrefExamBooked,
+    'EXAM_REMINDER_7D' => l10n.notifPrefExamReminder7d,
+    'EXAM_REMINDER_24H' => l10n.notifPrefExamReminder24h,
+    'EXAM_CHANGED' => l10n.notifPrefExamChanged,
+    'EXAM_CANCELLED' => l10n.notifPrefExamCancelled,
+    'LESSON_CARD_UPDATED' => l10n.notifPrefLessonCardUpdated,
+    'INSTRUCTOR_FEEDBACK' => l10n.notifPrefInstructorFeedback,
+    'ACCOUNT_SECURITY' => l10n.notifPrefAccountSecurity,
     _ => type,
   };
 }

@@ -1,4 +1,5 @@
 import '../../../core/utils/formatters.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../auth/models/user.dart';
 import '../../orders/models/order.dart';
 
@@ -90,11 +91,11 @@ class Planning {
     return endDate!.difference(startDate!).inMinutes;
   }
 
-  String get statusLabel => switch (status) {
-    'confirmed' => 'Bevestigd',
-    'completed' => 'Afgerond',
-    'cancelled' => 'Geannuleerd',
-    _ => 'In afwachting',
+  String statusLabel(AppLocalizations l10n) => switch (status) {
+    'confirmed' => l10n.statusConfirmed,
+    'completed' => l10n.statusCompleted,
+    'cancelled' => l10n.statusCancelled,
+    _ => l10n.statusPending,
   };
 }
 

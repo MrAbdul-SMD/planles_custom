@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/utils/formatters.dart';
+import '../../../l10n/l10n.dart';
 import '../../../shared/widgets.dart';
 import '../../dashboard/screens/dashboard_screen.dart' show PlanningTile;
 import '../models/planning.dart';
@@ -26,15 +27,17 @@ class _PlanningListScreenState extends ConsumerState<PlanningListScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Planning'),
+        title: Text(l10n.planningTitle),
         bottom: TabBar(
           controller: _tabs,
-          tabs: const [
-            Tab(text: 'Aankomend'),
-            Tab(text: 'Afgerond'),
-            Tab(text: 'Geannuleerd'),
+          tabs: [
+            Tab(text: l10n.planningTabUpcoming),
+            Tab(text: l10n.planningTabCompleted),
+            Tab(text: l10n.planningTabCancelled),
           ],
         ),
       ),
@@ -61,6 +64,7 @@ class _PlanningTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final page = ref.watch(planningListProvider);
 
     return RefreshIndicator(
@@ -72,12 +76,12 @@ class _PlanningTab extends ConsumerWidget {
           final items = selector(value);
           if (items.isEmpty) {
             return ListView(
-              children: const [
-                SizedBox(height: 80),
+              children: [
+                const SizedBox(height: 80),
                 EmptyState(
                   icon: Icons.event_busy_outlined,
-                  title: 'Niets te vinden',
-                  subtitle: 'Er staan nog geen lessen in deze categorie.',
+                  title: l10n.planningEmptyTitle,
+                  subtitle: l10n.planningEmptySubtitle,
                 ),
               ],
             );
@@ -99,6 +103,7 @@ class _PlanningTab extends ConsumerWidget {
   }
 
   Widget _grouped(BuildContext context, List<Planning> items) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final children = <Widget>[];
     DateTime? currentDay;
@@ -118,8 +123,8 @@ class _PlanningTab extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(4, 14, 4, 10),
             child: Text(
               planning.startDate == null
-                  ? 'Datum onbekend'
-                  : F.relativeDay(planning.startDate),
+                  ? l10n.planningUnknownDate
+                  : F.relativeDay(l10n, planning.startDate),
               style: theme.textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.w800,
                 color: theme.colorScheme.onSurfaceVariant,

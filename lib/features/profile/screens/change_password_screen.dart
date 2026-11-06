@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/network/api_exception.dart';
+import '../../../l10n/l10n.dart';
 import '../../../shared/widgets.dart';
 import '../providers/profile_providers.dart';
 
@@ -30,12 +30,13 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
   }
 
   String? _validatePassword(String? value) {
+    final l10n = context.l10n;
     final v = value ?? '';
-    if (v.length < 8) return 'Minimaal 8 tekens';
+    if (v.length < 8) return l10n.registerPasswordMin8;
     if (!v.contains(RegExp(r'[a-z]')) ||
         !v.contains(RegExp(r'[A-Z]')) ||
         !v.contains(RegExp(r'\d'))) {
-      return 'Gebruik een kleine letter, hoofdletter en cijfer';
+      return l10n.registerPasswordNeedsMix;
     }
     return null;
   }
@@ -51,12 +52,12 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
             newPassword: _next.text,
           );
       if (!mounted) return;
-      showAppSnack(context, 'Wachtwoord gewijzigd');
+      showAppSnack(context, context.l10n.changePasswordSuccess);
       context.pop();
-    } on ApiException catch (e) {
-      if (mounted) showAppSnack(context, e.validationMessage, error: true);
     } catch (e) {
-      if (mounted) showAppSnack(context, '$e', error: true);
+      if (mounted) {
+        showAppSnack(context, describeError(context, e), error: true);
+      }
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -64,8 +65,9 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Scaffold(
-      appBar: AppBar(title: const Text('Wachtwoord wijzigen')),
+      appBar: AppBar(title: Text(l10n.changePasswordTitle)),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 440),
@@ -77,19 +79,20 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                 TextFormField(
                   controller: _current,
                   obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Huidig wachtwoord',
+                  decoration: InputDecoration(
+                    labelText: l10n.changePasswordCurrentLabel,
                   ),
-                  validator: (v) =>
-                      (v == null || v.isEmpty) ? 'Vul je wachtwoord in' : null,
+                  validator: (v) => (v == null || v.isEmpty)
+                      ? l10n.loginPasswordRequired
+                      : null,
                 ),
                 const SizedBox(height: 14),
                 TextFormField(
                   controller: _next,
                   obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Nieuw wachtwoord',
-                    helperText: 'Minimaal 8 tekens met een kleine letter, hoofdletter en cijfer',
+                  decoration: InputDecoration(
+                    labelText: l10n.changePasswordNewLabel,
+                    helperText: l10n.registerPasswordRules,
                     helperMaxLines: 2,
                   ),
                   validator: _validatePassword,
@@ -98,12 +101,11 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                 TextFormField(
                   controller: _confirm,
                   obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Herhaal wachtwoord',
+                  decoration: InputDecoration(
+                    labelText: l10n.registerPasswordRepeat,
                   ),
-                  validator: (v) => v != _next.text
-                      ? 'Wachtwoorden komen niet overeen'
-                      : null,
+                  validator: (v) =>
+                      v != _next.text ? l10n.registerPasswordMismatch : null,
                 ),
                 const SizedBox(height: 28),
                 FilledButton(
@@ -114,7 +116,7 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                           height: 22,
                           child: CircularProgressIndicator(strokeWidth: 2.4),
                         )
-                      : const Text('Wachtwoord opslaan'),
+                      : Text(l10n.changePasswordSubmit),
                 ),
               ],
             ),

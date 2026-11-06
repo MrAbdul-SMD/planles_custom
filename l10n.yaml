@@ -1,0 +1,20 @@
+# flutter gen-l10n configuration (runs automatically on `flutter pub get`,
+# `flutter test` and builds because `generate: true` is set in pubspec.yaml).
+#
+# Manual run: `flutter gen-l10n` (or `python3 tool/sync_l10n.py`, which also
+# merges the translation fragments written by the migration scripts).
+
+# Inputs
+arb-dir: lib/l10n
+template-arb-file: app_nl.arb # Dutch is the source language
+
+# Outputs
+output-dir: lib/l10n # keep generated files next to the ARB files
+output-localization-file: app_localizations.dart
+output-class: AppLocalizations
+
+# `AppLocalizations.of(context)` returns a non-null value.
+nullable-getter: false
+
+# Run `dart format` on the generated files.
+format: true

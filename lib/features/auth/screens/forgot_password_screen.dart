@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/network/api_exception.dart';
+import '../../../l10n/language_picker.dart';
+import '../../../l10n/l10n.dart';
 import '../../../shared/widgets.dart';
 import '../providers/auth_provider.dart';
 
@@ -33,8 +35,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   }
 
   Future<void> _sendCode() async {
+    final l10n = context.l10n;
     if (_email.text.trim().isEmpty) {
-      showAppSnack(context, 'Vul je e-mailadres in', error: true);
+      showAppSnack(context, l10n.loginEmailRequired, error: true);
       return;
     }
     setState(() => _busy = true);
@@ -42,12 +45,14 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
       await ref.read(authRepositoryProvider).forgetPassword(_email.text);
       if (!mounted) return;
       setState(() => _codeSent = true);
-      showAppSnack(context, 'We hebben een code naar je e-mail gestuurd.');
+      showAppSnack(context, l10n.forgotCodeSent);
     } on ApiException catch (e) {
-      if (mounted) showAppSnack(context, e.validationMessage, error: true);
-    } catch (_) {
       if (mounted) {
-        showAppSnack(context, 'Versturen is mislukt.', error: true);
+        showAppSnack(context, describeError(context, e), error: true);
+      }
+    } catch (e) {
+      if (mounted) {
+        showAppSnack(context, describeError(context, e), error: true);
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -56,6 +61,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
   Future<void> _reset() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
+    final l10n = context.l10n;
     setState(() => _busy = true);
     try {
       final repo = ref.read(authRepositoryProvider);
@@ -65,13 +71,15 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
         password: _password.text.isEmpty ? null : _password.text,
       );
       if (!mounted) return;
-      showAppSnack(context, 'Wachtwoord gewijzigd. Je kunt nu inloggen.');
+      showAppSnack(context, l10n.forgotPasswordChanged);
       context.go('/login');
     } on ApiException catch (e) {
-      if (mounted) showAppSnack(context, e.validationMessage, error: true);
-    } catch (_) {
       if (mounted) {
-        showAppSnack(context, 'Resetten is mislukt.', error: true);
+        showAppSnack(context, describeError(context, e), error: true);
+      }
+    } catch (e) {
+      if (mounted) {
+        showAppSnack(context, describeError(context, e), error: true);
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -81,8 +89,12 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     return Scaffold(
-      appBar: AppBar(title: const Text('Wachtwoord vergeten')),
+      appBar: AppBar(
+        title: Text(l10n.forgotTitle),
+        actions: const [LanguageMenuButton()],
+      ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -95,7 +107,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
-                      _codeSent ? 'Voer de code in' : 'Herstel je wachtwoord',
+                      _codeSent ? l10n.forgotEnterCode : l10n.forgotResetTitle,
                       style: theme.textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.w800,
                       ),
@@ -103,8 +115,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                     const SizedBox(height: 8),
                     Text(
                       _codeSent
-                          ? 'We hebben een code gestuurd naar ${_email.text.trim()}.'
-                          : 'Vul je e-mailadres in en we sturen je een herstelcode.',
+                          ? l10n.forgotCodeSentTo(_email.text.trim())
+                          : l10n.forgotEmailHint,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -114,14 +126,14 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                       controller: _email,
                       readOnly: _codeSent,
                       keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(
-                        labelText: 'E-mailadres',
+                      decoration: InputDecoration(
+                        labelText: l10n.loginEmailLabel,
                       ),
                       validator: (v) {
                         final value = v?.trim() ?? '';
-                        if (value.isEmpty) return 'Vul je e-mailadres in';
+                        if (value.isEmpty) return l10n.loginEmailRequired;
                         if (!value.contains('@')) {
-                          return 'Vul een geldig e-mailadres in';
+                          return l10n.loginEmailInvalid;
                         }
                         return null;
                       },
@@ -132,31 +144,33 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                         controller: _otp,
                         keyboardType: TextInputType.number,
                         maxLength: 6,
-                        decoration: const InputDecoration(
-                          labelText: 'Herstelcode',
+                        decoration: InputDecoration(
+                          labelText: l10n.forgotCodeLabel,
                           counterText: '',
                         ),
                         validator: (v) => (v == null || v.trim().length < 4)
-                            ? 'Vul de code in'
+                            ? l10n.forgotCodeRequired
                             : null,
                       ),
                       const SizedBox(height: 14),
                       TextFormField(
                         controller: _password,
                         obscureText: true,
-                        decoration: const InputDecoration(
-                          labelText: 'Nieuw wachtwoord (optioneel)',
-                          helperText: 'Minimaal 8 tekens met een kleine letter, hoofdletter en cijfer',
+                        decoration: InputDecoration(
+                          labelText: l10n.forgotNewPassword,
+                          helperText: l10n.registerPasswordRules,
                           helperMaxLines: 2,
                         ),
                         validator: (v) {
                           final value = v ?? '';
                           if (value.isEmpty) return null;
-                          if (value.length < 8) return 'Minimaal 8 tekens';
+                          if (value.length < 8) {
+                            return l10n.registerPasswordMin8;
+                          }
                           if (!value.contains(RegExp(r'[a-z]')) ||
                               !value.contains(RegExp(r'[A-Z]')) ||
                               !value.contains(RegExp(r'\d'))) {
-                            return 'Gebruik een kleine letter, hoofdletter en cijfer';
+                            return l10n.registerPasswordNeedsMix;
                           }
                           return null;
                         },
@@ -177,19 +191,19 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                             )
                           : Text(
                               _codeSent
-                                  ? 'Wachtwoord resetten'
-                                  : 'Code versturen',
+                                  ? l10n.forgotSubmitReset
+                                  : l10n.forgotSubmitSend,
                             ),
                     ),
                     if (_codeSent)
                       TextButton(
                         onPressed: _busy ? null : _sendCode,
-                        child: const Text('Code opnieuw versturen'),
+                        child: Text(l10n.forgotResend),
                       ),
                     const SizedBox(height: 8),
                     TextButton(
                       onPressed: () => context.go('/login'),
-                      child: const Text('Terug naar inloggen'),
+                      child: Text(l10n.forgotBackToLogin),
                     ),
                   ],
                 ),

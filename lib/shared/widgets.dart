@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../l10n/l10n.dart';
+
 /// Renders an [AsyncValue] with consistent loading / error / empty states so
 /// every feature screen stays declarative.
 class AsyncView<T> extends StatelessWidget {
@@ -27,7 +29,7 @@ class AsyncView<T> extends StatelessWidget {
       skipLoadingOnReload: true,
       loading: () => const Center(child: LoadingView()),
       error: (error, _) =>
-          ErrorView(message: error.toString(), onRetry: onRetry),
+          ErrorView(message: describeError(context, error), onRetry: onRetry),
       data: (value) {
         if (isEmpty?.call(value) ?? false) {
           return empty ?? const SizedBox.shrink();
@@ -97,7 +99,7 @@ class ErrorView extends StatelessWidget {
               OutlinedButton.icon(
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh_rounded),
-                label: const Text('Opnieuw proberen'),
+                label: Text(context.l10n.retry),
               ),
             ],
           ],
@@ -350,9 +352,10 @@ Future<bool> confirmAction(
   BuildContext context, {
   required String title,
   required String message,
-  String confirmLabel = 'Bevestigen',
+  String? confirmLabel,
   bool destructive = false,
 }) async {
+  final l10n = context.l10n;
   final result = await showDialog<bool>(
     context: context,
     builder: (context) => AlertDialog(
@@ -361,7 +364,7 @@ Future<bool> confirmAction(
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),
-          child: const Text('Annuleren'),
+          child: Text(l10n.cancel),
         ),
         FilledButton(
           onPressed: () => Navigator.of(context).pop(true),
@@ -370,7 +373,7 @@ Future<bool> confirmAction(
                   backgroundColor: Theme.of(context).colorScheme.error,
                 )
               : null,
-          child: Text(confirmLabel),
+          child: Text(confirmLabel ?? l10n.confirm),
         ),
       ],
     ),

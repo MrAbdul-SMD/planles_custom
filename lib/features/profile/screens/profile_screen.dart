@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/network/api_exception.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../l10n/language_picker.dart';
+import '../../../l10n/l10n.dart';
 import '../../../shared/widgets.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/profile_providers.dart';
@@ -12,43 +13,42 @@ class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
   Future<void> _signOut(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
     final ok = await confirmAction(
       context,
-      title: 'Uitloggen',
-      message: 'Weet je zeker dat je wilt uitloggen?',
-      confirmLabel: 'Uitloggen',
+      title: l10n.profileSignOut,
+      message: l10n.profileSignOutMessage,
+      confirmLabel: l10n.profileSignOut,
     );
     if (!ok) return;
     await ref.read(authControllerProvider.notifier).signOut();
   }
 
   Future<void> _deactivate(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
     final ok = await confirmAction(
       context,
-      title: 'Account deactiveren',
-      message:
-          'Je account wordt gedeactiveerd en je kunt niet meer inloggen. '
-          'Dit kan niet ongedaan worden gemaakt.',
-      confirmLabel: 'Deactiveren',
+      title: l10n.profileDeactivate,
+      message: l10n.profileDeactivateMessage,
+      confirmLabel: l10n.profileDeactivateConfirm,
       destructive: true,
     );
     if (!ok) return;
     try {
       await ref.read(profileRepositoryProvider).deactivate();
       if (!context.mounted) return;
-      showAppSnack(context, 'Account gedeactiveerd');
+      showAppSnack(context, l10n.profileAccountDeactivated);
       await ref.read(authControllerProvider.notifier).signOut();
-    } on ApiException catch (e) {
-      if (context.mounted) {
-        showAppSnack(context, e.validationMessage, error: true);
-      }
     } catch (e) {
-      if (context.mounted) showAppSnack(context, '$e', error: true);
+      if (context.mounted) {
+        showAppSnack(context, describeError(context, e), error: true);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final user = ref.watch(currentUserProvider);
     final theme = Theme.of(context);
 
@@ -57,7 +57,7 @@ class ProfileScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Profiel')),
+      appBar: AppBar(title: Text(l10n.profileTitle)),
       body: RefreshIndicator(
         onRefresh: () =>
             ref.read(authControllerProvider.notifier).refreshUser(),
@@ -73,7 +73,7 @@ class ProfileScreen extends ConsumerWidget {
                     AppAvatar(initials: user.initials, size: 72),
                     const SizedBox(height: 12),
                     Text(
-                      user.fullName,
+                      user.displayName(l10n),
                       textAlign: TextAlign.center,
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w800,
@@ -88,7 +88,9 @@ class ProfileScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 10),
                     StatusChip(
-                      label: user.isInstructor ? 'Instructeur' : 'Leerling',
+                      label: user.isInstructor
+                          ? l10n.registerInstructor
+                          : l10n.registerStudent,
                       tone: StatusTone.info,
                     ),
                   ],
@@ -110,7 +112,10 @@ class ProfileScreen extends ConsumerWidget {
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Text('Saldo', style: theme.textTheme.bodyLarge),
+                      child: Text(
+                        l10n.dashboardBalanceLabel,
+                        style: theme.textTheme.bodyLarge,
+                      ),
                     ),
                     Text(
                       F.money(user.balance),
@@ -120,7 +125,7 @@ class ProfileScreen extends ConsumerWidget {
                     ),
                     const SizedBox(width: 8),
                     IconButton(
-                      tooltip: 'Opwaarderen',
+                      tooltip: l10n.profileTopUp,
                       onPressed: () => context.push('/balance/topup'),
                       icon: const Icon(Icons.add_circle_outline),
                     ),
@@ -131,7 +136,7 @@ class ProfileScreen extends ConsumerWidget {
 
             // --------------------------------------------------------- info
             const SizedBox(height: 24),
-            const SectionHeader('Persoonlijke gegevens'),
+            SectionHeader(l10n.registerPersonalDetails),
             Card(
               child: Padding(
                 padding: const EdgeInsets.symmetric(
@@ -140,13 +145,13 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 child: Column(
                   children: [
-                    InfoRow('Telefoon', user.phone ?? '–'),
+                    InfoRow(l10n.planningInfoPhone, user.phone ?? '–'),
                     InfoRow(
-                      'Geboortedatum',
+                      l10n.registerBirthdate,
                       F.dateShort(F.date(user.birthdate)),
                     ),
                     InfoRow(
-                      'Adres',
+                      l10n.registerAddress,
                       [
                         user.street,
                         user.houseNumber,
@@ -156,10 +161,10 @@ class ProfileScreen extends ConsumerWidget {
                     ),
                     if (user.pickupLocation != null &&
                         user.pickupLocation!.isNotEmpty)
-                      InfoRow('Ophaallocatie', user.pickupLocation!),
+                      InfoRow(l10n.studentsPickupLabel, user.pickupLocation!),
                     if (user.licensePlate != null &&
                         user.licensePlate!.isNotEmpty)
-                      InfoRow('Kenteken', user.licensePlate!),
+                      InfoRow(l10n.profileLicensePlate, user.licensePlate!),
                   ],
                 ),
               ),
@@ -167,35 +172,37 @@ class ProfileScreen extends ConsumerWidget {
 
             // ------------------------------------------------------- actions
             const SizedBox(height: 24),
-            const SectionHeader('Account'),
+            SectionHeader(l10n.profileSectionAccount),
             Card(
               child: Column(
                 children: [
                   ListTile(
                     leading: const Icon(Icons.edit_outlined),
-                    title: const Text('Gegevens bewerken'),
+                    title: Text(l10n.editProfileTitle),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => context.push('/profile/edit'),
                   ),
                   const Divider(),
                   ListTile(
                     leading: const Icon(Icons.lock_outline),
-                    title: const Text('Wachtwoord wijzigen'),
+                    title: Text(l10n.changePasswordTitle),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => context.push('/profile/password'),
                   ),
                   const Divider(),
                   ListTile(
                     leading: const Icon(Icons.tune_outlined),
-                    title: const Text('Meldingsinstellingen'),
+                    title: Text(l10n.profileNotificationSettings),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => context.push('/notifications/settings'),
                   ),
+                  const Divider(),
+                  const LanguageListTile(),
                   if (user.isInstructor) ...[
                     const Divider(),
                     ListTile(
                       leading: const Icon(Icons.groups_outlined),
-                      title: const Text('Mijn leerlingen'),
+                      title: Text(l10n.studentsTitle),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => context.push('/students'),
                     ),
@@ -208,7 +215,7 @@ class ProfileScreen extends ConsumerWidget {
             OutlinedButton.icon(
               onPressed: () => _signOut(context, ref),
               icon: const Icon(Icons.logout_rounded),
-              label: const Text('Uitloggen'),
+              label: Text(l10n.profileSignOut),
             ),
             const SizedBox(height: 12),
             TextButton(
@@ -216,7 +223,7 @@ class ProfileScreen extends ConsumerWidget {
               style: TextButton.styleFrom(
                 foregroundColor: theme.colorScheme.error,
               ),
-              child: const Text('Account deactiveren'),
+              child: Text(l10n.profileDeactivate),
             ),
             const SizedBox(height: 8),
             Center(

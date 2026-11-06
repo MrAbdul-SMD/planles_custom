@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../l10n/l10n.dart';
 import '../../../shared/widgets.dart';
 import '../../auth/models/user.dart';
 import '../providers/directory_providers.dart';
@@ -17,14 +18,15 @@ class _StudentsScreenState extends ConsumerState<StudentsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final students = ref.watch(myStudentsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Mijn leerlingen')),
+      appBar: AppBar(title: Text(l10n.studentsTitle)),
       body: students.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => ErrorView(
-          message: '$e',
+          message: describeError(context, e),
           onRetry: () => ref.invalidate(myStudentsProvider),
         ),
         data: (list) {
@@ -33,9 +35,10 @@ class _StudentsScreenState extends ConsumerState<StudentsScreen> {
               : list
                     .where(
                       (s) =>
-                          s.fullName.toLowerCase().contains(
-                            _query.toLowerCase(),
-                          ) ||
+                          s
+                              .displayName(l10n)
+                              .toLowerCase()
+                              .contains(_query.toLowerCase()) ||
                           (s.email ?? '').toLowerCase().contains(
                             _query.toLowerCase(),
                           ),
@@ -48,19 +51,18 @@ class _StudentsScreenState extends ConsumerState<StudentsScreen> {
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
                 child: TextField(
                   onChanged: (v) => setState(() => _query = v),
-                  decoration: const InputDecoration(
-                    hintText: 'Zoek leerling',
-                    prefixIcon: Icon(Icons.search_rounded),
+                  decoration: InputDecoration(
+                    hintText: l10n.studentsSearchHint,
+                    prefixIcon: const Icon(Icons.search_rounded),
                   ),
                 ),
               ),
               Expanded(
                 child: filtered.isEmpty
-                    ? const EmptyState(
+                    ? EmptyState(
                         icon: Icons.groups_outlined,
-                        title: 'Geen leerlingen',
-                        subtitle:
-                            'Er zijn nog geen leerlingen aan je gekoppeld.',
+                        title: l10n.studentsEmptyTitle,
+                        subtitle: l10n.studentsEmptySubtitle,
                       )
                     : RefreshIndicator(
                         onRefresh: () async =>
@@ -89,13 +91,14 @@ class _StudentTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
 
     return Card(
       child: ListTile(
         leading: AppAvatar(initials: student.initials, size: 42),
         title: Text(
-          student.fullName,
+          student.displayName(l10n),
           style: const TextStyle(fontWeight: FontWeight.w600),
         ),
         subtitle: Text(student.email ?? ''),
@@ -118,24 +121,24 @@ class _StudentTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    student.fullName,
+                    student.displayName(l10n),
                     style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w800,
                     ),
                   ),
                   const SizedBox(height: 16),
                   InfoRow(
-                    'E-mail',
+                    l10n.studentsEmailLabel,
                     student.email ?? '–',
                     icon: Icons.mail_outline,
                   ),
                   InfoRow(
-                    'Telefoon',
+                    l10n.studentsPhoneLabel,
                     student.phone ?? '–',
                     icon: Icons.phone_outlined,
                   ),
                   InfoRow(
-                    'Adres',
+                    l10n.studentsAddressLabel,
                     [
                       student.street,
                       student.houseNumber,
@@ -147,12 +150,12 @@ class _StudentTile extends StatelessWidget {
                   if (student.pickupLocation != null &&
                       student.pickupLocation!.isNotEmpty)
                     InfoRow(
-                      'Ophaallocatie',
+                      l10n.studentsPickupLabel,
                       student.pickupLocation!,
                       icon: Icons.location_on_outlined,
                     ),
                   InfoRow(
-                    'Saldo',
+                    l10n.dashboardBalanceLabel,
                     student.balance?.toStringAsFixed(2) ?? '–',
                     icon: Icons.account_balance_wallet_outlined,
                   ),

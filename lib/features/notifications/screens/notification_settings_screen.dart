@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_exception.dart';
+import '../../../l10n/language_picker.dart';
+import '../../../l10n/l10n.dart';
 import '../../../shared/widgets.dart';
 import '../models/app_notification.dart';
 import '../providers/notifications_providers.dart';
@@ -23,9 +25,10 @@ class _NotificationSettingsScreenState
   Widget build(BuildContext context) {
     final async = ref.watch(notificationSettingsProvider);
     final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Meldingsinstellingen')),
+      appBar: AppBar(title: Text(l10n.notifSettingsTitle)),
       body: AsyncView<NotificationSettings>(
         value: async,
         onRetry: () => ref.invalidate(notificationSettingsProvider),
@@ -36,16 +39,19 @@ class _NotificationSettingsScreenState
           return ListView(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
             children: [
-              const SectionHeader('Niet storen'),
+              const LanguageListTile(),
+              const SizedBox(height: 12),
+              SectionHeader(l10n.notifSettingsQuietSection),
               Card(
                 child: Column(
                   children: [
                     SwitchListTile(
-                      title: const Text('Stille uren'),
+                      title: Text(l10n.notifSettingsQuietHours),
                       subtitle: Text(
-                        'Geen meldingen tussen '
-                        '${_timeLabel(draft.quietHours.start)} en '
-                        '${_timeLabel(draft.quietHours.end)}',
+                        l10n.notifSettingsQuietRange(
+                          _timeLabel(draft.quietHours.start),
+                          _timeLabel(draft.quietHours.end),
+                        ),
                       ),
                       value: draft.quietHours.enabled,
                       onChanged: (value) => _updateQuiet(
@@ -56,7 +62,7 @@ class _NotificationSettingsScreenState
                       const Divider(),
                       ListTile(
                         leading: const Icon(Icons.bedtime_outlined),
-                        title: const Text('Begin'),
+                        title: Text(l10n.notifSettingsQuietStart),
                         trailing: Text(
                           _timeLabel(draft.quietHours.start),
                           style: theme.textTheme.titleSmall?.copyWith(
@@ -71,7 +77,7 @@ class _NotificationSettingsScreenState
                       ),
                       ListTile(
                         leading: const Icon(Icons.wb_sunny_outlined),
-                        title: const Text('Einde'),
+                        title: Text(l10n.notifSettingsQuietEnd),
                         trailing: Text(
                           _timeLabel(draft.quietHours.end),
                           style: theme.textTheme.titleSmall?.copyWith(
@@ -89,14 +95,14 @@ class _NotificationSettingsScreenState
                 ),
               ),
               const SizedBox(height: 24),
-              const SectionHeader('Soorten meldingen'),
+              SectionHeader(l10n.notifSettingsTypesSection),
               Card(
                 child: Column(
                   children: [
                     for (final (i, pref) in draft.preferences.indexed) ...[
                       if (i > 0) const Divider(),
                       SwitchListTile(
-                        title: Text(pref.label),
+                        title: Text(pref.label(l10n)),
                         value: pref.inAppEnabled || pref.pushEnabled,
                         onChanged: (value) => _toggle(pref, value),
                       ),
@@ -113,7 +119,7 @@ class _NotificationSettingsScreenState
                         height: 22,
                         child: CircularProgressIndicator(strokeWidth: 2.4),
                       )
-                    : const Text('Opslaan'),
+                    : Text(l10n.save),
               ),
             ],
           );
@@ -187,12 +193,16 @@ class _NotificationSettingsScreenState
       ref.invalidate(notificationSettingsProvider);
       if (mounted) {
         setState(() => _draft = updated);
-        showAppSnack(context, 'Instellingen opgeslagen');
+        showAppSnack(context, context.l10n.notifSettingsSaved);
       }
     } on ApiException catch (e) {
-      if (mounted) showAppSnack(context, e.validationMessage, error: true);
+      if (mounted) {
+        showAppSnack(context, describeError(context, e), error: true);
+        }
     } catch (e) {
-      if (mounted) showAppSnack(context, '$e', error: true);
+      if (mounted) {
+        showAppSnack(context, describeError(context, e), error: true);
+        }
     } finally {
       if (mounted) setState(() => _saving = false);
     }
