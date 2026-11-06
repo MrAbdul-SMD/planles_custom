@@ -2137,6 +2137,18 @@ abstract class AppLocalizations {
   /// In nl, this message translates to:
   /// **'Betaling ontvangen'**
   String get paymentReturnSuccess;
+
+  /// No description provided for @orderDetailOpenInvoiceFailed.
+  ///
+  /// In nl, this message translates to:
+  /// **'De factuur kon niet worden geopend.'**
+  String get orderDetailOpenInvoiceFailed;
+
+  /// No description provided for @orderDetailDownloadInvoice.
+  ///
+  /// In nl, this message translates to:
+  /// **'Downloaden'**
+  String get orderDetailDownloadInvoice;
 }
 
 class _AppLocalizationsDelegate

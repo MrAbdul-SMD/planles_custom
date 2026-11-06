@@ -1,9 +1,7 @@
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:printing/printing.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/deep_links.dart';
@@ -26,7 +24,6 @@ class OrderDetailScreen extends ConsumerStatefulWidget {
 
 class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
   bool _busy = false;
-  bool _invoiceBusy = false;
 
   Future<void> _run(Future<void> Function() action, {String? success}) async {
     final l10n = context.l10n;
@@ -94,29 +91,6 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
     }
   }
 
-  Future<void> _invoice() async {
-    setState(() => _invoiceBusy = true);
-    try {
-      final bytes = await ref.read(ordersRepositoryProvider).invoice(widget.id);
-      if (bytes.isEmpty) {
-        throw const ApiException(
-          'Lege factuur.',
-          code: AppErrorCode.emptyInvoice,
-        );
-      }
-      final pdf = Uint8List.fromList(bytes);
-      await Printing.layoutPdf(
-        onLayout: (_) async => pdf,
-        name: 'factuur-${widget.id}.pdf',
-      );
-    } catch (e) {
-      if (mounted) {
-        showAppSnack(context, describeError(context, e), error: true);
-        }
-    } finally {
-      if (mounted) setState(() => _invoiceBusy = false);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -356,14 +330,8 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
                   const SizedBox(height: 10),
                 ],
                 OutlinedButton.icon(
-                  onPressed: _invoiceBusy ? null : _invoice,
-                  icon: _invoiceBusy
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.picture_as_pdf_outlined),
+                  onPressed: () => context.push('/orders/${widget.id}/invoice'),
+                  icon: const Icon(Icons.picture_as_pdf_outlined),
                   label: Text(l10n.orderDetailOpenInvoice),
                 ),
               ],

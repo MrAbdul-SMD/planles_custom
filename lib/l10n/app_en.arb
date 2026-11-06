@@ -338,5 +338,7 @@
   "notifPrefAccount": "Account",
   "notifPrefLocked": "Always on (cannot be turned off)",
   "paymentReturnProcessing": "Processing payment…",
-  "paymentReturnSuccess": "Payment received"
+  "paymentReturnSuccess": "Payment received",
+  "orderDetailOpenInvoiceFailed": "The invoice could not be opened.",
+  "orderDetailDownloadInvoice": "Download"
 }

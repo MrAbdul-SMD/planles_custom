@@ -11,6 +11,7 @@ import '../features/dashboard/screens/dashboard_screen.dart';
 import '../features/notifications/screens/notification_settings_screen.dart';
 import '../features/notifications/screens/notifications_screen.dart';
 import '../features/orders/screens/buy_lessons_screen.dart';
+import '../features/orders/screens/invoice_screen.dart';
 import '../features/orders/screens/order_detail_screen.dart';
 import '../features/orders/screens/orders_screen.dart';
 import '../features/orders/screens/payment_return_screen.dart';
@@ -129,6 +130,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/orders/:id',
         builder: (_, state) =>
             OrderDetailScreen(id: int.parse(state.pathParameters['id']!)),
+      ),
+      GoRoute(
+        path: '/orders/:id/invoice',
+        builder: (_, state) =>
+            InvoiceScreen(id: int.parse(state.pathParameters['id']!)),
       ),
       GoRoute(path: '/balance/topup', builder: (_, _) => const TopUpScreen()),
       GoRoute(

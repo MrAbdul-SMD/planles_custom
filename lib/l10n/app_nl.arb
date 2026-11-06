@@ -747,5 +747,7 @@
   "notifPrefAccount": "Account",
   "notifPrefLocked": "Altijd aan (kan niet worden uitgezet)",
   "paymentReturnProcessing": "Betaling verwerken…",
-  "paymentReturnSuccess": "Betaling ontvangen"
+  "paymentReturnSuccess": "Betaling ontvangen",
+  "orderDetailOpenInvoiceFailed": "De factuur kon niet worden geopend.",
+  "orderDetailDownloadInvoice": "Downloaden"
 }

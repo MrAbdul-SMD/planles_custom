@@ -1092,4 +1092,11 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get paymentReturnSuccess => 'Betaling ontvangen';
+
+  @override
+  String get orderDetailOpenInvoiceFailed =>
+      'De factuur kon niet worden geopend.';
+
+  @override
+  String get orderDetailDownloadInvoice => 'Downloaden';
 }

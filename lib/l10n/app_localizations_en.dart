@@ -1087,4 +1087,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get paymentReturnSuccess => 'Payment received';
+
+  @override
+  String get orderDetailOpenInvoiceFailed => 'The invoice could not be opened.';
+
+  @override
+  String get orderDetailDownloadInvoice => 'Download';
 }

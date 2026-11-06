@@ -1,80 +1,364 @@
 {
-  "ordersTitle": {"nl": "Bestellingen", "en": "Orders"},
-  "ordersBuyButton": {"nl": "Kopen", "en": "Buy"},
-  "ordersEmptyTitle": {"nl": "Nog geen bestellingen", "en": "No orders yet"},
-  "ordersEmptySubtitle": {"nl": "Koop je eerste lespakket om lessen in te plannen.", "en": "Buy your first lesson package to schedule lessons."},
-  "ordersOrderNumber": {"nl": "Bestelling #{id}", "en": "Order #{id}", "placeholders": {"id": {"type": "int"}}},
-  "ordersPaymentPaid": {"nl": "Betaald", "en": "Paid"},
-  "ordersPaymentOpen": {"nl": "Open", "en": "Open"},
-  "ordersPaymentPending": {"nl": "In behandeling", "en": "Pending"},
-  "ordersPaymentFailed": {"nl": "Mislukt", "en": "Failed"},
-  "ordersPaymentCanceled": {"nl": "Geannuleerd", "en": "Cancelled"},
-  "ordersPaymentExpired": {"nl": "Verlopen", "en": "Expired"},
-  "ordersPaymentUnpaid": {"nl": "Nog niet betaald", "en": "Not paid yet"},
-  "ordersTotalDuration": {"nl": "{duration} les", "en": "{duration} lesson", "placeholders": {"duration": {"type": "String"}}},
-
-  "orderDetailTitle": {"nl": "Bestelling #{id}", "en": "Order #{id}", "placeholders": {"id": {"type": "int"}}},
-  "orderDetailPlacedOn": {"nl": "Geplaatst op {date}", "en": "Placed on {date}", "placeholders": {"date": {"type": "String"}}},
-  "orderDetailSectionDetails": {"nl": "Gegevens", "en": "Details"},
-  "orderDetailStudent": {"nl": "Leerling", "en": "Student"},
-  "orderDetailInstructor": {"nl": "Instructeur", "en": "Instructor"},
-  "orderDetailTotal": {"nl": "Totaal", "en": "Total"},
-  "orderDetailScheduled": {"nl": "Gepland", "en": "Scheduled"},
-  "orderDetailAvailable": {"nl": "Beschikbaar", "en": "Available"},
-  "orderDetailPaymentMethod": {"nl": "Betaalwijze", "en": "Payment method"},
-  "orderDetailPaymentDigital": {"nl": "Online", "en": "Online"},
-  "orderDetailPaymentCash": {"nl": "Contant", "en": "Cash"},
-  "orderDetailPaymentBalance": {"nl": "Saldo", "en": "Balance"},
-  "orderDetailSectionLessons": {"nl": "Lessen", "en": "Lessons"},
-  "orderDetailNoLessons": {"nl": "Geen lesonderdelen gevonden.", "en": "No lesson items found."},
-  "orderDetailLesson": {"nl": "Les", "en": "Lesson"},
-  "orderDetailLessonCount": {"nl": "{count} lessen", "en": "{count} lessons", "placeholders": {"count": {"type": "int"}}},
-  "orderDetailMinutesAvailable": {"nl": "{duration} vrij", "en": "{duration} available", "placeholders": {"duration": {"type": "String"}}},
-  "orderDetailScheduleButton": {"nl": "Inplannen", "en": "Schedule"},
-  "orderDetailSectionActions": {"nl": "Acties", "en": "Actions"},
-  "orderDetailPayNow": {"nl": "Nu betalen", "en": "Pay now"},
-  "orderDetailMarkPaid": {"nl": "Markeer als betaald", "en": "Mark as paid"},
-  "orderDetailRequestPayment": {"nl": "Betaling aanvragen", "en": "Request payment"},
-  "orderDetailPaymentRequested": {"nl": "Betalingsverzoek verstuurd", "en": "Payment request sent"},
-  "orderDetailOpenInvoice": {"nl": "Factuur openen", "en": "Open invoice"},
-  "orderDetailPaymentPageFailed": {"nl": "De betalingspagina kon niet worden geopend.", "en": "Could not open the payment page."},
-
-  "buyLessonsTitle": {"nl": "Lessen kopen", "en": "Buy lessons"},
-  "buyLessonsChoosePackage": {"nl": "Kies een lespakket", "en": "Choose a lesson package"},
-  "buyLessonsPayButton": {"nl": "Betalen — {amount}", "en": "Pay — {amount}", "placeholders": {"amount": {"type": "String"}}},
-  "buyLessonsStepVehicle": {"nl": "1. Voertuig", "en": "1. Vehicle"},
-  "buyLessonsVehicleFallback": {"nl": "Voertuig {id}", "en": "Vehicle {id}", "placeholders": {"id": {"type": "int"}}},
-  "buyLessonsStepLesson": {"nl": "2. Les", "en": "2. Lesson"},
-  "buyLessonsChooseVehicleFirst": {"nl": "Kies eerst een voertuigtype.", "en": "Choose a vehicle type first."},
-  "buyLessonsNoPackages": {"nl": "Geen lespakketten beschikbaar.", "en": "No lesson packages available."},
-  "buyLessonsStepQuantity": {"nl": "3. Aantal", "en": "3. Quantity"},
-  "buyLessonsStepStudent": {"nl": "4. Leerling", "en": "4. Student"},
-  "buyLessonsStepPaymentInstructor": {"nl": "5. Betaalwijze", "en": "5. Payment method"},
-  "buyLessonsStepPaymentStudent": {"nl": "4. Betaalwijze", "en": "4. Payment method"},
-  "buyLessonsPaymentOnline": {"nl": "Online", "en": "Online"},
-  "buyLessonsPaymentBalance": {"nl": "Saldo", "en": "Balance"},
-  "buyLessonsBalanceNote": {"nl": "Het bedrag wordt van je saldo afgeschreven. Je saldo: {balance}", "en": "The amount will be deducted from your balance. Your balance: {balance}", "placeholders": {"balance": {"type": "String"}}},
-  "buyLessonsMollieNote": {"nl": "Je doorgestuurd naar de veilige betaalpagina van Mollie.", "en": "You will be redirected to Mollie's secure payment page."},
-  "buyLessonsAfterPurchase": {"nl": "Na de aankoop plan je je lessen in vanuit de bestelling.", "en": "After purchase you schedule your lessons from the order."},
-  "buyLessonsOrderPlaced": {"nl": "Bestelling geplaatst", "en": "Order placed"},
-  "buyLessonsCompletePayment": {"nl": "Rond de betaling af", "en": "Complete the payment"},
-  "buyLessonsNoStudents": {"nl": "Je hebt nog geen leerlingen toegewezen.", "en": "You have no students assigned yet."},
-  "buyLessonsChooseStudent": {"nl": "Kies een leerling", "en": "Choose a student"},
-  "buyLessonsLessonTypeTrial": {"nl": "Proefles", "en": "Trial lesson"},
-  "buyLessonsLessonTypeBase": {"nl": "Basisles", "en": "Basic lesson"},
-  "buyLessonsLessonTypePack": {"nl": "Lespakket", "en": "Lesson package"},
-  "buyLessonsLessonTypeExam": {"nl": "Examen", "en": "Exam"},
-  "buyLessonsTotalLine": {"nl": "{duration} les — {amount}", "en": "{duration} lesson — {amount}", "placeholders": {"duration": {"type": "String"}, "amount": {"type": "String"}}},
-
-  "scheduleLessonTitle": {"nl": "Les inplannen", "en": "Schedule lesson"},
-  "scheduleLessonChooseDateTime": {"nl": "Kies een datum en starttijd.", "en": "Choose a date and start time."},
-  "scheduleLessonFutureDate": {"nl": "De les moet in de toekomst liggen.", "en": "The lesson must be in the future."},
-  "scheduleLessonScheduled": {"nl": "Les ingepland", "en": "Lesson scheduled"},
-  "scheduleLessonAvailable": {"nl": "Nog {duration} beschikbaar in dit pakket.", "en": "{duration} available in this package.", "placeholders": {"duration": {"type": "String"}}},
-  "scheduleLessonNoTimeLeft": {"nl": "Er is geen beschikbare lestijd meer in dit pakket.", "en": "No lesson time left in this package."},
-  "scheduleLessonDate": {"nl": "Datum", "en": "Date"},
-  "scheduleLessonNotChosen": {"nl": "Nog niet gekozen", "en": "Not chosen yet"},
-  "scheduleLessonStartTime": {"nl": "Starttijd", "en": "Start time"},
-  "scheduleLessonDuration": {"nl": "Duur", "en": "Duration"},
-  "scheduleLessonScheduleButton": {"nl": "Inplannen", "en": "Schedule"}
+  "ordersTitle": {
+    "nl": "Bestellingen",
+    "en": "Orders"
+  },
+  "ordersBuyButton": {
+    "nl": "Kopen",
+    "en": "Buy"
+  },
+  "ordersEmptyTitle": {
+    "nl": "Nog geen bestellingen",
+    "en": "No orders yet"
+  },
+  "ordersEmptySubtitle": {
+    "nl": "Koop je eerste lespakket om lessen in te plannen.",
+    "en": "Buy your first lesson package to schedule lessons."
+  },
+  "ordersOrderNumber": {
+    "nl": "Bestelling #{id}",
+    "en": "Order #{id}",
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "ordersPaymentPaid": {
+    "nl": "Betaald",
+    "en": "Paid"
+  },
+  "ordersPaymentOpen": {
+    "nl": "Open",
+    "en": "Open"
+  },
+  "ordersPaymentPending": {
+    "nl": "In behandeling",
+    "en": "Pending"
+  },
+  "ordersPaymentFailed": {
+    "nl": "Mislukt",
+    "en": "Failed"
+  },
+  "ordersPaymentCanceled": {
+    "nl": "Geannuleerd",
+    "en": "Cancelled"
+  },
+  "ordersPaymentExpired": {
+    "nl": "Verlopen",
+    "en": "Expired"
+  },
+  "ordersPaymentUnpaid": {
+    "nl": "Nog niet betaald",
+    "en": "Not paid yet"
+  },
+  "ordersTotalDuration": {
+    "nl": "{duration} les",
+    "en": "{duration} lesson",
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "orderDetailTitle": {
+    "nl": "Bestelling #{id}",
+    "en": "Order #{id}",
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "orderDetailPlacedOn": {
+    "nl": "Geplaatst op {date}",
+    "en": "Placed on {date}",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "orderDetailSectionDetails": {
+    "nl": "Gegevens",
+    "en": "Details"
+  },
+  "orderDetailStudent": {
+    "nl": "Leerling",
+    "en": "Student"
+  },
+  "orderDetailInstructor": {
+    "nl": "Instructeur",
+    "en": "Instructor"
+  },
+  "orderDetailTotal": {
+    "nl": "Totaal",
+    "en": "Total"
+  },
+  "orderDetailScheduled": {
+    "nl": "Gepland",
+    "en": "Scheduled"
+  },
+  "orderDetailAvailable": {
+    "nl": "Beschikbaar",
+    "en": "Available"
+  },
+  "orderDetailPaymentMethod": {
+    "nl": "Betaalwijze",
+    "en": "Payment method"
+  },
+  "orderDetailPaymentDigital": {
+    "nl": "Online",
+    "en": "Online"
+  },
+  "orderDetailPaymentCash": {
+    "nl": "Contant",
+    "en": "Cash"
+  },
+  "orderDetailPaymentBalance": {
+    "nl": "Saldo",
+    "en": "Balance"
+  },
+  "orderDetailSectionLessons": {
+    "nl": "Lessen",
+    "en": "Lessons"
+  },
+  "orderDetailNoLessons": {
+    "nl": "Geen lesonderdelen gevonden.",
+    "en": "No lesson items found."
+  },
+  "orderDetailLesson": {
+    "nl": "Les",
+    "en": "Lesson"
+  },
+  "orderDetailLessonCount": {
+    "nl": "{count} lessen",
+    "en": "{count} lessons",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "orderDetailMinutesAvailable": {
+    "nl": "{duration} vrij",
+    "en": "{duration} available",
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "orderDetailScheduleButton": {
+    "nl": "Inplannen",
+    "en": "Schedule"
+  },
+  "orderDetailSectionActions": {
+    "nl": "Acties",
+    "en": "Actions"
+  },
+  "orderDetailPayNow": {
+    "nl": "Nu betalen",
+    "en": "Pay now"
+  },
+  "orderDetailMarkPaid": {
+    "nl": "Markeer als betaald",
+    "en": "Mark as paid"
+  },
+  "orderDetailRequestPayment": {
+    "nl": "Betaling aanvragen",
+    "en": "Request payment"
+  },
+  "orderDetailPaymentRequested": {
+    "nl": "Betalingsverzoek verstuurd",
+    "en": "Payment request sent"
+  },
+  "orderDetailOpenInvoice": {
+    "nl": "Factuur openen",
+    "en": "Open invoice"
+  },
+  "orderDetailPaymentPageFailed": {
+    "nl": "De betalingspagina kon niet worden geopend.",
+    "en": "Could not open the payment page."
+  },
+  "buyLessonsTitle": {
+    "nl": "Lessen kopen",
+    "en": "Buy lessons"
+  },
+  "buyLessonsChoosePackage": {
+    "nl": "Kies een lespakket",
+    "en": "Choose a lesson package"
+  },
+  "buyLessonsPayButton": {
+    "nl": "Betalen — {amount}",
+    "en": "Pay — {amount}",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "buyLessonsStepVehicle": {
+    "nl": "1. Voertuig",
+    "en": "1. Vehicle"
+  },
+  "buyLessonsVehicleFallback": {
+    "nl": "Voertuig {id}",
+    "en": "Vehicle {id}",
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "buyLessonsStepLesson": {
+    "nl": "2. Les",
+    "en": "2. Lesson"
+  },
+  "buyLessonsChooseVehicleFirst": {
+    "nl": "Kies eerst een voertuigtype.",
+    "en": "Choose a vehicle type first."
+  },
+  "buyLessonsNoPackages": {
+    "nl": "Geen lespakketten beschikbaar.",
+    "en": "No lesson packages available."
+  },
+  "buyLessonsStepQuantity": {
+    "nl": "3. Aantal",
+    "en": "3. Quantity"
+  },
+  "buyLessonsStepStudent": {
+    "nl": "4. Leerling",
+    "en": "4. Student"
+  },
+  "buyLessonsStepPaymentInstructor": {
+    "nl": "5. Betaalwijze",
+    "en": "5. Payment method"
+  },
+  "buyLessonsStepPaymentStudent": {
+    "nl": "4. Betaalwijze",
+    "en": "4. Payment method"
+  },
+  "buyLessonsPaymentOnline": {
+    "nl": "Online",
+    "en": "Online"
+  },
+  "buyLessonsPaymentBalance": {
+    "nl": "Saldo",
+    "en": "Balance"
+  },
+  "buyLessonsBalanceNote": {
+    "nl": "Het bedrag wordt van je saldo afgeschreven. Je saldo: {balance}",
+    "en": "The amount will be deducted from your balance. Your balance: {balance}",
+    "placeholders": {
+      "balance": {
+        "type": "String"
+      }
+    }
+  },
+  "buyLessonsMollieNote": {
+    "nl": "Je doorgestuurd naar de veilige betaalpagina van Mollie.",
+    "en": "You will be redirected to Mollie's secure payment page."
+  },
+  "buyLessonsAfterPurchase": {
+    "nl": "Na de aankoop plan je je lessen in vanuit de bestelling.",
+    "en": "After purchase you schedule your lessons from the order."
+  },
+  "buyLessonsOrderPlaced": {
+    "nl": "Bestelling geplaatst",
+    "en": "Order placed"
+  },
+  "buyLessonsCompletePayment": {
+    "nl": "Rond de betaling af",
+    "en": "Complete the payment"
+  },
+  "buyLessonsNoStudents": {
+    "nl": "Je hebt nog geen leerlingen toegewezen.",
+    "en": "You have no students assigned yet."
+  },
+  "buyLessonsChooseStudent": {
+    "nl": "Kies een leerling",
+    "en": "Choose a student"
+  },
+  "buyLessonsLessonTypeTrial": {
+    "nl": "Proefles",
+    "en": "Trial lesson"
+  },
+  "buyLessonsLessonTypeBase": {
+    "nl": "Basisles",
+    "en": "Basic lesson"
+  },
+  "buyLessonsLessonTypePack": {
+    "nl": "Lespakket",
+    "en": "Lesson package"
+  },
+  "buyLessonsLessonTypeExam": {
+    "nl": "Examen",
+    "en": "Exam"
+  },
+  "buyLessonsTotalLine": {
+    "nl": "{duration} les — {amount}",
+    "en": "{duration} lesson — {amount}",
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "scheduleLessonTitle": {
+    "nl": "Les inplannen",
+    "en": "Schedule lesson"
+  },
+  "scheduleLessonChooseDateTime": {
+    "nl": "Kies een datum en starttijd.",
+    "en": "Choose a date and start time."
+  },
+  "scheduleLessonFutureDate": {
+    "nl": "De les moet in de toekomst liggen.",
+    "en": "The lesson must be in the future."
+  },
+  "scheduleLessonScheduled": {
+    "nl": "Les ingepland",
+    "en": "Lesson scheduled"
+  },
+  "scheduleLessonAvailable": {
+    "nl": "Nog {duration} beschikbaar in dit pakket.",
+    "en": "{duration} available in this package.",
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "scheduleLessonNoTimeLeft": {
+    "nl": "Er is geen beschikbare lestijd meer in dit pakket.",
+    "en": "No lesson time left in this package."
+  },
+  "scheduleLessonDate": {
+    "nl": "Datum",
+    "en": "Date"
+  },
+  "scheduleLessonNotChosen": {
+    "nl": "Nog niet gekozen",
+    "en": "Not chosen yet"
+  },
+  "scheduleLessonStartTime": {
+    "nl": "Starttijd",
+    "en": "Start time"
+  },
+  "scheduleLessonDuration": {
+    "nl": "Duur",
+    "en": "Duration"
+  },
+  "scheduleLessonScheduleButton": {
+    "nl": "Inplannen",
+    "en": "Schedule"
+  },
+  "orderDetailOpenInvoiceFailed": {
+    "nl": "De factuur kon niet worden geopend.",
+    "en": "The invoice could not be opened."
+  }
 }
