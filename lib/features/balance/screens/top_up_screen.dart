@@ -58,7 +58,7 @@ class _TopUpScreenState extends ConsumerState<TopUpScreen> {
           .purchaseBalance(amount: amount, redirectUrl: paymentRedirectUrl(kind: 'topup'));
       final uri = Uri.tryParse(url);
       if (uri != null) {
-        await launchUrl(uri, mode: kIsWeb ? LaunchMode.platformDefault : LaunchMode.externalApplication);
+        await launchUrl(uri, mode: kIsWeb ? LaunchMode.platformDefault : LaunchMode.externalApplication, webOnlyWindowName: kIsWeb ? '_self' : null);
       }
       // The webhook credits the balance; refresh in case it was instant.
       await ref.read(authControllerProvider.notifier).refreshUser();
