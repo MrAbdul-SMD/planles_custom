@@ -76,7 +76,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navOrders => 'Orders';
 
   @override
-  String get navNotifications => 'Notifications';
+  String get navNotifications => 'Alerts';
 
   @override
   String get navProfile => 'Profile';
@@ -1109,4 +1109,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get planningAwaitingConfirmation =>
       'Waiting for the other party to confirm.';
+
+  @override
+  String planningNumber(int id) {
+    return 'Lesson #$id';
+  }
+
+  @override
+  String planningOrderId(int id) {
+    return 'Order #$id';
+  }
 }

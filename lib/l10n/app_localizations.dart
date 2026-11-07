@@ -2179,6 +2179,18 @@ abstract class AppLocalizations {
   /// In nl, this message translates to:
   /// **'Wacht op bevestiging van de andere partij.'**
   String get planningAwaitingConfirmation;
+
+  /// No description provided for @planningNumber.
+  ///
+  /// In nl, this message translates to:
+  /// **'Les #{id}'**
+  String planningNumber(int id);
+
+  /// No description provided for @planningOrderId.
+  ///
+  /// In nl, this message translates to:
+  /// **'Bestelling #{id}'**
+  String planningOrderId(int id);
 }
 
 class _AppLocalizationsDelegate

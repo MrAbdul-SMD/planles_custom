@@ -28,6 +28,12 @@ class _TopUpScreenState extends ConsumerState<TopUpScreen> {
   bool _busy = false;
 
   @override
+  void initState() {
+    super.initState();
+    ref.invalidate(currentUserProvider);
+  }
+
+  @override
   void dispose() {
     _custom.dispose();
     super.dispose();

@@ -29,6 +29,12 @@ class ScheduleLessonScreen extends ConsumerStatefulWidget {
 
 class _ScheduleLessonScreenState extends ConsumerState<ScheduleLessonScreen> {
   DateTime? _date;
+
+  @override
+  void initState() {
+    super.initState();
+    ref.invalidate(orderItemsProvider(widget.orderId));
+  }
   TimeOfDay? _start;
   int _duration = 60;
   bool _busy = false;

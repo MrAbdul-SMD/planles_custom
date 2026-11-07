@@ -24,8 +24,6 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
   }
 
   Future<void> _initialLoad() async {
-    final state = ref.read(notificationsProvider);
-    if (state.items.isNotEmpty || state.refreshing) return;
     try {
       await ref.read(notificationsProvider.notifier).refresh();
     } catch (_) {

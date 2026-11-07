@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/network/api_client.dart';
 import '../../../core/network/api_exception.dart';
+import '../../../core/providers.dart';
 import '../../../l10n/language_picker.dart';
 import '../../../l10n/l10n.dart';
 import '../../../shared/widgets.dart';
@@ -29,6 +33,91 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.dispose();
   }
 
+  Future<void> _pickEnvironment(BuildContext context) async {
+    final l10n = context.l10n;
+    final prefs = await SharedPreferences.getInstance();
+    final current = ApiClient.resolvedBaseUrl;
+
+    final devUrl = dotenv.maybeGet('API_BASE_URL_DEV', fallback: 'http://localhost:8000/api') ?? 'http://localhost:8000/api';
+    final stagingUrl = dotenv.maybeGet('API_BASE_URL_STAGING', fallback: 'https://staging.planles.nl/api') ?? 'https://staging.planles.nl/api';
+    final prodUrl = dotenv.maybeGet('API_BASE_URL', fallback: ApiClient.defaultBaseUrl) ?? ApiClient.defaultBaseUrl;
+
+    final options = <MapEntry<String, String>>[
+      MapEntry('Production', prodUrl),
+      MapEntry('Staging', stagingUrl),
+      MapEntry('Development', devUrl),
+    ];
+
+    if (!context.mounted) return;
+    final picked = await showDialog<String>(
+      context: context,
+      builder: (ctx) => SimpleDialog(
+        title: const Text('Environment'),
+        children: [
+          for (final e in options)
+            SimpleDialogOption(
+              onPressed: () => Navigator.of(ctx).pop(e.value),
+              child: Row(
+                children: [
+                  if (e.value == current)
+                    const Icon(Icons.check_rounded, size: 18)
+                  else
+                    const SizedBox(width: 18),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text('${e.key}\n${e.value}')),
+                ],
+              ),
+            ),
+          SimpleDialogOption(
+            onPressed: () => Navigator.of(ctx).pop('__custom__'),
+            child: const Row(
+              children: [
+                SizedBox(width: 18),
+                SizedBox(width: 8),
+                Text('Custom…'),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (picked == null || !context.mounted) return;
+
+    String url = picked;
+    if (picked == '__custom__') {
+      final controller = TextEditingController(text: current);
+      final result = await showDialog<String>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Custom base URL'),
+          content: TextField(controller: controller),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: Text(l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
+              child: Text(l10n.confirm),
+            ),
+          ],
+        ),
+      );
+      controller.dispose();
+      if (result == null || result.isEmpty || !context.mounted) return;
+      url = result;
+    }
+
+    await prefs.setString('planles.baseUrlOverride', url);
+    ApiClient.setOverride(url);
+    try {
+      ref.read(apiClientProvider).setBaseUrl(url);
+    } catch (_) {}
+    if (context.mounted) {
+      showAppSnack(context, 'Base URL: $url');
+    }
+  }
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     setState(() => _busy = true);
@@ -56,7 +145,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final l10n = context.l10n;
     return Scaffold(
       appBar: AppBar(
-        actions: const [LanguageMenuButton()],
+        actions: [
+          const LanguageMenuButton(),
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            tooltip: 'Environment',
+            onPressed: () => _pickEnvironment(context),
+          ),
+        ],
       ),
       body: Container(
         decoration: BoxDecoration(

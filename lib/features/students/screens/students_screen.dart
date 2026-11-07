@@ -17,6 +17,12 @@ class _StudentsScreenState extends ConsumerState<StudentsScreen> {
   String _query = '';
 
   @override
+  void initState() {
+    super.initState();
+    ref.invalidate(myStudentsProvider);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final students = ref.watch(myStudentsProvider);

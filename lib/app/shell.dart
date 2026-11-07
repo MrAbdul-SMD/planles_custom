@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/notifications/providers/notifications_providers.dart';
+import '../features/orders/providers/orders_providers.dart';
+import '../features/planning/providers/planning_providers.dart';
+import '../features/auth/providers/auth_provider.dart';
 import '../l10n/l10n.dart';
 
 /// Bottom navigation shell shared by the five primary tabs.
@@ -35,7 +38,7 @@ class HomeShell extends ConsumerWidget {
         child: NavigationBar(
           backgroundColor: Colors.transparent,
           selectedIndex: navigationShell.currentIndex,
-          onDestinationSelected: _goBranch,
+          onDestinationSelected: (i) => _goBranch(i, ref),
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
           elevation: 0,
           destinations: [
@@ -78,9 +81,29 @@ class HomeShell extends ConsumerWidget {
     );
   }
 
-  void _goBranch(int index) => navigationShell.goBranch(
-    index,
-    // Returning to the root of a tab pops its stack.
-    initialLocation: index == navigationShell.currentIndex,
-  );
+  void _goBranch(int index, WidgetRef ref) {
+    if (index != navigationShell.currentIndex) {
+      // Refresh the destination tab's data on every visit.
+      switch (index) {
+        case 0:
+          ref.invalidate(planningListProvider);
+          ref.invalidate(ordersListProvider);
+          ref.invalidate(unreadCountProvider);
+          ref.read(authControllerProvider.notifier).refreshUser();
+        case 1:
+          ref.invalidate(planningListProvider);
+        case 2:
+          ref.invalidate(ordersListProvider);
+        case 3:
+          ref.invalidate(notificationsProvider);
+          ref.invalidate(unreadCountProvider);
+        case 4:
+          ref.read(authControllerProvider.notifier).refreshUser();
+      }
+    }
+    navigationShell.goBranch(
+      index,
+      initialLocation: index == navigationShell.currentIndex,
+    );
+  }
 }

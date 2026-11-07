@@ -4,6 +4,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app/app.dart';
 import 'app/router.dart';
@@ -32,6 +33,11 @@ Future<void> main() async {
   }
 
   final tokenStorage = await TokenStorage.create();
+
+  // Apply a persisted base-URL override (dev/staging switcher).
+  final prefs = await SharedPreferences.getInstance();
+  ApiClient.setOverride(prefs.getString('planles.baseUrlOverride'));
+
   final apiClient = ApiClient(tokenStorage: tokenStorage);
 
   final container = ProviderContainer(

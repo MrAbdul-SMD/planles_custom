@@ -20,6 +20,12 @@ class _PlanningListScreenState extends ConsumerState<PlanningListScreen>
   late final TabController _tabs = TabController(length: 3, vsync: this);
 
   @override
+  void initState() {
+    super.initState();
+    ref.invalidate(planningListProvider);
+  }
+
+  @override
   void dispose() {
     _tabs.dispose();
     super.dispose();

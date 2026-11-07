@@ -19,7 +19,7 @@
   "navHome": "Home",
   "navPlanning": "Planning",
   "navOrders": "Orders",
-  "navNotifications": "Notifications",
+  "navNotifications": "Alerts",
   "navProfile": "Profile",
   "statusConfirmed": "Confirmed",
   "statusCompleted": "Completed",
@@ -345,5 +345,7 @@
   "themeModeSystem": "System",
   "themeModeLight": "Light",
   "themeModeDark": "Dark",
-  "planningAwaitingConfirmation": "Waiting for the other party to confirm."
+  "planningAwaitingConfirmation": "Waiting for the other party to confirm.",
+  "planningNumber": "Lesson #{id}",
+  "planningOrderId": "Order #{id}"
 }

@@ -1115,4 +1115,14 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String get planningAwaitingConfirmation =>
       'Wacht op bevestiging van de andere partij.';
+
+  @override
+  String planningNumber(int id) {
+    return 'Les #$id';
+  }
+
+  @override
+  String planningOrderId(int id) {
+    return 'Bestelling #$id';
+  }
 }

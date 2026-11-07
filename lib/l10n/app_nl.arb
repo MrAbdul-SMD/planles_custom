@@ -754,5 +754,21 @@
   "themeModeSystem": "Systeem",
   "themeModeLight": "Licht",
   "themeModeDark": "Donker",
-  "planningAwaitingConfirmation": "Wacht op bevestiging van de andere partij."
+  "planningAwaitingConfirmation": "Wacht op bevestiging van de andere partij.",
+  "planningNumber": "Les #{id}",
+  "@planningNumber": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "planningOrderId": "Bestelling #{id}",
+  "@planningOrderId": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  }
 }

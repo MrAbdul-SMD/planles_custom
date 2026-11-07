@@ -23,6 +23,12 @@ class _NotificationSettingsScreenState
   bool _saving = false;
 
   @override
+  void initState() {
+    super.initState();
+    ref.invalidate(notificationSettingsProvider);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final async = ref.watch(notificationSettingsProvider);
     final theme = Theme.of(context);

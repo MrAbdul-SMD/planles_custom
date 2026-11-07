@@ -392,14 +392,28 @@ class PlanningTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      planning.drivingClass?.name ??
-                          l10n.dashboardLessonFallback,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            planning.drivingClass?.name ??
+                                l10n.dashboardLessonFallback,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          l10n.planningNumber(planning.id),
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: theme.colorScheme.outline,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -419,11 +433,13 @@ class PlanningTile extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              trailing ??
-                  StatusChip(
-                    label: planning.statusLabel(l10n),
-                    tone: PlanningTone.forStatus(planning.status),
-                  ),
+              Flexible(
+                child: trailing ??
+                    StatusChip(
+                      label: planning.statusLabel(l10n),
+                      tone: PlanningTone.forStatus(planning.status),
+                    ),
+              ),
               const SizedBox(width: 4),
               Icon(
                 Icons.chevron_right_rounded,

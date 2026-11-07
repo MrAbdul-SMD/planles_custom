@@ -10,8 +10,19 @@ import '../../../shared/widgets.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/profile_providers.dart';
 
-class ProfileScreen extends ConsumerWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  @override
+  void initState() {
+    super.initState();
+    ref.invalidate(currentUserProvider);
+  }
 
   Future<void> _signOut(BuildContext context, WidgetRef ref) async {
     final l10n = context.l10n;
@@ -48,7 +59,7 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final l10n = context.l10n;
     final user = ref.watch(currentUserProvider);
     final theme = Theme.of(context);

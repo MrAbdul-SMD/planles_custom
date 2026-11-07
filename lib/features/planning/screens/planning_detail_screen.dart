@@ -182,9 +182,11 @@ class _PlanningDetailScreenState extends ConsumerState<PlanningDetailScreen> {
     final end = planning.endDate;
     final actions = _actions(planning, isStudent);
 
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
-      children: [
+    return SafeArea(
+      bottom: true,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+        children: [
         // ---------------------------------------------------------- header
         Container(
           padding: const EdgeInsets.all(20),
@@ -243,8 +245,8 @@ class _PlanningDetailScreenState extends ConsumerState<PlanningDetailScreen> {
             child: Column(
               children: [
                 InfoRow(
-                  l10n.planningLesson,
-                  planning.drivingClass?.name ?? '–',
+                  l10n.planningNumber(planning.id),
+                  '#${planning.id}',
                 ),
                 InfoRow(
                   l10n.planningInfoLessonType,
@@ -351,6 +353,7 @@ class _PlanningDetailScreenState extends ConsumerState<PlanningDetailScreen> {
           ),
         ],
       ],
+    ),
     );
   }
 

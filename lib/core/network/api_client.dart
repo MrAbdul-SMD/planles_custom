@@ -60,12 +60,25 @@ class ApiClient {
     // }
   }
 
+  /// Override the base URL at runtime (e.g. switching dev/staging/prod).
+  void setBaseUrl(String url) {
+    _dio.options.baseUrl = url;
+  }
+
+  static String? _overrideBaseUrl;
+
+  /// Persisted override (from SharedPreferences) applied before ApiClient
+  /// creation in main().
+  static void setOverride(String? url) => _overrideBaseUrl = url;
+
   static const defaultBaseUrl = 'https://api.planles.nl/api';
 
-  /// `API_BASE_URL` from the bundled `.env` file, falling back to
-  /// [defaultBaseUrl] when the file or the key is missing (and in tests,
-  /// where `dotenv.load()` is never called).
+  /// `API_BASE_URL` from the bundled `.env` file (or the runtime override),
+  /// falling back to [defaultBaseUrl] when missing.
   static String get resolvedBaseUrl {
+    if (_overrideBaseUrl != null && _overrideBaseUrl!.isNotEmpty) {
+      return _overrideBaseUrl!;
+    }
     if (!dotenv.isInitialized) return defaultBaseUrl;
     return dotenv.maybeGet('API_BASE_URL') ?? defaultBaseUrl;
   }

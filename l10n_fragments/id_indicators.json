@@ -1,0 +1,4 @@
+{
+  "planningNumber": {"nl": "Les #{id}", "en": "Lesson #{id}", "placeholders": {"id": {"type": "int"}}},
+  "planningOrderId": {"nl": "Bestelling #{id}", "en": "Order #{id}", "placeholders": {"id": {"type": "int"}}}
+}

@@ -1,5 +1,4 @@
 // Firebase Messaging Service Worker
-// Place this file in the `web/` directory so it is served at the root.
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
 

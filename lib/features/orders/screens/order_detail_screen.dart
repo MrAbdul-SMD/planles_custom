@@ -26,6 +26,13 @@ class OrderDetailScreen extends ConsumerStatefulWidget {
 class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
   bool _busy = false;
 
+  @override
+  void initState() {
+    super.initState();
+    ref.invalidate(orderDetailProvider(widget.id));
+    ref.invalidate(orderItemsProvider(widget.id));
+  }
+
   Future<void> _run(Future<void> Function() action, {String? success}) async {
     final l10n = context.l10n;
     setState(() => _busy = true);
@@ -138,7 +145,9 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
                                 ?.copyWith(fontWeight: FontWeight.w800),
                           ),
                         ),
-                        StatusChip(label: label, tone: tone),
+                        Flexible(
+                          child: StatusChip(label: label, tone: tone),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 10),

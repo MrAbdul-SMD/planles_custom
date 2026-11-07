@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import '../firebase_options.dart';
@@ -53,10 +54,6 @@ class FcmService {
 
   /// Requests permission and returns the (possibly null) token.
   Future<String?> getToken() async {
-    if (kIsWeb) {
-      debugPrint('FCM: web push skipped.');
-      return null;
-    }
     try {
       final messaging = FirebaseMessaging.instance;
       await messaging.requestPermission(
@@ -64,6 +61,15 @@ class FcmService {
         badge: true,
         sound: true,
       );
+      if (kIsWeb) {
+        final vapidKey = dotenv.maybeGet('FCM_VAPID_KEY');
+        if (vapidKey == null || vapidKey.isEmpty) {
+          debugPrint('FCM: web push skipped (no FCM_VAPID_KEY in .env).');
+          return null;
+        }
+        // ignore: deprecated_member_use
+        return await messaging.getToken(vapidKey: vapidKey);
+      }
       // ignore: deprecated_member_use
       return await messaging.getToken();
     } catch (e) {
