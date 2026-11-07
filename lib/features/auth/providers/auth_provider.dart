@@ -60,6 +60,7 @@ class AuthController extends Notifier<AuthState> {
     try {
       final user = await _repo.me();
       _set(Authenticated(user));
+      _registerFcm();
     } on ApiException catch (e) {
       if (e.isUnauthorized) {
         await storage.clear();
@@ -78,6 +79,8 @@ class AuthController extends Notifier<AuthState> {
     await storage.write(token);
     final user = await _repo.me();
     _set(Authenticated(user));
+    // Best-effort FCM registration.
+    _registerFcm();
   }
 
   /// Returns `completed == true` when the account was created and the user
@@ -95,11 +98,15 @@ class AuthController extends Notifier<AuthState> {
     await storage.write(result.token!);
     final user = await _repo.me();
     _set(Authenticated(user));
+    _registerFcm();
     return (completed: true, message: result.message);
   }
 
   Future<void> signOut() async {
     final storage = ref.read(tokenStorageProvider);
+    final fcm = ref.read(fcmServiceProvider);
+    final token = fcm.currentToken;
+    if (token != null) await fcm.unregister(token);
     await storage.clear();
     _set(const AuthUnauthenticated());
   }
@@ -119,6 +126,19 @@ class AuthController extends Notifier<AuthState> {
   }
 
   void setUser(User user) => _set(Authenticated(user));
+
+  Future<void> _registerFcm() async {
+    try {
+      final fcm = ref.read(fcmServiceProvider);
+      final token = await fcm.getToken();
+      if (token != null) {
+        await fcm.register(token);
+        fcm.listenForRefresh((t) => fcm.register(t));
+      }
+    } catch (_) {
+      // Best effort.
+    }
+  }
 
   void _set(AuthState next) {
     if (ref.mounted) state = next;

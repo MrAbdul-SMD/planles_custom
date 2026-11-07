@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app/app.dart';
 import 'app/router.dart';
 import 'core/deep_links.dart';
+import 'core/fcm_service.dart';
 import 'core/network/api_client.dart';
 import 'core/providers.dart';
 import 'core/storage/token_storage.dart';
@@ -14,6 +15,10 @@ import 'features/auth/providers/auth_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Firebase Cloud Messaging (best-effort — requires google-services.json /
+  // GoogleService-Info.plist, which the developer must add).
+  await FcmService.initialize();
 
   // Client-side configuration (API_BASE_URL, …) from the bundled .env asset.
   // A missing file must not brick the app — ApiClient falls back to its

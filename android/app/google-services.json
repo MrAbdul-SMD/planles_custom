@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "575410287121",
+    "project_id": "planles-custom",
+    "storage_bucket": "planles-custom.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:575410287121:android:6a898ad6e8f69951cdb7b0",
+        "android_client_info": {
+          "package_name": "com.example.planles_custom"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCd69lyV6iqMYSahlG0IOTXdKyrVsC0PlA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -156,3 +156,20 @@ locale with Dutch as fallback.
   `l10n_fragments/<feature>.json`; `python3 tool/sync_l10n.py` merges them
   into the ARB files under an advisory lock and regenerates the localizations.
   See `docs/i18n-guide.md` for the conventions.
+
+## Push notifications (Firebase Cloud Messaging)
+
+The app registers its FCM token with the backend (`POST /auth/fcm/register`)
+on sign-in and unregisters on sign-out (`POST /auth/fcm/unregister`).
+
+Setup:
+1. Create a Firebase project and add an Android app (package
+   `com.example.planles_custom`) and/or an iOS app.
+2. Download `google-services.json` (Android) and/or `GoogleService-Info.plist`
+   (iOS) and place them in `android/app/` and `ios/Runner/` respectively.
+3. `firebase_core` and `firebase_messaging` are already in `pubspec.yaml`.
+4. `lib/main.dart` calls `FcmService.initialize()` (best-effort; the app
+   still works without the config files, just without push).
+
+Token registration / unregistration is wired into `AuthController`
+(`login`, `register`, `restore`, `signOut`).
