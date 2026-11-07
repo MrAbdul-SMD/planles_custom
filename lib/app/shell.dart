@@ -19,23 +19,37 @@ class HomeShell extends ConsumerWidget {
     final unread = ref.watch(unreadCountProvider).value ?? 0;
     final l10n = context.l10n;
 
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
       body: navigationShell,
-      bottomNavigationBar: Container(
-        margin: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainer,
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              blurRadius: 16,
-              offset: const Offset(0, -2),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        bottom: true,
+        child: Container(
+          margin: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+          decoration: BoxDecoration(
+            color: isDark
+                ? const Color(0xFF131B2E).withValues(alpha: 0.95)
+                : Colors.white.withValues(alpha: 0.95),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: theme.colorScheme.outlineVariant.withValues(
+                alpha: isDark ? 0.35 : 0.6,
+              ),
+              width: 1,
             ),
-          ],
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: NavigationBar(
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.06),
+                blurRadius: 20,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: NavigationBar(
           backgroundColor: Colors.transparent,
           selectedIndex: navigationShell.currentIndex,
           onDestinationSelected: (i) => _goBranch(i, ref),
@@ -78,7 +92,8 @@ class HomeShell extends ConsumerWidget {
           ],
         ),
       ),
-    );
+    ),
+  );
   }
 
   void _goBranch(int index, WidgetRef ref) {

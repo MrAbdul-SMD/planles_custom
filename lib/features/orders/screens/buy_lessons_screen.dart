@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/deep_links.dart';
 import '../../../core/network/api_exception.dart';
@@ -325,6 +327,20 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
       ref.read(authControllerProvider.notifier).refreshUser();
 
       final orderId = result.orderId;
+      final checkoutUrl = result.checkoutUrl;
+
+      if (checkoutUrl != null && checkoutUrl.isNotEmpty) {
+        final uri = Uri.tryParse(checkoutUrl);
+        if (uri != null) {
+          await launchUrl(
+            uri,
+            mode: kIsWeb
+                ? LaunchMode.platformDefault
+                : LaunchMode.externalApplication,
+            webOnlyWindowName: kIsWeb ? '_self' : null,
+          );
+        }
+      }
 
       if (!mounted) return;
       if (orderId != null) {

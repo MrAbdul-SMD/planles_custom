@@ -8,7 +8,7 @@ import '../../auth/providers/auth_provider.dart';
 import '../providers/orders_providers.dart';
 
 /// Landing screen for Mollie's redirect after a payment. Refreshes the
-/// relevant data and then sends the user home.
+/// relevant data with retry polling and then sends the user home.
 class PaymentReturnScreen extends ConsumerStatefulWidget {
   const PaymentReturnScreen({super.key, this.kind = 'payment'});
 
@@ -20,6 +20,8 @@ class PaymentReturnScreen extends ConsumerStatefulWidget {
 }
 
 class _PaymentReturnScreenState extends ConsumerState<PaymentReturnScreen> {
+  bool _completed = false;
+
   @override
   void initState() {
     super.initState();
@@ -39,7 +41,11 @@ class _PaymentReturnScreenState extends ConsumerState<PaymentReturnScreen> {
 
     try {
       if (kind == 'topup') {
-        await ref.read(authControllerProvider.notifier).refreshUser();
+        // Poll user balance up to 4 times to ensure Mollie webhook finished
+        for (int i = 0; i < 4; i++) {
+          await ref.read(authControllerProvider.notifier).refreshUser();
+          if (i < 3) await Future.delayed(const Duration(milliseconds: 1400));
+        }
       } else {
         ref.invalidate(ordersListProvider);
         if (orderId != null) {
@@ -48,20 +54,38 @@ class _PaymentReturnScreenState extends ConsumerState<PaymentReturnScreen> {
             ref.invalidate(orderItemsProvider(orderId));
           } catch (_) {}
         }
+        for (int i = 0; i < 3; i++) {
+          await Future.delayed(const Duration(milliseconds: 1200));
+          ref.invalidate(ordersListProvider);
+          if (orderId != null) {
+            ref.invalidate(orderDetailProvider(orderId));
+            ref.invalidate(orderItemsProvider(orderId));
+          }
+        }
       }
     } catch (_) {
-      // Best effort; the user can refresh manually.
+      // Best effort
     }
+
     if (!mounted) return;
-    try {
-      showAppSnack(context, l10n.paymentReturnSuccess);
-    } catch (_) {}
-    if (mounted) context.go('/home');
+    setState(() => _completed = true);
+    showAppSnack(context, l10n.paymentReturnSuccess);
+
+    await Future.delayed(const Duration(milliseconds: 1200));
+    if (mounted) {
+      if (orderId != null) {
+        context.go('/orders/$orderId');
+      } else {
+        context.go('/home');
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.paymentReturnProcessing),
@@ -72,18 +96,52 @@ class _PaymentReturnScreenState extends ConsumerState<PaymentReturnScreen> {
         ),
       ),
       body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const CircularProgressIndicator(),
-            const SizedBox(height: 16),
-            Text(l10n.paymentReturnProcessing),
-            const SizedBox(height: 24),
-            TextButton(
-              onPressed: () => context.go('/home'),
-              child: Text(l10n.cancel),
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  color: _completed
+                      ? const Color(0xFF10B981).withValues(alpha: 0.15)
+                      : theme.colorScheme.primaryContainer,
+                  shape: BoxShape.circle,
+                ),
+                child: _completed
+                    ? const Icon(Icons.check_rounded, size: 40, color: Color(0xFF10B981))
+                    : const Padding(
+                        padding: EdgeInsets.all(20),
+                        child: CircularProgressIndicator(strokeWidth: 3),
+                      ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                _completed ? 'Betaling verwerkt!' : l10n.paymentReturnProcessing,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.2,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                _completed
+                    ? 'Je gegevens zijn bijgewerkt. We sturen je door...'
+                    : 'We verifiëren de betaling met je bank...',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 28),
+              FilledButton.tonal(
+                onPressed: () => context.go('/home'),
+                child: const Text('Direct naar Dashboard'),
+              ),
+            ],
+          ),
         ),
       ),
     );

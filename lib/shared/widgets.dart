@@ -249,7 +249,7 @@ class InfoRow extends StatelessWidget {
   }
 }
 
-/// Pill showing a planning / payment status with a sensible colour.
+/// Pill showing a planning / payment status with tactile micro-dot indicator.
 class StatusChip extends StatelessWidget {
   const StatusChip({super.key, required this.label, required this.tone});
 
@@ -264,16 +264,16 @@ class StatusChip extends StatelessWidget {
     final (bg, fg) = switch (tone) {
       StatusTone.success =>
         isDark
-            ? (const Color(0xFF14532D), const Color(0xFF86EFAC))
-            : (const Color(0xFFDCFCE7), const Color(0xFF15803D)),
+            ? (const Color(0xFF064E3B), const Color(0xFF6EE7B7))
+            : (const Color(0xFFECFDF5), const Color(0xFF047857)),
       StatusTone.warning =>
         isDark
             ? (const Color(0xFF78350F), const Color(0xFFFCD34D))
-            : (const Color(0xFFFEF3C7), const Color(0xFFB45309)),
+            : (const Color(0xFFFFFBEB), const Color(0xFFB45309)),
       StatusTone.danger =>
         isDark
             ? (const Color(0xFF7F1D1D), const Color(0xFFFCA5A5))
-            : (const Color(0xFFFEE2E2), const Color(0xFFB91C1C)),
+            : (const Color(0xFFFEF2F2), const Color(0xFFB91C1C)),
       StatusTone.neutral =>
         isDark
             ? (scheme.surfaceContainerHighest, scheme.onSurfaceVariant)
@@ -281,23 +281,41 @@ class StatusChip extends StatelessWidget {
       StatusTone.info =>
         isDark
             ? (const Color(0xFF1E3A8A), const Color(0xFF93C5FD))
-            : (const Color(0xFFDBEAFE), const Color(0xFF1D4ED8)),
+            : (const Color(0xFFEFF6FF), const Color(0xFF1D4ED8)),
     };
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: fg.withValues(alpha: 0.22), width: 1),
       ),
-      child: Text(
-        label,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-          color: fg,
-          fontSize: 12.5,
-          fontWeight: FontWeight.w700,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(
+              color: fg,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 5),
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: fg,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.1,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -328,15 +346,27 @@ class AppAvatar extends StatelessWidget {
       height: size,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: scheme.primaryContainer,
+        gradient: LinearGradient(
+          colors: [
+            scheme.primaryContainer,
+            scheme.primary.withValues(alpha: 0.22),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         shape: BoxShape.circle,
+        border: Border.all(
+          color: scheme.primary.withValues(alpha: 0.2),
+          width: 1.5,
+        ),
       ),
       child: Text(
         initials,
         style: TextStyle(
-          color: scheme.onPrimaryContainer,
-          fontWeight: FontWeight.w700,
-          fontSize: size * 0.36,
+          color: scheme.primary,
+          fontWeight: FontWeight.w800,
+          fontSize: size * 0.38,
+          letterSpacing: -0.2,
         ),
       ),
     );

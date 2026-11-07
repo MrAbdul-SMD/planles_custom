@@ -114,32 +114,45 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
-                  vertical: 12,
+                  vertical: 14,
                 ),
                 child: Row(
                   children: [
-                    Icon(
-                      Icons.account_balance_wallet_outlined,
-                      color: theme.colorScheme.primary,
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(
+                        Icons.account_balance_wallet_rounded,
+                        color: theme.colorScheme.primary,
+                        size: 20,
+                      ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 14),
                     Expanded(
-                      child: Text(
-                        l10n.dashboardBalanceLabel,
-                        style: theme.textTheme.bodyLarge,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.dashboardBalanceLabel,
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          Text(
+                            F.money(user.balance),
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    Text(
-                      F.money(user.balance),
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    IconButton(
-                      tooltip: l10n.profileTopUp,
+                    FilledButton.tonal(
                       onPressed: () => context.push('/balance/topup'),
-                      icon: const Icon(Icons.add_circle_outline),
+                      child: Text(l10n.profileTopUp),
                     ),
                   ],
                 ),

@@ -16,14 +16,23 @@ class PlanningPage {
 
   List<Planning> get upcoming =>
       items
-          .where((p) => !p.isCancelled && (p.endDate == null || !p.isPast))
+          .where(
+            (p) =>
+                !p.isCancelled &&
+                !p.isCompleted &&
+                (p.endDate == null || !p.isPast),
+          )
           .toList()
         ..sort(_byStartAsc);
 
   List<Planning> get past {
     final list =
         items
-            .where((p) => !p.isCancelled && p.endDate != null && p.isPast)
+            .where(
+              (p) =>
+                  !p.isCancelled &&
+                  (p.isCompleted || (p.endDate != null && p.isPast)),
+            )
             .toList()
           ..sort(_byStartDesc);
     return list;

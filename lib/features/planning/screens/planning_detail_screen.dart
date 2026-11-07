@@ -182,6 +182,15 @@ class _PlanningDetailScreenState extends ConsumerState<PlanningDetailScreen> {
     final end = planning.endDate;
     final actions = _actions(planning, isStudent);
 
+    final cachedClass = ref
+        .watch(planningListProvider)
+        .value
+        ?.items
+        .where((p) => p.id == planning.id)
+        .firstOrNull
+        ?.drivingClass;
+    final drivingClass = planning.drivingClass ?? cachedClass;
+
     return SafeArea(
       bottom: true,
       child: ListView(
@@ -189,22 +198,41 @@ class _PlanningDetailScreenState extends ConsumerState<PlanningDetailScreen> {
         children: [
         // ---------------------------------------------------------- header
         Container(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(22),
           decoration: BoxDecoration(
-            color: theme.colorScheme.primaryContainer,
-            borderRadius: BorderRadius.circular(20),
+            color: theme.colorScheme.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(
+              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.45),
+              width: 1,
+            ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    child: Text(
-                      planning.drivingClass?.name ?? l10n.planningLesson,
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          drivingClass?.name ?? l10n.planningLesson,
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.3,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          l10n.planningNumber(planning.id),
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            color: theme.colorScheme.outline,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   StatusChip(
@@ -213,23 +241,55 @@ class _PlanningDetailScreenState extends ConsumerState<PlanningDetailScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
-              Text(
-                start == null ? l10n.planningDateNotSet : F.dateMedium(start),
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+              const SizedBox(height: 18),
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+                  borderRadius: BorderRadius.circular(14),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                [
-                  if (start != null && end != null)
-                    '${F.time(start)} – ${F.time(end)}',
-                  if (planning.durationMinutes > 0)
-                    F.minutesLabel(l10n, planning.durationMinutes),
-                ].join(' · '),
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(
+                        Icons.calendar_month_rounded,
+                        color: theme.colorScheme.primary,
+                        size: 22,
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            start == null ? l10n.planningDateNotSet : F.dateMedium(start),
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            [
+                              if (start != null && end != null)
+                                '${F.time(start)} – ${F.time(end)}',
+                              if (planning.durationMinutes > 0)
+                                F.minutesLabel(l10n, planning.durationMinutes),
+                            ].join(' · '),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -250,7 +310,7 @@ class _PlanningDetailScreenState extends ConsumerState<PlanningDetailScreen> {
                 ),
                 InfoRow(
                   l10n.planningInfoLessonType,
-                  switch (planning.drivingClass?.lessonType) {
+                  switch (drivingClass?.lessonType) {
                     'trial' => l10n.planningTypeTrial,
                     'base' => l10n.planningTypeBase,
                     'pack' => l10n.planningTypePack,
@@ -382,7 +442,7 @@ class _PlanningDetailScreenState extends ConsumerState<PlanningDetailScreen> {
 
     final actions = <Widget>[];
     final canReschedule =
-        planning.isConfirmed &&
+        (planning.isConfirmed || planning.isPending) &&
         (planning.startDate?.isAfter(
               DateTime.now().add(const Duration(hours: 24)),
             ) ??

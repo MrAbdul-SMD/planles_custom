@@ -7,7 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 /// Palette: deep sky-blue primary + warm orange accent (automotive feel),
 /// Manrope typography, generous rounding, tabular figures for money.
 abstract final class AppTheme {
-  static const seed = Color(0xFF0369A1);
+  static const seed = Color(0xFF0F4C81);
   static const accent = Color(0xFFEA580C);
 
   static ThemeData light() => _build(Brightness.light);
@@ -17,16 +17,29 @@ abstract final class AppTheme {
     final baseScheme = ColorScheme.fromSeed(
       seedColor: seed,
       brightness: brightness,
+      surface: brightness == Brightness.light ? const Color(0xFFF8FAFC) : const Color(0xFF090D16),
     );
-    // Override the secondary with a warm, high-contrast accent so the UI
-    // doesn't read as "default blue Material".
+    // High-contrast, tactile automotive-grade palette
     final scheme = baseScheme.copyWith(
+      primary: brightness == Brightness.light ? const Color(0xFF0F4C81) : const Color(0xFF38BDF8),
+      onPrimary: brightness == Brightness.light ? Colors.white : const Color(0xFF0C243B),
+      primaryContainer: brightness == Brightness.light
+          ? const Color(0xFFE0F2FE)
+          : const Color(0xFF162D4A),
+      onPrimaryContainer: brightness == Brightness.light
+          ? const Color(0xFF034A75)
+          : const Color(0xFFBAE6FD),
       secondary: accent,
       onSecondary: Colors.white,
-      secondaryContainer: accent.withValues(alpha: brightness == Brightness.light ? 0.14 : 0.22),
+      secondaryContainer: accent.withValues(alpha: brightness == Brightness.light ? 0.12 : 0.22),
       onSecondaryContainer: brightness == Brightness.light
-          ? const Color(0xFF7C2D12)
+          ? const Color(0xFF9A3412)
           : const Color(0xFFFDBA74),
+      surfaceContainerLowest: brightness == Brightness.light ? Colors.white : const Color(0xFF0B101D),
+      surfaceContainerLow: brightness == Brightness.light ? Colors.white : const Color(0xFF11192C),
+      surfaceContainer: brightness == Brightness.light ? const Color(0xFFF1F5F9) : const Color(0xFF17223B),
+      surfaceContainerHigh: brightness == Brightness.light ? const Color(0xFFE2E8F0) : const Color(0xFF1E2C4D),
+      surfaceContainerHighest: brightness == Brightness.light ? const Color(0xFFCBD5E1) : const Color(0xFF26375E),
     );
 
     final base = ThemeData(brightness: brightness).textTheme;
@@ -119,14 +132,16 @@ abstract final class AppTheme {
       ),
       cardTheme: CardThemeData(
         color: scheme.surfaceContainerLow,
-        elevation: 2,
-        shadowColor: scheme.primary.withValues(alpha: 0.06),
+        elevation: 0,
         margin: EdgeInsets.zero,
         clipBehavior: Clip.antiAlias,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(18),
           side: BorderSide(
-            color: scheme.outlineVariant.withValues(alpha: 0.3),
+            color: scheme.outlineVariant.withValues(
+              alpha: brightness == Brightness.light ? 0.5 : 0.22,
+            ),
+            width: 1,
           ),
         ),
       ),

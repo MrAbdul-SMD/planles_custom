@@ -24,10 +24,10 @@ class OrdersScreen extends ConsumerWidget {
         label: Text(l10n.ordersBuyButton),
       ),
       body: RefreshIndicator(
-        onRefresh: () async => ref.invalidate(ordersListProvider),
+        onRefresh: () async => ref.refresh(ordersListProvider.future),
         child: AsyncView<OrdersPage>(
           value: orders,
-          onRetry: () => ref.invalidate(ordersListProvider),
+          onRetry: () => ref.refresh(ordersListProvider.future),
           data: (page) {
             if (page.items.isEmpty) {
               return ListView(
