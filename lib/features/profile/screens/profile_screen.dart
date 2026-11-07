@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../l10n/language_picker.dart';
 import '../../../l10n/l10n.dart';
+import '../../../l10n/theme_mode_picker.dart';
 import '../../../shared/widgets.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/profile_providers.dart';
@@ -198,6 +199,8 @@ class ProfileScreen extends ConsumerWidget {
                   ),
                   const Divider(),
                   const LanguageListTile(),
+                  const Divider(),
+                  const ThemeModeListTile(),
                   if (user.isInstructor) ...[
                     const Divider(),
                     ListTile(

@@ -2149,6 +2149,30 @@ abstract class AppLocalizations {
   /// In nl, this message translates to:
   /// **'Downloaden'**
   String get orderDetailDownloadInvoice;
+
+  /// No description provided for @themeModeLabel.
+  ///
+  /// In nl, this message translates to:
+  /// **'Thema'**
+  String get themeModeLabel;
+
+  /// No description provided for @themeModeSystem.
+  ///
+  /// In nl, this message translates to:
+  /// **'Systeem'**
+  String get themeModeSystem;
+
+  /// No description provided for @themeModeLight.
+  ///
+  /// In nl, this message translates to:
+  /// **'Licht'**
+  String get themeModeLight;
+
+  /// No description provided for @themeModeDark.
+  ///
+  /// In nl, this message translates to:
+  /// **'Donker'**
+  String get themeModeDark;
 }
 
 class _AppLocalizationsDelegate

@@ -1,5 +1,6 @@
 import 'package:app_links/app_links.dart';
 import 'package:flutter/foundation.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,6 +20,7 @@ Future<void> main() async {
   // Firebase Cloud Messaging (best-effort — requires google-services.json /
   // GoogleService-Info.plist, which the developer must add).
   await FcmService.initialize();
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
   // Client-side configuration (API_BASE_URL, …) from the bundled .env asset.
   // A missing file must not brick the app — ApiClient falls back to its
@@ -77,4 +79,9 @@ Future<void> main() async {
       if (initial != null) handleDeepLink(initial, router);
     });
   }
+
+  // Show foreground FCM messages as local notifications.
+  FirebaseMessaging.onMessage.listen((message) {
+    FcmService.showForeground(message);
+  });
 }

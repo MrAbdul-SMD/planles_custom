@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 /// Planles brand theme — distinctive identity, not the default Material look.
@@ -90,8 +91,11 @@ abstract final class AppTheme {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
+        systemOverlayStyle: brightness == Brightness.light
+            ? SystemUiOverlayStyle.dark
+            : SystemUiOverlayStyle.light,
         centerTitle: false,
-        titleTextStyle: textTheme.headlineSmall,
+        titleTextStyle: textTheme.headlineSmall?.copyWith(color: scheme.onSurface),
         // Subtle bottom rule so the app bar reads as a distinct band.
         shape: Border(
           bottom: BorderSide(

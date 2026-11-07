@@ -749,5 +749,9 @@
   "paymentReturnProcessing": "Betaling verwerken…",
   "paymentReturnSuccess": "Betaling ontvangen",
   "orderDetailOpenInvoiceFailed": "De factuur kon niet worden geopend.",
-  "orderDetailDownloadInvoice": "Downloaden"
+  "orderDetailDownloadInvoice": "Downloaden",
+  "themeModeLabel": "Thema",
+  "themeModeSystem": "Systeem",
+  "themeModeLight": "Licht",
+  "themeModeDark": "Donker"
 }

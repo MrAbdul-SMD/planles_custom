@@ -1093,4 +1093,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get orderDetailDownloadInvoice => 'Download';
+
+  @override
+  String get themeModeLabel => 'Theme';
+
+  @override
+  String get themeModeSystem => 'System';
+
+  @override
+  String get themeModeLight => 'Light';
+
+  @override
+  String get themeModeDark => 'Dark';
 }

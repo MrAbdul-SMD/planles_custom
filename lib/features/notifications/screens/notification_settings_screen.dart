@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../l10n/language_picker.dart';
 import '../../../l10n/l10n.dart';
+import '../../../l10n/theme_mode_picker.dart';
 import '../../../shared/widgets.dart';
 import '../models/app_notification.dart';
 import '../providers/notifications_providers.dart';
@@ -36,10 +37,13 @@ class _NotificationSettingsScreenState
           _draft ??= settings;
           final draft = _draft!;
 
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
-            children: [
+          return SafeArea(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+              children: [
               const LanguageListTile(),
+              const SizedBox(height: 12),
+              const ThemeModeListTile(),
               const SizedBox(height: 12),
               SectionHeader(l10n.notifSettingsQuietSection),
               Card(
@@ -127,6 +131,7 @@ class _NotificationSettingsScreenState
                     : Text(l10n.save),
               ),
             ],
+          ),
           );
         },
       ),

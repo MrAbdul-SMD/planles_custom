@@ -340,5 +340,9 @@
   "paymentReturnProcessing": "Processing payment…",
   "paymentReturnSuccess": "Payment received",
   "orderDetailOpenInvoiceFailed": "The invoice could not be opened.",
-  "orderDetailDownloadInvoice": "Download"
+  "orderDetailDownloadInvoice": "Download",
+  "themeModeLabel": "Theme",
+  "themeModeSystem": "System",
+  "themeModeLight": "Light",
+  "themeModeDark": "Dark"
 }

@@ -1099,4 +1099,16 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get orderDetailDownloadInvoice => 'Downloaden';
+
+  @override
+  String get themeModeLabel => 'Thema';
+
+  @override
+  String get themeModeSystem => 'Systeem';
+
+  @override
+  String get themeModeLight => 'Licht';
+
+  @override
+  String get themeModeDark => 'Donker';
 }

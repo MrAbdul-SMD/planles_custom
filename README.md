@@ -173,3 +173,13 @@ Setup:
 
 Token registration / unregistration is wired into `AuthController`
 (`login`, `register`, `restore`, `signOut`).
+
+### macOS pub get rsync error
+
+If `flutter pub get` fails with `rsync: mkdir .../build/macos/SourcePackages/... failed`,
+create the directories manually:
+
+```bash
+mkdir -p build/ios/SourcePackages build/macos/SourcePackages
+flutter pub get
+```

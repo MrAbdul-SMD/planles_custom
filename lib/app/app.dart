@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:planles_custom/core/locale_provider.dart';
+import 'package:planles_custom/core/theme_mode_provider.dart';
 import 'package:planles_custom/l10n/app_localizations.dart';
 
 import 'theme.dart';
@@ -22,11 +23,13 @@ class PlanlesApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // `null` → follow the system language.
     final override = ref.watch(localeOverrideProvider).value;
+    final themeMode = ref.watch(themeModeProvider).value ?? ThemeMode.system;
 
     return MaterialApp.router(
       title: 'Planles',
       debugShowCheckedModeBanner: false,
       locale: override,
+      themeMode: themeMode,
       supportedLocales: const [Locale('nl'), Locale('en')],
       localizationsDelegates: const [
         AppLocalizations.delegate,
@@ -37,7 +40,6 @@ class PlanlesApp extends ConsumerWidget {
       ],
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
-      themeMode: ThemeMode.system,
       builder: (context, child) {
         final content = child ?? const SizedBox.shrink();
         return LayoutBuilder(
