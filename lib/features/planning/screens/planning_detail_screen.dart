@@ -365,6 +365,7 @@ class _PlanningDetailScreenState extends ConsumerState<PlanningDetailScreen> {
 
   List<Widget> _actions(Planning planning, bool isStudent) {
     final l10n = context.l10n;
+    final user = ref.watch(currentUserProvider);
     if (_busy) {
       return [
         const Center(
@@ -385,12 +386,27 @@ class _PlanningDetailScreenState extends ConsumerState<PlanningDetailScreen> {
             false);
 
     if (isStudent) {
-      if (planning.isPending) {
+      if (planning.canBeConfirmedBy(user)) {
         actions.add(
           FilledButton.icon(
             onPressed: _confirm,
             icon: const Icon(Icons.check_rounded),
             label: Text(l10n.planningConfirmLesson),
+          ),
+        );
+      } else if (planning.isPending) {
+        // The current user proposed this slot — wait for the other party.
+        actions.add(
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Text(
+                l10n.planningAwaitingConfirmation,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
           ),
         );
       }
@@ -450,6 +466,29 @@ class _PlanningDetailScreenState extends ConsumerState<PlanningDetailScreen> {
         );
       }
     } else {
+      if (planning.canBeConfirmedBy(user)) {
+        actions.add(
+          FilledButton.icon(
+            onPressed: _confirm,
+            icon: const Icon(Icons.check_rounded),
+            label: Text(l10n.planningConfirmLesson),
+          ),
+        );
+      } else if (planning.isPending) {
+        actions.add(
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Text(
+                l10n.planningAwaitingConfirmation,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+          ),
+        );
+      }
       if (planning.isConfirmed) {
         actions.add(
           FilledButton.icon(
@@ -472,6 +511,16 @@ class _PlanningDetailScreenState extends ConsumerState<PlanningDetailScreen> {
             onPressed: _cancel,
             icon: const Icon(Icons.close_rounded),
             label: Text(l10n.planningCancelLesson),
+          ),
+        );
+      }
+      // Instructors can reschedule pending or confirmed plannings.
+      if (planning.isPending || planning.isConfirmed) {
+        actions.add(
+          OutlinedButton.icon(
+            onPressed: () => context.push('/planning/${widget.id}/reschedule'),
+            icon: const Icon(Icons.event_repeat_outlined),
+            label: Text(l10n.planningRescheduleLesson),
           ),
         );
       }

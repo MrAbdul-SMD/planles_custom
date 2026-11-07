@@ -1111,4 +1111,8 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get themeModeDark => 'Donker';
+
+  @override
+  String get planningAwaitingConfirmation =>
+      'Wacht op bevestiging van de andere partij.';
 }

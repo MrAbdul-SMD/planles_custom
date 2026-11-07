@@ -2173,6 +2173,12 @@ abstract class AppLocalizations {
   /// In nl, this message translates to:
   /// **'Donker'**
   String get themeModeDark;
+
+  /// No description provided for @planningAwaitingConfirmation.
+  ///
+  /// In nl, this message translates to:
+  /// **'Wacht op bevestiging van de andere partij.'**
+  String get planningAwaitingConfirmation;
 }
 
 class _AppLocalizationsDelegate

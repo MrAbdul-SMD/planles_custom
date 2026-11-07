@@ -344,5 +344,6 @@
   "themeModeLabel": "Theme",
   "themeModeSystem": "System",
   "themeModeLight": "Light",
-  "themeModeDark": "Dark"
+  "themeModeDark": "Dark",
+  "planningAwaitingConfirmation": "Waiting for the other party to confirm."
 }

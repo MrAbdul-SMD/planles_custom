@@ -14,8 +14,9 @@ class DirectoryRepository {
   }
 
   List<User> _asUsers(dynamic data) {
-    if (data is! List) return const [];
-    return data
+    final list = data is Map ? data['result'] ?? data['data'] : data;
+    if (list is! List) return const [];
+    return list
         .whereType<Map>()
         .map((e) => User.fromJson(Map<String, dynamic>.from(e)))
         .toList();

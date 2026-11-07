@@ -84,6 +84,21 @@ class Planning {
   bool get isCompleted => status == 'completed';
   bool get isCancelled => status == 'cancelled';
 
+  /// Most recent log entry (logs are returned newest-first).
+  PlanningLog? get lastLog => logs.isEmpty ? null : logs.first;
+
+  /// True when the current user is the one who proposed (created/rescheduled)
+  /// this planning, meaning they may not confirm it themselves.
+  bool proposedBy(User? user) =>
+      lastLog != null &&
+      (lastLog!.action == 'created' || lastLog!.action == 'rescheduled') &&
+      lastLog!.user?.id != null &&
+      lastLog!.user!.id == user?.id;
+
+  /// Whether this planning can be confirmed by [user].
+  bool canBeConfirmedBy(User? user) =>
+      isPending && !proposedBy(user);
+
   bool get isPast => endDate != null && endDate!.isBefore(DateTime.now());
 
   int get durationMinutes {

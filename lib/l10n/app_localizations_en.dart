@@ -1105,4 +1105,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get themeModeDark => 'Dark';
+
+  @override
+  String get planningAwaitingConfirmation =>
+      'Waiting for the other party to confirm.';
 }

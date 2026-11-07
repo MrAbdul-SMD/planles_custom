@@ -753,5 +753,6 @@
   "themeModeLabel": "Thema",
   "themeModeSystem": "Systeem",
   "themeModeLight": "Licht",
-  "themeModeDark": "Donker"
+  "themeModeDark": "Donker",
+  "planningAwaitingConfirmation": "Wacht op bevestiging van de andere partij."
 }

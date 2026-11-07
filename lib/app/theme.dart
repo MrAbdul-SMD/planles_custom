@@ -33,20 +33,23 @@ abstract final class AppTheme {
     final textTheme = base.apply(
       fontFamily: GoogleFonts.manrope().fontFamily,
     ).copyWith(
-      headlineLarge: GoogleFonts.manrope(
+      headlineLarge: GoogleFonts.spaceGrotesk(
         fontSize: 30,
-        fontWeight: FontWeight.w800,
-        letterSpacing: -0.6,
-      ),
-      headlineMedium: GoogleFonts.manrope(
-        fontSize: 24,
-        fontWeight: FontWeight.w800,
-        letterSpacing: -0.4,
-      ),
-      headlineSmall: GoogleFonts.manrope(
-        fontSize: 20,
         fontWeight: FontWeight.w700,
+        letterSpacing: -0.6,
+        height: 1.15,
+      ),
+      headlineMedium: GoogleFonts.spaceGrotesk(
+        fontSize: 24,
+        fontWeight: FontWeight.w700,
+        letterSpacing: -0.4,
+        height: 1.2,
+      ),
+      headlineSmall: GoogleFonts.spaceGrotesk(
+        fontSize: 20,
+        fontWeight: FontWeight.w600,
         letterSpacing: -0.3,
+        height: 1.25,
       ),
       titleLarge: GoogleFonts.manrope(
         fontSize: 18,
@@ -116,13 +119,14 @@ abstract final class AppTheme {
       ),
       cardTheme: CardThemeData(
         color: scheme.surfaceContainerLow,
-        elevation: 0,
+        elevation: 2,
+        shadowColor: scheme.primary.withValues(alpha: 0.06),
         margin: EdgeInsets.zero,
         clipBehavior: Clip.antiAlias,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(16),
           side: BorderSide(
-            color: scheme.outlineVariant.withValues(alpha: 0.4),
+            color: scheme.outlineVariant.withValues(alpha: 0.3),
           ),
         ),
       ),
@@ -262,14 +266,14 @@ abstract final class AppTheme {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       ),
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: scheme.surfaceContainer,
+        backgroundColor: scheme.surfaceContainer.withValues(alpha: 0.85),
         indicatorColor: scheme.primaryContainer,
         indicatorShape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        height: 72,
+        height: 64,
         labelTextStyle: WidgetStatePropertyAll(textTheme.labelSmall),
       ),
       dividerTheme: DividerThemeData(
