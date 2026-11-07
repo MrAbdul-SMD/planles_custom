@@ -33,6 +33,11 @@ class FcmService {
 
   /// Requests notification permission and returns the (possibly null) token.
   Future<String?> getToken() async {
+    // Web push requires a service worker + VAPID key; skip on web for now.
+    if (kIsWeb) {
+      debugPrint('FCM: web push skipped.');
+      return null;
+    }
     try {
       final messaging = FirebaseMessaging.instance;
       await messaging.requestPermission(
@@ -40,13 +45,10 @@ class FcmService {
         badge: true,
         sound: true,
       );
-      if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
-        await messaging.getAPNSToken();
-      }
-      // firebase_messaging 17+: register() then await the token via onRegistered.
-      final tokenFuture = messaging.onRegistered.first;
-      await messaging.register();
-      return await tokenFuture;
+      // Use the classic (deprecated but working) getToken API. On iOS this
+      // waits for the APNS token internally.
+      // ignore: deprecated_member_use
+      return await messaging.getToken();
     } catch (e) {
       debugPrint('FCM: getToken failed: $e');
       return null;
@@ -73,6 +75,7 @@ class FcmService {
 
   /// Listens for token refreshes and re-registers the new token.
   void listenForRefresh(void Function(String token) onRefresh) {
-    FirebaseMessaging.instance.onRegistered.listen(onRefresh);
+    // ignore: deprecated_member_use
+    FirebaseMessaging.instance.onTokenRefresh.listen(onRefresh);
   }
 }

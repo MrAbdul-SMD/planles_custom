@@ -1,7 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 import '../storage/token_storage.dart';
 import 'api_exception.dart';
@@ -15,10 +13,7 @@ import 'api_exception.dart';
 ///  * notify the app when an *authenticated* request comes back 401 (the API
 ///    has no refresh token, so the session must end)
 class ApiClient {
-  ApiClient({
-    required TokenStorage tokenStorage,
-    String? baseUrl,
-  }) {
+  ApiClient({required TokenStorage tokenStorage, String? baseUrl}) {
     _tokenStorage = tokenStorage;
 
     _dio = Dio(
@@ -51,18 +46,18 @@ class ApiClient {
       ),
     );
 
-    if (kDebugMode) {
-      _dio.interceptors.add(
-        PrettyDioLogger(
-          requestHeader: true,
-          requestBody: true,
-          responseBody: true,
-          responseHeader: false,
-          error: true,
-          compact: true,
-        ),
-      );
-    }
+    // if (kDebugMode) {
+    //   _dio.interceptors.add(
+    //     PrettyDioLogger(
+    //       requestHeader: true,
+    //       requestBody: true,
+    //       responseBody: true,
+    //       responseHeader: false,
+    //       error: true,
+    //       compact: true,
+    //     ),
+    //   );
+    // }
   }
 
   static const defaultBaseUrl = 'https://api.planles.nl/api';
