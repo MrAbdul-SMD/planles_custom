@@ -54,7 +54,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
     final url = await _checkout(
       () => ref
           .read(ordersRepositoryProvider)
-          .pay(orderId: widget.id, redirectUrl: paymentRedirectUrl(kind: paymentRedirectKind)),
+          .pay(orderId: widget.id, redirectUrl: paymentRedirectUrl()),
     );
     if (url != null) await _open(url);
   }

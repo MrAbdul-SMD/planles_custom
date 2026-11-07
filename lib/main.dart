@@ -49,13 +49,12 @@ Future<void> main() async {
   final router = container.read(routerProvider);
 
   // Handle payment redirects coming back into the app (mobile / desktop).
+  AppLinks? appLinks;
   if (!kIsWeb) {
-    final appLinks = AppLinks();
+    appLinks = AppLinks();
     appLinks.uriLinkStream.listen((uri) {
       handleDeepLink(uri, router);
     });
-    final initial = await appLinks.getInitialLink();
-    if (initial != null) handleDeepLink(initial, router);
   }
 
   runApp(
@@ -64,4 +63,13 @@ Future<void> main() async {
       child: PlanlesApp(router: router),
     ),
   );
+
+  if (appLinks != null) {
+    // Defer the initial-link handling until after the first frame so the
+    // router is fully mounted.
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final initial = await appLinks!.getInitialLink();
+      if (initial != null) handleDeepLink(initial, router);
+    });
+  }
 }

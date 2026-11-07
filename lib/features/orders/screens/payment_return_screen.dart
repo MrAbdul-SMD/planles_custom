@@ -23,12 +23,17 @@ class _PaymentReturnScreenState extends ConsumerState<PaymentReturnScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(_finish);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _finish());
   }
 
   Future<void> _finish() async {
     final l10n = context.l10n;
-    final uri = GoRouterState.of(context).uri;
+    Uri uri;
+    try {
+      uri = GoRouterState.of(context).uri;
+    } catch (_) {
+      uri = Uri.parse('/payment/callback?kind=${widget.kind}');
+    }
     final kind = uri.queryParameters['kind'] ?? widget.kind;
     final orderId = int.tryParse(uri.queryParameters['orderId'] ?? '');
 
@@ -38,16 +43,20 @@ class _PaymentReturnScreenState extends ConsumerState<PaymentReturnScreen> {
       } else {
         ref.invalidate(ordersListProvider);
         if (orderId != null) {
-          ref.invalidate(orderDetailProvider(orderId));
-          ref.invalidate(orderItemsProvider(orderId));
+          try {
+            ref.invalidate(orderDetailProvider(orderId));
+            ref.invalidate(orderItemsProvider(orderId));
+          } catch (_) {}
         }
       }
     } catch (_) {
       // Best effort; the user can refresh manually.
     }
     if (!mounted) return;
-    showAppSnack(context, l10n.paymentReturnSuccess);
-    context.go('/home');
+    try {
+      showAppSnack(context, l10n.paymentReturnSuccess);
+    } catch (_) {}
+    if (mounted) context.go('/home');
   }
 
   @override

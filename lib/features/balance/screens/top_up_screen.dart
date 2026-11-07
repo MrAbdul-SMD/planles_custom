@@ -48,7 +48,7 @@ class _TopUpScreenState extends ConsumerState<TopUpScreen> {
     try {
       final url = await ref
           .read(ordersRepositoryProvider)
-          .purchaseBalance(amount: amount, redirectUrl: paymentRedirectUrl(kind: topupRedirectKind));
+          .purchaseBalance(amount: amount, redirectUrl: paymentRedirectUrl(kind: 'topup'));
       final uri = Uri.tryParse(url);
       if (uri != null) {
         await launchUrl(uri, mode: LaunchMode.externalApplication);

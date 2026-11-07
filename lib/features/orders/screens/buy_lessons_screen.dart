@@ -280,7 +280,7 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
             paymentType: _paymentType,
             items: [(id: classId, quantity: _quantity)],
             studentId: _studentId,
-            redirectUrl: paymentRedirectUrl(kind: paymentRedirectKind),
+            redirectUrl: paymentRedirectUrl(),
           );
 
       ref.invalidate(ordersListProvider);

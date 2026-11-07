@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -36,8 +37,17 @@ final routerProvider = Provider<GoRouter>((ref) {
 
   final router = GoRouter(
     initialLocation: '/home',
+    overridePlatformDefaultLocation: !kIsWeb,
     refreshListenable: auth,
     debugLogDiagnostics: kDebugMode,
+    errorBuilder: (context, state) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        GoRouter.of(context).go('/home');
+      });
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    },
     redirect: (context, state) {
       final signedIn = auth.value is Authenticated;
       final location = state.matchedLocation;
@@ -50,6 +60,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       return isAuthRoute ? null : '/login';
     },
     routes: [
+      GoRoute(path: '/', redirect: (_, _) => '/home'),
       GoRoute(path: '/login', builder: (_, _) => const LoginScreen()),
       GoRoute(path: '/register', builder: (_, _) => const RegisterScreen()),
       GoRoute(
