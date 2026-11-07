@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/deep_links.dart';
 import '../../../core/network/api_exception.dart';
@@ -49,7 +48,14 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.buyLessonsTitle)),
+      appBar: AppBar(
+        title: Text(l10n.buyLessonsTitle),
+        leading: IconButton(
+          icon: const Icon(Icons.close_rounded),
+          onPressed: () => context.canPop() ? context.pop() : context.go('/orders'),
+          tooltip: l10n.cancel,
+        ),
+      ),
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
@@ -139,21 +145,53 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
                     if (list.isEmpty) {
                       return Text(l10n.buyLessonsNoPackages);
                     }
-                    return Column(
-                      children: [
-                        for (final c in list) ...[
-                          _ClassOption(
-                            drivingClass: c,
-                            selected: _classId == c.id,
-                            onTap: () => setState(() {
-                              _classId = c.id;
-                              _quantity = 1;
-                            }),
-                          ),
-                          const SizedBox(height: 10),
-                        ],
-                      ],
-                    );
+                    // Group by lesson type: trial → base (lesson) → pack → exam.
+                    const order = <String, int>{
+                      'trial': 0,
+                      'base': 1,
+                      'pack': 2,
+                      'exam': 3,
+                    };
+                    final sorted = [...list]
+                      ..sort((a, b) => (order[a.lessonType] ?? 99)
+                          .compareTo(order[b.lessonType] ?? 99));
+                    String? currentGroup;
+                    final children = <Widget>[];
+                    for (final c in sorted) {
+                      final group = c.lessonType ?? '';
+                      if (group != currentGroup) {
+                        currentGroup = group;
+                        final label = switch (group) {
+                          'trial' => l10n.buyLessonsLessonTypeTrial,
+                          'base' => l10n.buyLessonsLessonTypeBase,
+                          'pack' => l10n.buyLessonsLessonTypePack,
+                          'exam' => l10n.buyLessonsLessonTypeExam,
+                          _ => null,
+                        };
+                        if (label != null) {
+                          children.add(Padding(
+                            padding: const EdgeInsets.only(top: 8, bottom: 6),
+                            child: Text(
+                              label,
+                              style: theme.textTheme.labelLarge?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ));
+                        }
+                      }
+                      children.add(_ClassOption(
+                        drivingClass: c,
+                        selected: _classId == c.id,
+                        onTap: () => setState(() {
+                          _classId = c.id;
+                          _quantity = 1;
+                        }),
+                      ));
+                      children.add(const SizedBox(height: 10));
+                    }
+                    return Column(children: children);
                   },
                 ),
 
@@ -286,26 +324,18 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
       ref.invalidate(ordersListProvider);
       ref.read(authControllerProvider.notifier).refreshUser();
 
-      final url = result.checkoutUrl;
-      if (url != null) {
-        await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-      }
+      final orderId = result.orderId;
 
       if (!mounted) return;
-      final orderId = result.orderId;
       if (orderId != null) {
         context.go('/orders/$orderId');
       } else {
         context.go('/orders');
       }
-      if (mounted) {
-        showAppSnack(
-          context,
-          url == null
-              ? l10n.buyLessonsOrderPlaced
-              : l10n.buyLessonsCompletePayment,
-        );
-      }
+      showAppSnack(
+        context,
+        l10n.buyLessonsOrderPlaced,
+      );
     } on ApiException catch (e) {
       if (mounted) {
         showAppSnack(context, describeError(context, e), error: true);

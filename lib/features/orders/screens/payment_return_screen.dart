@@ -63,6 +63,14 @@ class _PaymentReturnScreenState extends ConsumerState<PaymentReturnScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Scaffold(
+      appBar: AppBar(
+        title: Text(l10n.paymentReturnProcessing),
+        leading: IconButton(
+          icon: const Icon(Icons.close_rounded),
+          onPressed: () => context.go('/home'),
+          tooltip: l10n.cancel,
+        ),
+      ),
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -70,6 +78,11 @@ class _PaymentReturnScreenState extends ConsumerState<PaymentReturnScreen> {
             const CircularProgressIndicator(),
             const SizedBox(height: 16),
             Text(l10n.paymentReturnProcessing),
+            const SizedBox(height: 24),
+            TextButton(
+              onPressed: () => context.go('/home'),
+              child: Text(l10n.cancel),
+            ),
           ],
         ),
       ),

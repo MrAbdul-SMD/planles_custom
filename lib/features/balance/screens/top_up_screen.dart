@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -51,7 +52,7 @@ class _TopUpScreenState extends ConsumerState<TopUpScreen> {
           .purchaseBalance(amount: amount, redirectUrl: paymentRedirectUrl(kind: 'topup'));
       final uri = Uri.tryParse(url);
       if (uri != null) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
+        await launchUrl(uri, mode: kIsWeb ? LaunchMode.platformDefault : LaunchMode.externalApplication);
       }
       // The webhook credits the balance; refresh in case it was instant.
       await ref.read(authControllerProvider.notifier).refreshUser();

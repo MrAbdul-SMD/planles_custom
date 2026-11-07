@@ -1,4 +1,5 @@
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -81,7 +82,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
   Future<void> _open(String url) async {
     final uri = Uri.tryParse(url);
     if (uri == null) return;
-    final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    final ok = await launchUrl(uri, mode: kIsWeb ? LaunchMode.platformDefault : LaunchMode.externalApplication);
     if (!ok && mounted) {
       showAppSnack(
         context,
@@ -100,7 +101,14 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
     final user = ref.watch(currentUserProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.orderDetailTitle(widget.id))),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.close_rounded),
+          onPressed: () => context.canPop() ? context.pop() : context.go('/orders'),
+          tooltip: l10n.cancel,
+        ),
+        title: Text(l10n.orderDetailTitle(widget.id)),
+      ),
       body: AsyncView<Order>(
         value: async,
         onRetry: () => ref.invalidate(orderDetailProvider(widget.id)),
