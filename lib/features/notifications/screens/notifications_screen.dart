@@ -17,6 +17,10 @@ class NotificationsScreen extends ConsumerStatefulWidget {
 }
 
 class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
+  /// Whether the initial load has finished. Used to distinguish "still
+  /// loading for the first time" from "loaded but empty".
+  bool _loaded = false;
+
   @override
   void initState() {
     super.initState();
@@ -28,6 +32,8 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
       await ref.read(notificationsProvider.notifier).refresh();
     } catch (_) {
       // The error view already reflects the failure on rebuild.
+    } finally {
+      if (mounted) setState(() => _loaded = true);
     }
   }
 
@@ -108,7 +114,11 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
 
   Widget _buildBody(NotificationsState state, ThemeData theme) {
     final l10n = context.l10n;
-    if (state.items.isEmpty && state.refreshing) {
+    // Until the initial load has finished, show a loading indicator instead of
+    // an "empty" state so the alert list isn't mistaken for having no data
+    // before the first refresh completes.
+    final isLoading = state.items.isEmpty && (state.refreshing || !_loaded);
+    if (isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
     if (state.items.isEmpty) {

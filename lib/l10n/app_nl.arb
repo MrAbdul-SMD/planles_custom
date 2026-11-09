@@ -155,6 +155,8 @@
   "registerSubmitCreate": "Account aanmaken",
   "registerSubmitCode": "Code aanvragen",
   "registerHaveAccount": "Ik heb al een account",
+  "registerCarImage": "Autobeeld",
+  "registerCarImageSelect": "Autobeeld selecteren",
   "forgotTitle": "Wachtwoord vergeten",
   "forgotEnterCode": "Voer de code in",
   "forgotResetTitle": "Herstel je wachtwoord",

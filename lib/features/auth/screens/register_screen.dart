@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,6 +10,8 @@ import '../../../l10n/language_picker.dart';
 import '../../../l10n/l10n.dart';
 import '../../../shared/widgets.dart';
 import '../providers/auth_provider.dart';
+
+import 'package:image_picker/image_picker.dart';
 
 /// Registration is a two-step OTP flow: fill in the form → the API mails a
 /// code → enter the code → the account is created and we are signed in.
@@ -40,6 +44,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   bool _otpSent = false;
   bool _busy = false;
   String? _otpMessage;
+  File? _carImage;
 
   @override
   void dispose() {
@@ -80,7 +85,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       'pickupLocation': _pickupLocation.text.trim(),
     if (_licensePlate.text.trim().isNotEmpty)
       'licensePlate': _licensePlate.text.trim(),
-    if (_otp.text.trim().isNotEmpty) 'otp': _otp.text.trim(),
+    if (_carImage != null) 'carImage': _carImage!.path,
   };
 
   Future<void> _submit() async {
@@ -90,7 +95,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     try {
       final result = await ref
           .read(authControllerProvider.notifier)
-          .register(payload: _payload());
+          .register(payload: _payload(), carImage: _carImage);
       if (!mounted) return;
       if (result.completed) {
         // Redirected by the router.
@@ -126,6 +131,21 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     );
     if (picked == null) return;
     setState(() => _birthdate.text = DateFormat('yyyy-MM-dd').format(picked));
+  }
+
+  Future<void> _pickCarImage() async {
+    final picked = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 800,
+      maxHeight: 600,
+    );
+    if (picked != null) {
+      setState(() => _carImage = File(picked.path));
+    }
+  }
+
+  void _clearCarImage() {
+    setState(() => _carImage = null);
   }
 
   @override
@@ -336,7 +356,48 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         labelText: l10n.registerLicensePlate,
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    if (_profile == 'INSTRUCTOR') ...[
+                      const SizedBox(height: 24),
+                      Text(
+                        l10n.registerCarImage,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _carImage == null
+                                ? ElevatedButton.icon(
+                                    onPressed: _pickCarImage,
+                                    icon: const Icon(Icons.photo_library_outlined),
+                                    label: Text(l10n.registerCarImageSelect),
+                                  )
+                                : Row(
+                                    children: [
+                                      const Icon(Icons.check_circle_outlined,
+                                          color: Colors.green, size: 20),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        'Car image selected',
+                                        style: theme.textTheme.bodySmall,
+                                      ),
+                                    ],
+                                  ),
+                          ),
+                          const SizedBox(width: 12),
+                          ElevatedButton.icon(
+                            onPressed: _carImage != null
+                                ? _clearCarImage
+                                : null,
+                            icon: const Icon(Icons.clear_outlined),
+                            label: const Text('Clear'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                    ],
 
                     Text(
                       l10n.registerPasswordLabel,

@@ -326,9 +326,12 @@ class _BalanceTelemetryCard extends ConsumerWidget {
                     children: [
                       const Icon(Icons.add_rounded, size: 18),
                       const SizedBox(width: 6),
-                      Text(
-                        l10n.dashboardTopUpBalance,
-                        style: const TextStyle(fontWeight: FontWeight.w800),
+                      Flexible(
+                        child: Text(
+                          l10n.dashboardTopUpBalance,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontWeight: FontWeight.w800),
+                        ),
                       ),
                     ],
                   ),
@@ -506,19 +509,30 @@ class _NextLessonBoardingPass extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             child: Row(
               children: [
-                TextButton.icon(
-                  onPressed: () => context.push('/planning/${planning.id}'),
-                  icon: const Icon(Icons.info_outline_rounded, size: 16),
-                  label: const Text('Details bekijken'),
+                Flexible(
+                  child: TextButton.icon(
+                    onPressed: () => context.push('/planning/${planning.id}'),
+                    icon: const Icon(Icons.info_outline_rounded, size: 16),
+                    label: const Text(
+                      'Details bekijken',
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 ),
-                const Spacer(),
-                OutlinedButton.icon(
-                  onPressed: () => context.push('/planning/${planning.id}/reschedule'),
-                  icon: const Icon(Icons.event_repeat_rounded, size: 16),
-                  label: Text(l10n.planningRescheduleLesson),
-                  style: OutlinedButton.styleFrom(
-                    visualDensity: VisualDensity.compact,
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: OutlinedButton.icon(
+                    onPressed: () =>
+                        context.push('/planning/${planning.id}/reschedule'),
+                    icon: const Icon(Icons.event_repeat_rounded, size: 16),
+                    label: Text(
+                      l10n.planningRescheduleLesson,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      visualDensity: VisualDensity.compact,
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                    ),
                   ),
                 ),
               ],

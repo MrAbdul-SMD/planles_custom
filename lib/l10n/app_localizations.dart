@@ -764,6 +764,18 @@ abstract class AppLocalizations {
   /// **'Ik heb al een account'**
   String get registerHaveAccount;
 
+  /// No description provided for @registerCarImage.
+  ///
+  /// In nl, this message translates to:
+  /// **'Autobeeld'**
+  String get registerCarImage;
+
+  /// No description provided for @registerCarImageSelect.
+  ///
+  /// In nl, this message translates to:
+  /// **'Autobeeld selecteren'**
+  String get registerCarImageSelect;
+
   /// No description provided for @forgotTitle.
   ///
   /// In nl, this message translates to:

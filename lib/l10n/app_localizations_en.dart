@@ -359,6 +359,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get registerHaveAccount => 'I already have an account';
 
   @override
+  String get registerCarImage => 'Car image';
+
+  @override
+  String get registerCarImageSelect => 'Select car image';
+
+  @override
   String get forgotTitle => 'Forgot password';
 
   @override

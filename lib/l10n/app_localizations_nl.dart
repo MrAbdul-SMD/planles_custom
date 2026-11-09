@@ -359,6 +359,12 @@ class AppLocalizationsNl extends AppLocalizations {
   String get registerHaveAccount => 'Ik heb al een account';
 
   @override
+  String get registerCarImage => 'Autobeeld';
+
+  @override
+  String get registerCarImageSelect => 'Autobeeld selecteren';
+
+  @override
   String get forgotTitle => 'Wachtwoord vergeten';
 
   @override

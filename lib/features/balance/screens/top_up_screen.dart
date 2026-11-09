@@ -378,6 +378,9 @@ class _TopUpScreenState extends ConsumerState<TopUpScreen> {
                           const SizedBox(width: 10),
                           FilledButton.tonal(
                             onPressed: () => setState(() => _awaitingPayment = false),
+                            style: FilledButton.styleFrom(
+                              minimumSize: const Size(0, 40),
+                            ),
                             child: const Text('Ander bedrag'),
                           ),
                         ],

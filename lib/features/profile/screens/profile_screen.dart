@@ -21,7 +21,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    ref.invalidate(currentUserProvider);
+    // (Re)load the latest user data when the profile appears so it is never
+    // left empty or showing stale information.
+    ref.read(authControllerProvider.notifier).refreshUser();
   }
 
   Future<void> _signOut(BuildContext context, WidgetRef ref) async {
@@ -152,6 +154,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                     FilledButton.tonal(
                       onPressed: () => context.push('/balance/topup'),
+                      // The global button theme uses `Size.fromHeight`, i.e. an
+                      // infinite minimum width. Inside an unbounded Row that
+                      // forces an infinite width and crashes layout, so give
+                      // this button a finite minimum width.
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size(0, 40),
+                      ),
                       child: Text(l10n.profileTopUp),
                     ),
                   ],

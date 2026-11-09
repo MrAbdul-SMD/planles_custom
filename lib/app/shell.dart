@@ -105,15 +105,23 @@ class HomeShell extends ConsumerWidget {
           ref.invalidate(ordersListProvider);
           ref.invalidate(unreadCountProvider);
           ref.read(authControllerProvider.notifier).refreshUser();
+          break;
         case 1:
           ref.invalidate(planningListProvider);
+          break;
         case 2:
           ref.invalidate(ordersListProvider);
+          break;
         case 3:
-          ref.invalidate(notificationsProvider);
+          // The notifications screen stays alive inside the IndexedStack, so
+          // invalidating the provider would reset it to an empty state without
+          // re-running the screen's initial load. Refresh in place instead.
+          ref.read(notificationsProvider.notifier).refresh().ignore();
           ref.invalidate(unreadCountProvider);
+          break;
         case 4:
           ref.read(authControllerProvider.notifier).refreshUser();
+          break;
       }
     }
     navigationShell.goBranch(

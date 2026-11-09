@@ -110,6 +110,8 @@
   "registerSubmitCreate": "Create account",
   "registerSubmitCode": "Request code",
   "registerHaveAccount": "I already have an account",
+  "registerCarImage": "Car image",
+  "registerCarImageSelect": "Select car image",
   "forgotTitle": "Forgot password",
   "forgotEnterCode": "Enter the code",
   "forgotResetTitle": "Reset your password",
