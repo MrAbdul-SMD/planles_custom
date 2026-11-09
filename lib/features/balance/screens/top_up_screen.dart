@@ -37,8 +37,11 @@ class _TopUpScreenState extends ConsumerState<TopUpScreen> {
   @override
   void initState() {
     super.initState();
-    ref.invalidate(currentUserProvider);
     _custom.text = '50';
+    // Refresh balance so the screen shows the latest value.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) ref.read(authControllerProvider.notifier).refreshUser();
+    });
   }
 
   @override
@@ -133,11 +136,22 @@ class _TopUpScreenState extends ConsumerState<TopUpScreen> {
           .read(ordersRepositoryProvider)
           .purchaseBalance(amount: amount, redirectUrl: paymentRedirectUrl(kind: 'topup'));
       final uri = Uri.tryParse(url);
-      if (uri != null) {
-        await launchUrl(
-          uri,
-          mode: kIsWeb ? LaunchMode.platformDefault : LaunchMode.externalApplication,
-          webOnlyWindowName: kIsWeb ? '_self' : null,
+      if (uri == null) {
+        throw const ApiException(
+          'Ongeldige betaal-link ontvangen.',
+          code: AppErrorCode.paymentFailed,
+        );
+      }
+
+      final launched = await launchUrl(
+        uri,
+        mode: kIsWeb ? LaunchMode.platformDefault : LaunchMode.externalApplication,
+        webOnlyWindowName: kIsWeb ? '_self' : null,
+      );
+      if (!launched && !kIsWeb) {
+        throw const ApiException(
+          'Kon de betaalpagina niet openen.',
+          code: AppErrorCode.paymentFailed,
         );
       }
 
@@ -150,13 +164,13 @@ class _TopUpScreenState extends ConsumerState<TopUpScreen> {
     } on ApiException catch (e) {
       if (mounted) {
         showAppSnack(context, describeError(context, e), error: true);
+        setState(() => _busy = false);
       }
-      setState(() => _busy = false);
     } catch (e) {
       if (mounted) {
         showAppSnack(context, describeError(context, e), error: true);
+        setState(() => _busy = false);
       }
-      setState(() => _busy = false);
     }
   }
 
@@ -377,7 +391,10 @@ class _TopUpScreenState extends ConsumerState<TopUpScreen> {
                           ),
                           const SizedBox(width: 10),
                           FilledButton.tonal(
-                            onPressed: () => setState(() => _awaitingPayment = false),
+                            onPressed: () {
+                              _pollingTimer?.cancel();
+                              setState(() => _awaitingPayment = false);
+                            },
                             style: FilledButton.styleFrom(
                               minimumSize: const Size(0, 40),
                             ),
