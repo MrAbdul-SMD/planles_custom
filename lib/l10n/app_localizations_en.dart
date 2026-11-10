@@ -967,6 +967,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get buyLessonsAddItem => 'Add to order';
+
+  @override
   String get scheduleLessonTitle => 'Schedule lesson';
 
   @override

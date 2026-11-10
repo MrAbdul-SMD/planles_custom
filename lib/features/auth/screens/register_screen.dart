@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/network/api_exception.dart';
-import '../../../l10n/language_picker.dart';
 import '../../../l10n/l10n.dart';
 import '../../../shared/widgets.dart';
 import '../providers/auth_provider.dart';
@@ -157,7 +156,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.registerTitle),
-        actions: const [LanguageMenuButton()],
       ),
       body: SafeArea(
         child: Center(

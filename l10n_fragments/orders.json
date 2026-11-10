@@ -308,6 +308,10 @@
       }
     }
   },
+  "buyLessonsAddItem": {
+    "nl": "Toevoegen aan bestelling",
+    "en": "Add to order"
+  },
   "scheduleLessonTitle": {
     "nl": "Les inplannen",
     "en": "Schedule lesson"

@@ -15,7 +15,15 @@ import '../../students/providers/directory_providers.dart';
 import '../models/order.dart';
 import '../providers/orders_providers.dart';
 
-/// Buy a driving class: pick vehicle → class → quantity → payment method.
+class _CartItem {
+  _CartItem({required this.drivingClass, required this.quantity});
+
+  final DrivingClass drivingClass;
+  int quantity;
+}
+
+/// Buy driving classes: pick vehicle → class, add one or more items to the
+/// order (same or different classes), then choose payment and submit.
 /// Instructors additionally pick for which student.
 class BuyLessonsScreen extends ConsumerStatefulWidget {
   const BuyLessonsScreen({super.key});
@@ -31,6 +39,7 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
   String _paymentType = 'digital';
   int? _studentId;
   bool _busy = false;
+  final List<_CartItem> _cart = [];
 
   @override
   Widget build(BuildContext context) {
@@ -49,12 +58,16 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
       if (c.id == _classId) selectedClass = c;
     }
 
+    final canSubmit =
+        !_busy && _cart.isNotEmpty && (!isInstructor || _studentId != null);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.buyLessonsTitle),
         leading: IconButton(
           icon: const Icon(Icons.close_rounded),
-          onPressed: () => context.canPop() ? context.pop() : context.go('/orders'),
+          onPressed: () =>
+              context.canPop() ? context.pop() : context.go('/orders'),
           tooltip: l10n.cancel,
         ),
       ),
@@ -62,12 +75,7 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
           child: FilledButton(
-            onPressed:
-                (_busy ||
-                    selectedClass == null ||
-                    (isInstructor && _studentId == null))
-                ? null
-                : _submit,
+            onPressed: canSubmit ? _submit : null,
             child: _busy
                 ? const SizedBox(
                     width: 22,
@@ -75,11 +83,9 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
                     child: CircularProgressIndicator(strokeWidth: 2.4),
                   )
                 : Text(
-                    selectedClass == null
+                    _cart.isEmpty
                         ? l10n.buyLessonsChoosePackage
-                        : l10n.buyLessonsPayButton(
-                            F.money(_total(selectedClass)),
-                          ),
+                        : l10n.buyLessonsPayButton(F.money(_cartTotal())),
                   ),
           ),
         ),
@@ -155,8 +161,10 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
                       'exam': 3,
                     };
                     final sorted = [...list]
-                      ..sort((a, b) => (order[a.lessonType] ?? 99)
-                          .compareTo(order[b.lessonType] ?? 99));
+                      ..sort(
+                        (a, b) => (order[a.lessonType] ?? 99)
+                            .compareTo(order[b.lessonType] ?? 99),
+                      );
                     String? currentGroup;
                     final children = <Widget>[];
                     for (final c in sorted) {
@@ -171,26 +179,31 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
                           _ => null,
                         };
                         if (label != null) {
-                          children.add(Padding(
-                            padding: const EdgeInsets.only(top: 8, bottom: 6),
-                            child: Text(
-                              label,
-                              style: theme.textTheme.labelLarge?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
-                                fontWeight: FontWeight.w700,
+                          children.add(
+                            Padding(
+                              padding:
+                                  const EdgeInsets.only(top: 8, bottom: 6),
+                              child: Text(
+                                label,
+                                style: theme.textTheme.labelLarge?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
                             ),
-                          ));
+                          );
                         }
                       }
-                      children.add(_ClassOption(
-                        drivingClass: c,
-                        selected: _classId == c.id,
-                        onTap: () => setState(() {
-                          _classId = c.id;
-                          _quantity = 1;
-                        }),
-                      ));
+                      children.add(
+                        _ClassOption(
+                          drivingClass: c,
+                          selected: _classId == c.id,
+                          onTap: () => setState(() {
+                            _classId = c.id;
+                            _quantity = 1;
+                          }),
+                        ),
+                      );
                       children.add(const SizedBox(height: 10));
                     }
                     return Column(children: children);
@@ -243,10 +256,106 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
                       l10n,
                       (selectedClass.durationMinutes ?? 0) * _quantity,
                     ),
-                    F.money(_total(selectedClass)),
+                    F.money(_itemTotal(selectedClass, _quantity)),
                   ),
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: OutlinedButton.icon(
+                    onPressed: () => _addToCart(selectedClass!),
+                    icon: const Icon(Icons.add_shopping_cart_outlined),
+                    label: Text(l10n.buyLessonsAddItem),
+                  ),
+                ),
+              ],
+
+              if (_cart.isNotEmpty) ...[
+                const SizedBox(height: 24),
+                SectionHeader(l10n.orderDetailSectionLessons),
+                Card(
+                  child: Column(
+                    children: [
+                      for (final (i, item) in _cart.indexed) ...[
+                        if (i > 0) const Divider(height: 1),
+                        ListTile(
+                          contentPadding: const EdgeInsets.only(
+                            left: 16,
+                            right: 4,
+                          ),
+                          title: Text(
+                            item.drivingClass.name ?? l10n.orderDetailLesson,
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          subtitle: Text(
+                            [
+                              l10n.orderDetailLessonCount(item.quantity),
+                              if (item.drivingClass.duration != null)
+                                F.durationLabel(
+                                  l10n,
+                                  item.drivingClass.duration,
+                                ),
+                              F.money(
+                                _itemTotal(
+                                  item.drivingClass,
+                                  item.quantity,
+                                ),
+                              ),
+                            ].whereType<String>().join(' · '),
+                          ),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                visualDensity: VisualDensity.compact,
+                                onPressed: item.quantity > 1
+                                    ? () => setState(() => item.quantity--)
+                                    : null,
+                                icon: const Icon(
+                                  Icons.remove_circle_outline,
+                                  size: 20,
+                                ),
+                              ),
+                              Text(
+                                '${item.quantity}',
+                                style: theme.textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              IconButton(
+                                visualDensity: VisualDensity.compact,
+                                onPressed: () =>
+                                    setState(() => item.quantity++),
+                                icon: const Icon(
+                                  Icons.add_circle_outline,
+                                  size: 20,
+                                ),
+                              ),
+                              IconButton(
+                                visualDensity: VisualDensity.compact,
+                                onPressed: () =>
+                                    setState(() => _cart.removeAt(i)),
+                                icon: const Icon(Icons.delete_outline, size: 20),
+                                tooltip: l10n.delete,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  l10n.buyLessonsTotalLine(
+                    F.minutesLabel(l10n, _cartTotalMinutes()),
+                    F.money(_cartTotal()),
+                  ),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
@@ -306,19 +415,45 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
     );
   }
 
-  double _total(DrivingClass c) => (c.priceValue ?? 0) * _quantity;
+  double _itemTotal(DrivingClass c, int quantity) =>
+      (c.priceValue ?? 0) * quantity;
+
+  double _cartTotal() => _cart.fold<double>(
+        0,
+        (sum, item) => sum + _itemTotal(item.drivingClass, item.quantity),
+      );
+
+  int _cartTotalMinutes() => _cart.fold<int>(
+        0,
+        (sum, item) =>
+            sum + (item.drivingClass.durationMinutes ?? 0) * item.quantity,
+      );
+
+  void _addToCart(DrivingClass selectedClass) {
+    setState(() {
+      final existing = _cart.indexWhere(
+        (item) => item.drivingClass.id == selectedClass.id,
+      );
+      if (existing >= 0) {
+        _cart[existing].quantity += _quantity;
+      } else {
+        _cart.add(_CartItem(drivingClass: selectedClass, quantity: _quantity));
+      }
+      _quantity = 1;
+    });
+  }
 
   Future<void> _submit() async {
     final l10n = context.l10n;
-    final classId = _classId;
-    if (classId == null) return;
+    if (_cart.isEmpty) return;
     setState(() => _busy = true);
     try {
-      final result = await ref
-          .read(ordersRepositoryProvider)
-          .create(
+      final result = await ref.read(ordersRepositoryProvider).create(
             paymentType: _paymentType,
-            items: [(id: classId, quantity: _quantity)],
+            items: [
+              for (final item in _cart)
+                (id: item.drivingClass.id, quantity: item.quantity),
+            ],
             studentId: _studentId,
             redirectUrl: paymentRedirectUrl(),
           );
@@ -348,18 +483,15 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
       } else {
         context.go('/orders');
       }
-      showAppSnack(
-        context,
-        l10n.buyLessonsOrderPlaced,
-      );
+      showAppSnack(context, l10n.buyLessonsOrderPlaced);
     } on ApiException catch (e) {
       if (mounted) {
         showAppSnack(context, describeError(context, e), error: true);
-        }
+      }
     } catch (e) {
       if (mounted) {
         showAppSnack(context, describeError(context, e), error: true);
-        }
+      }
     } finally {
       if (mounted) setState(() => _busy = false);
     }

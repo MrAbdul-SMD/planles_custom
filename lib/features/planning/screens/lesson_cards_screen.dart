@@ -52,6 +52,19 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
 
   bool get _isInstructor => ref.read(currentUserProvider)?.isInstructor == true;
 
+  bool _isSelfReflection(LessonCardQuestion q) {
+    final name = q.category?.name?.toLowerCase() ?? '';
+    return q.category?.id == 2 ||
+        name.contains('zelfreflect') ||
+        name.contains('self reflection') ||
+        name.contains('self-reflection');
+  }
+
+  bool _canAnswer(LessonCardQuestion q) {
+    if (_isInstructor) return true;
+    return _isSelfReflection(q);
+  }
+
   Future<void> _load() async {
     setState(() {
       _loading = true;
@@ -61,17 +74,30 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
       final questions = await ref
           .read(planningRepositoryProvider)
           .lessonCards(widget.planningId);
+
+      // Only instructors can answer lesson-card questions in general; students
+      // may only answer self-reflection questions. For legacy responses that
+      // distinguish by `category.type` (student/instructor), keep that split.
+      final hasTypedCategories =
+          questions.any((q) => (q.category?.type ?? '').isNotEmpty);
       final wanted = _isInstructor ? 'instructor' : 'student';
-      final mine = questions
-          .where((q) => q.category?.type == wanted || q.category == null)
-          .toList();
+      final mine = hasTypedCategories
+          ? questions
+              .where((q) => q.category?.type == wanted || q.category == null)
+              .toList()
+          : questions.where(_canAnswer).toList();
 
       _answers
         ..clear()
         ..addAll(mine.map(_Answer.new));
+      for (final c in _controllers.values) {
+        c.dispose();
+      }
+      _controllers.clear();
       for (final a in _answers) {
         _controllers[a.question.id] = TextEditingController(text: a.text)
           ..addListener(() {
+            if (!_canAnswer(a.question)) return;
             a.text = _controllers[a.question.id]!.text;
             a.dirty = true;
           });
@@ -91,7 +117,8 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
     final l10n = context.l10n;
     final payload = <Map<String, dynamic>>[
       for (final a in _answers)
-        if (a.dirty || (a.text.isNotEmpty && a.question.text != a.text))
+        if (_canAnswer(a.question) &&
+            (a.dirty || (a.text.isNotEmpty && a.question.text != a.text)))
           {
             'questionId': a.question.id,
             'text': a.text,
@@ -124,6 +151,63 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
     } finally {
       if (mounted) setState(() => _saving = false);
     }
+  }
+
+  List<Widget> _buildGroupedAnswers(ThemeData theme) {
+    final widgets = <Widget>[];
+    String? currentCategory;
+    String? currentSubCategory;
+    var index = 0;
+
+    for (final answer in _answers) {
+      index++;
+      final category = answer.question.category?.name;
+      final subCategory = answer.question.subCategory?.name;
+
+      if (category != null && category != currentCategory) {
+        currentCategory = category;
+        currentSubCategory = null;
+        widgets.add(
+          Padding(
+            padding: EdgeInsets.only(top: widgets.isEmpty ? 0 : 12, bottom: 8),
+            child: Text(
+              category,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+        );
+      }
+
+      if (subCategory != null && subCategory != currentSubCategory) {
+        currentSubCategory = subCategory;
+        widgets.add(
+          Padding(
+            padding: const EdgeInsets.only(top: 4, bottom: 8),
+            child: Text(
+              subCategory,
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        );
+      }
+
+      widgets.add(
+        _QuestionCard(
+          index: index,
+          answer: answer,
+          controller: _controllers[answer.question.id]!,
+          editable: _canAnswer(answer.question),
+        ),
+      );
+      widgets.add(const SizedBox(height: 12));
+    }
+
+    return widgets;
   }
 
   @override
@@ -164,17 +248,10 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                for (final (i, answer) in _answers.indexed) ...[
-                  _QuestionCard(
-                    index: i + 1,
-                    answer: answer,
-                    controller: _controllers[answer.question.id]!,
-                  ),
-                  const SizedBox(height: 12),
-                ],
+                ..._buildGroupedAnswers(theme),
               ],
             ),
-      bottomNavigationBar: _answers.isEmpty
+      bottomNavigationBar: _answers.isEmpty || !_answers.any((a) => _canAnswer(a.question))
           ? null
           : SafeArea(
               child: Padding(
@@ -200,17 +277,18 @@ class _QuestionCard extends StatelessWidget {
     required this.index,
     required this.answer,
     required this.controller,
+    this.editable = true,
   });
 
   final int index;
   final _Answer answer;
   final TextEditingController controller;
+  final bool editable;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
-    final sub = answer.question.subCategory?.name;
 
     return Card(
       child: Padding(
@@ -235,23 +313,11 @@ class _QuestionCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        answer.question.title,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      if (sub != null && sub != answer.question.title)
-                        Text(
-                          sub,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                    ],
+                  child: Text(
+                    answer.question.title,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ],
@@ -259,6 +325,8 @@ class _QuestionCard extends StatelessWidget {
             const SizedBox(height: 14),
             TextField(
               controller: controller,
+              enabled: editable,
+              readOnly: !editable,
               minLines: 2,
               maxLines: 4,
               decoration: InputDecoration(
@@ -281,20 +349,24 @@ class _QuestionCard extends StatelessWidget {
                   ChoiceChip(
                     label: Text('$score'),
                     selected: answer.score == score,
-                    onSelected: (_) {
-                      answer.score = score;
-                      answer.dirty = true;
-                      (context as Element).markNeedsBuild();
-                    },
+                    onSelected: editable
+                        ? (_) {
+                            answer.score = score;
+                            answer.dirty = true;
+                            (context as Element).markNeedsBuild();
+                          }
+                        : null,
                   ),
                 ChoiceChip(
                   label: const Text('–'),
                   selected: answer.score == null,
-                  onSelected: (_) {
-                    answer.score = null;
-                    answer.dirty = true;
-                    (context as Element).markNeedsBuild();
-                  },
+                  onSelected: editable
+                      ? (_) {
+                          answer.score = null;
+                          answer.dirty = true;
+                          (context as Element).markNeedsBuild();
+                        }
+                      : null,
                 ),
               ],
             ),

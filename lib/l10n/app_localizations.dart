@@ -1898,6 +1898,12 @@ abstract class AppLocalizations {
   /// **'{duration} les — {amount}'**
   String buyLessonsTotalLine(String duration, String amount);
 
+  /// No description provided for @buyLessonsAddItem.
+  ///
+  /// In nl, this message translates to:
+  /// **'Toevoegen aan bestelling'**
+  String get buyLessonsAddItem;
+
   /// No description provided for @scheduleLessonTitle.
   ///
   /// In nl, this message translates to:

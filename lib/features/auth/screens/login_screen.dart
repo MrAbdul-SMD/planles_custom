@@ -7,7 +7,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/providers.dart';
-import '../../../l10n/language_picker.dart';
 import '../../../l10n/l10n.dart';
 import '../../../shared/widgets.dart';
 import '../providers/auth_provider.dart';
@@ -146,7 +145,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return Scaffold(
       appBar: AppBar(
         actions: [
-          const LanguageMenuButton(),
           IconButton(
             icon: const Icon(Icons.settings_outlined),
             tooltip: 'Environment',

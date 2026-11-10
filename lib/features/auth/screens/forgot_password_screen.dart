@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/network/api_exception.dart';
-import '../../../l10n/language_picker.dart';
 import '../../../l10n/l10n.dart';
 import '../../../shared/widgets.dart';
 import '../providers/auth_provider.dart';
@@ -93,7 +92,6 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.forgotTitle),
-        actions: const [LanguageMenuButton()],
       ),
       body: SafeArea(
         child: Center(

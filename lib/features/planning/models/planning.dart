@@ -136,6 +136,7 @@ class PlanningLog {
 class LessonCardQuestion {
   const LessonCardQuestion({
     required this.id,
+    this.subCategoryId,
     this.name,
     this.text,
     this.score,
@@ -146,42 +147,52 @@ class LessonCardQuestion {
   factory LessonCardQuestion.fromJson(Map<String, dynamic> json) =>
       LessonCardQuestion(
         id: int.tryParse(json['id'].toString()) ?? 0,
+        subCategoryId: int.tryParse(json['subCategoryId'].toString()),
         name: json['name']?.toString(),
         text: json['text']?.toString(),
         score: int.tryParse(json['score'].toString()),
-        category: json['category'] is Map
-            ? LessonCardCategory.fromJson(
-                json['category'] as Map<String, dynamic>,
-              )
-            : null,
-        subCategory: json['subCategory'] is Map
+        category: json['category'] is Map<String, dynamic>
+            ? LessonCardCategory.fromJson(json['category'] as Map<String, dynamic>)
+            : json['category'] is Map
+                ? LessonCardCategory.fromJson(
+                    Map<String, dynamic>.from(json['category'] as Map),
+                  )
+                : null,
+        subCategory: json['subCategory'] is Map<String, dynamic>
             ? LessonCardCategory.fromJson(
                 json['subCategory'] as Map<String, dynamic>,
               )
-            : null,
+            : json['subCategory'] is Map
+                ? LessonCardCategory.fromJson(
+                    Map<String, dynamic>.from(json['subCategory'] as Map),
+                  )
+                : null,
       );
 
   final int id;
+  final int? subCategoryId;
   final String? name;
   final String? text;
   final int? score;
   final LessonCardCategory? category;
   final LessonCardCategory? subCategory;
 
-  String get title => name ?? subCategory?.name ?? 'Vraag $id';
+  String get title => name ?? 'Vraag $id';
 }
 
 class LessonCardCategory {
-  const LessonCardCategory({this.id, this.name, this.type});
+  const LessonCardCategory({this.id, this.name, this.type, this.categoryId});
 
   factory LessonCardCategory.fromJson(Map<String, dynamic> json) =>
       LessonCardCategory(
         id: int.tryParse(json['id'].toString()),
         name: json['name']?.toString(),
         type: json['type']?.toString(),
+        categoryId: int.tryParse(json['categoryId'].toString()),
       );
 
   final int? id;
   final String? name;
   final String? type;
+  final int? categoryId;
 }

@@ -701,6 +701,7 @@
       }
     }
   },
+  "buyLessonsAddItem": "Toevoegen aan bestelling",
   "scheduleLessonTitle": "Les inplannen",
   "scheduleLessonChooseDateTime": "Kies een datum en starttijd.",
   "scheduleLessonFutureDate": "De les moet in de toekomst liggen.",

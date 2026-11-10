@@ -299,6 +299,7 @@
   "buyLessonsLessonTypePack": "Lesson package",
   "buyLessonsLessonTypeExam": "Exam",
   "buyLessonsTotalLine": "{duration} lesson — {amount}",
+  "buyLessonsAddItem": "Add to order",
   "scheduleLessonTitle": "Schedule lesson",
   "scheduleLessonChooseDateTime": "Choose a date and start time.",
   "scheduleLessonFutureDate": "The lesson must be in the future.",

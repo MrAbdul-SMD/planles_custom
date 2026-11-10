@@ -971,6 +971,9 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
+  String get buyLessonsAddItem => 'Toevoegen aan bestelling';
+
+  @override
   String get scheduleLessonTitle => 'Les inplannen';
 
   @override
