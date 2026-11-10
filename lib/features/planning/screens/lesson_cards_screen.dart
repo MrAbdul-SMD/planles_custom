@@ -155,58 +155,85 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
   }
 
   List<Widget> _buildGroupedAnswers(ThemeData theme) {
-    final widgets = <Widget>[];
-    String? currentCategory;
-    String? currentSubCategory;
-    var index = 0;
+    final grouped = <String, Map<String, List<_Answer>>>{};
+    const otherCategory = '__other__';
+    const otherSub = '__other__';
 
     for (final answer in _answers) {
-      index++;
-      final category = answer.question.category?.name;
-      final subCategory = answer.question.subCategory?.name;
+      final category = answer.question.category?.name ?? otherCategory;
+      final subCategory = answer.question.subCategory?.name ?? otherSub;
+      grouped
+          .putIfAbsent(category, () => <String, List<_Answer>>{})
+          .putIfAbsent(subCategory, () => <_Answer>[])
+          .add(answer);
+    }
 
-      if (category != null && category != currentCategory) {
-        currentCategory = category;
-        currentSubCategory = null;
-        widgets.add(
-          Padding(
-            padding: EdgeInsets.only(top: widgets.isEmpty ? 0 : 12, bottom: 8),
-            child: Text(
-              category,
-              style: theme.textTheme.titleMedium?.copyWith(
+    final widgets = <Widget>[];
+    var index = 0;
+
+    grouped.forEach((category, subGroups) {
+      final total = subGroups.values.fold<int>(0, (s, l) => s + l.length);
+      final answered = subGroups.values.fold<int>(
+        0,
+        (s, l) =>
+            s +
+            l.where((a) => a.text.trim().isNotEmpty || a.score != null).length,
+      );
+
+      widgets.add(
+        Card(
+          clipBehavior: Clip.antiAlias,
+          margin: const EdgeInsets.only(bottom: 12),
+          child: ExpansionTile(
+            initiallyExpanded: widgets.isEmpty,
+            tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+            title: Text(
+              category == otherCategory ? '-' : category,
+              style: theme.textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.w800,
               ),
             ),
-          ),
-        );
-      }
-
-      if (subCategory != null && subCategory != currentSubCategory) {
-        currentSubCategory = subCategory;
-        widgets.add(
-          Padding(
-            padding: const EdgeInsets.only(top: 4, bottom: 8),
-            child: Text(
-              subCategory,
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: theme.colorScheme.primary,
-                fontWeight: FontWeight.w700,
+            subtitle: Text(
+              '$answered/$total',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
+            children: [
+              for (final entry in subGroups.entries) ...[
+                if (entry.key != otherSub)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(4, 8, 4, 6),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        entry.key,
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                for (final answer in entry.value) ...[
+                  () {
+                    index++;
+                    return _QuestionCard(
+                      index: index,
+                      answer: answer,
+                      controller: _controllers[answer.question.id]!,
+                      editable: _canAnswer(answer.question),
+                    );
+                  }(),
+                  const SizedBox(height: 8),
+                ],
+              ],
+            ],
           ),
-        );
-      }
-
-      widgets.add(
-        _QuestionCard(
-          index: index,
-          answer: answer,
-          controller: _controllers[answer.question.id]!,
-          editable: _canAnswer(answer.question),
         ),
       );
-      widgets.add(const SizedBox(height: 12));
-    }
+    });
 
     return widgets;
   }
@@ -215,6 +242,10 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
+    final hasEditable = _answers.any((a) => _canAnswer(a.question));
+    final answered = _answers
+        .where((a) => a.text.trim().isNotEmpty || a.score != null)
+        .length;
 
     return Scaffold(
       appBar: AppBar(
@@ -230,42 +261,48 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
-          ? ErrorView(message: describeError(context, _error!), onRetry: _load)
-          : _answers.isEmpty
-          ? EmptyState(
-              icon: Icons.fact_check_outlined,
-              title: l10n.lessonCardEmptyTitle,
-              subtitle: l10n.lessonCardEmptySubtitle,
-            )
-          : ListView(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
-              children: [
-                Text(
-                  _isInstructor
-                      ? l10n.lessonCardInstructorIntro
-                      : l10n.lessonCardStudentIntro,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                ..._buildGroupedAnswers(theme),
-              ],
-            ),
-      bottomNavigationBar: _answers.isEmpty || !_answers.any((a) => _canAnswer(a.question))
+              ? ErrorView(
+                  message: describeError(context, _error!),
+                  onRetry: _load,
+                )
+              : _answers.isEmpty
+                  ? EmptyState(
+                      icon: Icons.fact_check_outlined,
+                      title: l10n.lessonCardEmptyTitle,
+                      subtitle: l10n.lessonCardEmptySubtitle,
+                    )
+                  : ListView(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+                      children: [
+                        if (_answers.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(4, 0, 4, 12),
+                            child: Text(
+                              '$answered/${_answers.length}',
+                              style: theme.textTheme.labelLarge?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ..._buildGroupedAnswers(theme),
+                      ],
+                    ),
+      bottomNavigationBar: !hasEditable
           ? null
           : SafeArea(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
-                child: FilledButton(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                child: FilledButton.icon(
                   onPressed: _saving ? null : _save,
-                  child: _saving
+                  icon: _saving
                       ? const SizedBox(
-                          width: 22,
-                          height: 22,
-                          child: CircularProgressIndicator(strokeWidth: 2.4),
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2.2),
                         )
-                      : Text(l10n.lessonCardSave),
+                      : const Icon(Icons.save_outlined),
+                  label: Text(l10n.lessonCardSave),
                 ),
               ),
             ),
@@ -291,88 +328,109 @@ class _QuestionCard extends StatelessWidget {
     final l10n = context.l10n;
     final theme = Theme.of(context);
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CircleAvatar(
-                  radius: 14,
-                  backgroundColor: theme.colorScheme.primaryContainer,
-                  child: Text(
-                    '$index',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: theme.colorScheme.onPrimaryContainer,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    answer.question.title,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ],
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.45),
+        ),
+      ),
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            answer.question.title,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w600,
             ),
-            const SizedBox(height: 14),
+          ),
+          const SizedBox(height: 10),
+          if (editable)
             TextField(
               controller: controller,
-              enabled: editable,
-              readOnly: !editable,
-              minLines: 2,
-              maxLines: 4,
+              minLines: 1,
+              maxLines: 3,
+              textInputAction: TextInputAction.newline,
               decoration: InputDecoration(
-                labelText: l10n.lessonCardAnswerLabel,
+                isDense: true,
+                hintText: l10n.lessonCardAnswerLabel,
+                border: const OutlineInputBorder(),
               ),
-            ),
-            const SizedBox(height: 14),
-            Text(
-              l10n.lessonCardScoreLabel,
-              style: theme.textTheme.labelMedium?.copyWith(
-                fontWeight: FontWeight.w600,
+            )
+          else
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerHighest
+                    .withValues(alpha: 0.35),
+                borderRadius: BorderRadius.circular(10),
               ),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 6,
-              runSpacing: 6,
-              children: [
-                for (final score in const [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-                  ChoiceChip(
-                    label: Text('$score'),
-                    selected: answer.score == score,
-                    onSelected: editable
-                        ? (_) {
-                            answer.score = score;
-                            answer.dirty = true;
-                            (context as Element).markNeedsBuild();
-                          }
-                        : null,
-                  ),
-                ChoiceChip(
-                  label: const Text('–'),
-                  selected: answer.score == null,
-                  onSelected: editable
-                      ? (_) {
-                          answer.score = null;
-                          answer.dirty = true;
-                          (context as Element).markNeedsBuild();
-                        }
-                      : null,
+              child: Text(
+                controller.text.trim().isEmpty ? '—' : controller.text,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: controller.text.trim().isEmpty
+                      ? theme.colorScheme.outline
+                      : theme.colorScheme.onSurface,
                 ),
-              ],
+              ),
             ),
-          ],
-        ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Text(
+                '${l10n.lessonCardScoreLabel}:',
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      for (final score in const [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+                        Padding(
+                          padding: const EdgeInsets.only(right: 6),
+                          child: ChoiceChip(
+                            visualDensity: VisualDensity.compact,
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
+                            label: Text('$score'),
+                            selected: answer.score == score,
+                            onSelected: editable
+                                ? (_) {
+                                    answer.score = score;
+                                    answer.dirty = true;
+                                    (context as Element).markNeedsBuild();
+                                  }
+                                : null,
+                          ),
+                        ),
+                      ChoiceChip(
+                        visualDensity: VisualDensity.compact,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        label: const Text('–'),
+                        selected: answer.score == null,
+                        onSelected: editable
+                            ? (_) {
+                                answer.score = null;
+                                answer.dirty = true;
+                                (context as Element).markNeedsBuild();
+                              }
+                            : null,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
