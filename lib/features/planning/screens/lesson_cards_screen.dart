@@ -75,9 +75,10 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
           .read(planningRepositoryProvider)
           .lessonCards(widget.planningId);
 
-      // Only instructors can answer lesson-card questions in general; students
-      // may only answer self-reflection questions. For legacy responses that
-      // distinguish by `category.type` (student/instructor), keep that split.
+      // Instructors can answer all lesson-card questions. Students may answer only
+      // self-reflection questions, but must be able to view all questions/answers
+      // in read-only form. For legacy responses that distinguish by
+      // `category.type` (student/instructor), keep that split.
       final hasTypedCategories =
           questions.any((q) => (q.category?.type ?? '').isNotEmpty);
       final wanted = _isInstructor ? 'instructor' : 'student';
@@ -85,7 +86,7 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
           ? questions
               .where((q) => q.category?.type == wanted || q.category == null)
               .toList()
-          : questions.where(_canAnswer).toList();
+          : questions;
 
       _answers
         ..clear()
