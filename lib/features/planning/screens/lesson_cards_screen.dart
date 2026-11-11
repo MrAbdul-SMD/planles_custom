@@ -52,17 +52,31 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
 
   bool get _isInstructor => ref.read(currentUserProvider)?.isInstructor == true;
 
-  bool _isSelfReflection(LessonCardQuestion q) {
+  bool _isStudentType(LessonCardQuestion q) {
+    final type = q.category?.type?.toLowerCase();
+    if (type == 'student') return true;
+    if (type == 'instructor') return false;
+
     final name = q.category?.name?.toLowerCase() ?? '';
-    return q.category?.id == 2 ||
-        name.contains('zelfreflect') ||
+    final subName = q.subCategory?.name?.toLowerCase() ?? '';
+    if (name.contains('zelfreflect') ||
         name.contains('self reflection') ||
-        name.contains('self-reflection');
+        name.contains('self-reflection') ||
+        subName.contains('zelfreflect') ||
+        subName.contains('self reflection') ||
+        subName.contains('self-reflection')) {
+      return true;
+    }
+
+    // Fallback for known sample data when API type is not provided.
+    return q.category?.id == 2;
   }
 
+  bool _isInstructorType(LessonCardQuestion q) => !_isStudentType(q);
+
   bool _canAnswer(LessonCardQuestion q) {
-    if (_isInstructor) return true;
-    return _isSelfReflection(q);
+    if (_isInstructor) return _isInstructorType(q);
+    return _isStudentType(q);
   }
 
   Future<void> _load() async {
@@ -75,18 +89,10 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
           .read(planningRepositoryProvider)
           .lessonCards(widget.planningId);
 
-      // Instructors can answer all lesson-card questions. Students may answer only
-      // self-reflection questions, but must be able to view all questions/answers
-      // in read-only form. For legacy responses that distinguish by
-      // `category.type` (student/instructor), keep that split.
-      final hasTypedCategories =
-          questions.any((q) => (q.category?.type ?? '').isNotEmpty);
-      final wanted = _isInstructor ? 'instructor' : 'student';
-      final mine = hasTypedCategories
-          ? questions
-              .where((q) => q.category?.type == wanted || q.category == null)
-              .toList()
-          : questions;
+      // Instructors update instructor-type categories, students update
+      // student-type (self-reflection) categories. Everyone can view all
+      // questions and answers in read-only form when not editable.
+      final mine = questions;
 
       _answers
         ..clear()
@@ -119,11 +125,13 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
     final payload = <Map<String, dynamic>>[
       for (final a in _answers)
         if (_canAnswer(a.question) &&
-            (a.dirty || (a.text.isNotEmpty && a.question.text != a.text)))
+            (a.dirty ||
+                a.text != (a.question.text ?? '') ||
+                a.score != a.question.score))
           {
             'questionId': a.question.id,
             'text': a.text,
-            if (a.score != null) 'score': a.score,
+            'score': a.score,
           },
     ];
 
@@ -180,6 +188,12 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
             l.where((a) => a.text.trim().isNotEmpty || a.score != null).length,
       );
 
+      final first = subGroups.values.isNotEmpty &&
+              subGroups.values.first.isNotEmpty
+          ? subGroups.values.first.first.question
+          : null;
+      final studentType = first != null && _isStudentType(first);
+
       widgets.add(
         Card(
           margin: const EdgeInsets.only(bottom: 10),
@@ -191,11 +205,36 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
             visualDensity: VisualDensity.compact,
             tilePadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
             childrenPadding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
-            title: Text(
-              category,
-              style: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
+            title: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    category,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: studentType
+                        ? theme.colorScheme.secondaryContainer
+                        : theme.colorScheme.tertiaryContainer,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    studentType ? 'Student' : 'Instructor',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: studentType
+                          ? theme.colorScheme.onSecondaryContainer
+                          : theme.colorScheme.onTertiaryContainer,
+                    ),
+                  ),
+                ),
+              ],
             ),
             subtitle: Text(
               '$answered/$total',
@@ -217,9 +256,7 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      entry.key == uncategorized
-                          ? category
-                          : entry.key,
+                      entry.key == uncategorized ? category : entry.key,
                       style: theme.textTheme.labelMedium?.copyWith(
                         color: theme.colorScheme.primary,
                         fontWeight: FontWeight.w700,
@@ -277,6 +314,25 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
             icon: const Icon(Icons.refresh_rounded),
           ),
         ],
+        bottom: _answers.isEmpty
+            ? null
+            : PreferredSize(
+                preferredSize: const Size.fromHeight(28),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      _isInstructor
+                          ? 'Update instructor categories'
+                          : 'Update self-reflection (student) categories',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
