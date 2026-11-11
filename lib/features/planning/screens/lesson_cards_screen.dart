@@ -188,135 +188,160 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
             s +
             l.where((a) => a.text.trim().isNotEmpty || a.score != null).length,
       );
-      final categoryKey = 'lesson-cat-$categoryIndex-${category.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '')}';
+      final categoryKey =
+          'lesson-cat-$categoryIndex-${category.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '')}';
       final expanded = _expandedCategories.putIfAbsent(
         category,
         () => categoryIndex == 1,
       );
 
-      final first = subGroups.values.isNotEmpty &&
-              subGroups.values.first.isNotEmpty
-          ? subGroups.values.first.first.question
-          : null;
+      final first =
+          subGroups.values.isNotEmpty && subGroups.values.first.isNotEmpty
+              ? subGroups.values.first.first.question
+              : null;
       final studentType = first != null && _isStudentType(first);
+      final accent = studentType
+          ? theme.colorScheme.secondary
+          : theme.colorScheme.primary;
+      final accentContainer = studentType
+          ? theme.colorScheme.secondaryContainer
+          : theme.colorScheme.primaryContainer;
+      final onAccentContainer = studentType
+          ? theme.colorScheme.onSecondaryContainer
+          : theme.colorScheme.onPrimaryContainer;
+      final progress = total == 0 ? 0.0 : answered / total;
 
       widgets.add(
-        Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: Card(
-            margin: EdgeInsets.zero,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(18),
+        Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
             ),
-            clipBehavior: Clip.antiAlias,
-            child: Theme(
-              data: Theme.of(context).copyWith(
-                dividerColor: Colors.transparent,
-              ),
-              child: ExpansionTile(
-                key: ValueKey(categoryKey),
-                initiallyExpanded: expanded,
-                onExpansionChanged: (value) {
-                  setState(() => _expandedCategories[category] = value);
-                },
-                tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-                collapsedShape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-                backgroundColor: theme.colorScheme.surface,
-                collapsedBackgroundColor: theme.colorScheme.surface,
-                title: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        category,
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          color: theme.colorScheme.onSurface,
-                          letterSpacing: -0.4,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: studentType
-                            ? theme.colorScheme.secondaryContainer
-                            : theme.colorScheme.tertiaryContainer,
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Text(
-                        studentType ? 'Student' : 'Instructor',
-                        style: theme.textTheme.labelMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: studentType
-                              ? theme.colorScheme.onSecondaryContainer
-                              : theme.colorScheme.onTertiaryContainer,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                subtitle: Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text(
-                    '$answered/$total',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Theme(
+            data: theme.copyWith(dividerColor: Colors.transparent),
+            child: ExpansionTile(
+              key: ValueKey(categoryKey),
+              initiallyExpanded: expanded,
+              onExpansionChanged: (value) {
+                setState(() => _expandedCategories[category] = value);
+              },
+              tilePadding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+              shape: const RoundedRectangleBorder(),
+              collapsedShape: const RoundedRectangleBorder(),
+              iconColor: accent,
+              collapsedIconColor: theme.colorScheme.onSurfaceVariant,
+              title: Row(
                 children: [
                   Container(
-                    width: double.infinity,
+                    width: 34,
+                    height: 34,
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.primaryContainer.withValues(alpha: 0.18),
-                      borderRadius: BorderRadius.circular(12),
+                      color: accentContainer,
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        for (final entry in subGroups.entries) ...[
-                          if (entry.key != uncategorized || subGroups.length > 1)
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 8, top: 2),
-                              child: Text(
-                                entry.key == uncategorized ? category : entry.key,
-                                style: theme.textTheme.labelLarge?.copyWith(
-                                  color: theme.colorScheme.primary,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                            ),
-                          for (final (i, answer) in entry.value.indexed) ...[
-                            Container(
-                              margin: const EdgeInsets.only(bottom: 6),
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: theme.colorScheme.surface,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: theme.colorScheme.outlineVariant,
-                                  width: 1,
-                                ),
-                              ),
-                              child: _QuestionRow(
-                                answer: answer,
-                                controller: _controllers[answer.question.id]!,
-                                editable: _canAnswer(answer.question),
-                              ),
-                            ),
-                            if (i != entry.value.length - 1)
-                              const SizedBox(height: 6),
-                          ],
-                        ],
-                      ],
+                    child: Icon(
+                      studentType
+                          ? Icons.self_improvement_rounded
+                          : Icons.fact_check_rounded,
+                      size: 18,
+                      color: onAccentContainer,
                     ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      category,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                  ),
+                  _TypePill(
+                    label: studentType ? 'Student' : 'Instructor',
+                    color: accentContainer,
+                    textColor: onAccentContainer,
                   ),
                 ],
               ),
+              subtitle: Padding(
+                padding: const EdgeInsets.only(top: 8, left: 44),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(999),
+                            child: LinearProgressIndicator(
+                              value: progress,
+                              minHeight: 6,
+                              backgroundColor: theme
+                                  .colorScheme.surfaceContainerHighest
+                                  .withValues(alpha: 0.7),
+                              valueColor: AlwaysStoppedAnimation<Color>(accent),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          '$answered/$total',
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              children: [
+                for (final entry in subGroups.entries) ...[
+                  if (entry.key != uncategorized || subGroups.length > 1)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(2, 8, 2, 6),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 4,
+                            height: 16,
+                            decoration: BoxDecoration(
+                              color: accent,
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              entry.key == uncategorized ? category : entry.key,
+                              style: theme.textTheme.labelLarge?.copyWith(
+                                color: theme.colorScheme.onSurface,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  for (final (i, answer) in entry.value.indexed)
+                    _QuestionRow(
+                      answer: answer,
+                      controller: _controllers[answer.question.id]!,
+                      editable: _canAnswer(answer.question),
+                    ),
+                  if (entry.key != subGroups.keys.last)
+                    const SizedBox(height: 4),
+                ],
+              ],
             ),
           ),
         ),
@@ -334,49 +359,19 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
     final answered = _answers
         .where((a) => a.text.trim().isNotEmpty || a.score != null)
         .length;
+    final total = _answers.length;
+    final progress = total == 0 ? 0.0 : answered / total;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.lessonCardTitle),
         actions: [
-          if (_answers.isNotEmpty)
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.only(right: 4),
-                child: Text(
-                  '$answered/${_answers.length}',
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ),
           IconButton(
             tooltip: l10n.lessonCardRefresh,
             onPressed: _loading ? null : _load,
             icon: const Icon(Icons.refresh_rounded),
           ),
         ],
-        bottom: _answers.isEmpty
-            ? null
-            : PreferredSize(
-                preferredSize: const Size.fromHeight(28),
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      _isInstructor
-                          ? 'Update instructor categories'
-                          : 'Update self-reflection (student) categories',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
@@ -392,23 +387,102 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
                       subtitle: l10n.lessonCardEmptySubtitle,
                     )
                   : ListView(
-                      padding: const EdgeInsets.fromLTRB(12, 4, 12, 24),
-                      children: _buildGroupedAnswers(theme),
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.surfaceContainerLow,
+                            borderRadius: BorderRadius.circular(18),
+                            border: Border.all(
+                              color: theme.colorScheme.outlineVariant
+                                  .withValues(alpha: 0.5),
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    _isInstructor
+                                        ? Icons.assignment_ind_rounded
+                                        : Icons.edit_note_rounded,
+                                    color: theme.colorScheme.primary,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      _isInstructor
+                                          ? 'Update instructor categories'
+                                          : 'Update self-reflection (student) categories',
+                                      style:
+                                          theme.textTheme.titleSmall?.copyWith(
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ),
+                                  Text(
+                                    '$answered/$total',
+                                    style:
+                                        theme.textTheme.labelLarge?.copyWith(
+                                      fontWeight: FontWeight.w800,
+                                      color: theme.colorScheme.primary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(999),
+                                child: LinearProgressIndicator(
+                                  value: progress,
+                                  minHeight: 8,
+                                  backgroundColor: theme
+                                      .colorScheme.surfaceContainerHighest
+                                      .withValues(alpha: 0.7),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                hasEditable
+                                    ? 'Editable items are highlighted. Others are read-only.'
+                                    : 'Read-only view.',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        ..._buildGroupedAnswers(theme),
+                      ],
                     ),
       bottomNavigationBar: !hasEditable
           ? null
           : SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(12, 6, 12, 10),
-                child: FilledButton(
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface,
+                  border: Border(
+                    top: BorderSide(
+                      color: theme.colorScheme.outlineVariant
+                          .withValues(alpha: 0.4),
+                    ),
+                  ),
+                ),
+                child: FilledButton.icon(
                   onPressed: _saving ? null : _save,
-                  child: _saving
+                  icon: _saving
                       ? const SizedBox(
-                          width: 20,
-                          height: 20,
+                          width: 18,
+                          height: 18,
                           child: CircularProgressIndicator(strokeWidth: 2.2),
                         )
-                      : Text(l10n.lessonCardSave),
+                      : const Icon(Icons.save_rounded),
+                  label: Text(l10n.lessonCardSave),
                 ),
               ),
             ),
@@ -439,116 +513,235 @@ class _QuestionRowState extends State<_QuestionRow> {
     final answer = widget.answer;
     final controller = widget.controller;
     final editable = widget.editable;
+    final hasContent = answer.text.trim().isNotEmpty || answer.score != null;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: editable
+            ? theme.colorScheme.surface
+            : theme.colorScheme.surfaceContainerLow.withValues(alpha: 0.55),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: editable
+              ? theme.colorScheme.primary.withValues(alpha: 0.18)
+              : theme.colorScheme.outlineVariant.withValues(alpha: 0.35),
+        ),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Container(
+                margin: const EdgeInsets.only(top: 2),
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: hasContent
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.outlineVariant,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   answer.question.title,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                    height: 1.25,
+                    fontWeight: FontWeight.w600,
+                    height: 1.3,
                   ),
                 ),
               ),
               const SizedBox(width: 8),
-              if (editable)
-                DropdownButton<int?>(
-                  value: answer.score,
-                  isDense: true,
-                  underline: const SizedBox.shrink(),
-                  alignment: AlignmentDirectional.centerEnd,
-                  icon: const Icon(Icons.expand_more, size: 18),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: theme.colorScheme.onSurface,
-                  ),
-                  items: [
-                    DropdownMenuItem<int?>(
-                      value: null,
-                      child: Text('–', style: theme.textTheme.bodySmall),
-                    ),
-                    for (final s in const [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-                      DropdownMenuItem<int?>(
-                        value: s,
-                        child: Text('$s'),
-                      ),
-                  ],
-                  onChanged: (value) {
-                    setState(() {
-                      answer.score = value;
-                      answer.dirty = true;
-                    });
-                  },
-                )
-              else
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: answer.score == null
-                        ? theme.colorScheme.surfaceContainerHighest
-                            .withValues(alpha: 0.4)
-                        : theme.colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    answer.score?.toString() ?? '–',
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: answer.score == null
-                          ? theme.colorScheme.onSurfaceVariant
-                          : theme.colorScheme.onPrimaryContainer,
-                    ),
-                  ),
-                ),
+              _ScoreControl(
+                score: answer.score,
+                editable: editable,
+                onChanged: (value) {
+                  setState(() {
+                    answer.score = value;
+                    answer.dirty = true;
+                  });
+                },
+              ),
             ],
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 10),
           if (editable)
-            SizedBox(
-              width: double.infinity,
-              child: TextField(
-                controller: controller,
-                keyboardType: TextInputType.multiline,
-                textInputAction: TextInputAction.newline,
-                minLines: 1,
-                maxLines: 3,
-                expands: false,
-                style: theme.textTheme.bodySmall,
-                onChanged: (value) {
-                  if (!widget.editable) return;
-                  answer.text = value;
-                  answer.dirty = true;
-                },
-                decoration: InputDecoration(
-                  isDense: true,
-                  hintText: l10n.lessonCardAnswerLabel,
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
+            TextField(
+              controller: controller,
+              keyboardType: TextInputType.multiline,
+              textInputAction: TextInputAction.newline,
+              minLines: 1,
+              maxLines: 4,
+              expands: false,
+              style: theme.textTheme.bodyMedium,
+              onChanged: (value) {
+                if (!widget.editable) return;
+                answer.text = value;
+                answer.dirty = true;
+              },
+              decoration: InputDecoration(
+                hintText: l10n.lessonCardAnswerLabel,
+                filled: true,
+                fillColor:
+                    theme.colorScheme.surfaceContainerLowest.withValues(alpha: 0.8),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: theme.colorScheme.outlineVariant.withValues(alpha: 0.6),
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: theme.colorScheme.outlineVariant.withValues(alpha: 0.6),
                   ),
                 ),
               ),
             )
-          else if (answer.text.trim().isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 2),
+          else
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface.withValues(alpha: 0.7),
+                borderRadius: BorderRadius.circular(12),
+              ),
               child: Text(
-                answer.text.trim(),
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+                controller.text.trim().isEmpty ? '—' : controller.text.trim(),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: controller.text.trim().isEmpty
+                      ? theme.colorScheme.outline
+                      : theme.colorScheme.onSurfaceVariant,
+                  height: 1.35,
                 ),
               ),
             ),
+          if (!editable) ...[
+            const SizedBox(height: 6),
+            Text(
+              'Read-only',
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.outline,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
         ],
+      ),
+    );
+  }
+}
+
+class _ScoreControl extends StatelessWidget {
+  const _ScoreControl({
+    required this.score,
+    required this.editable,
+    required this.onChanged,
+  });
+
+  final int? score;
+  final bool editable;
+  final ValueChanged<int?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final hasScore = score != null;
+    final bg = hasScore
+        ? theme.colorScheme.primaryContainer
+        : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.7);
+    final fg = hasScore
+        ? theme.colorScheme.onPrimaryContainer
+        : theme.colorScheme.onSurfaceVariant;
+
+    if (!editable) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Text(
+          score?.toString() ?? '–',
+          style: theme.textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.w800,
+            color: fg,
+          ),
+        ),
+      );
+    }
+
+    return PopupMenuButton<int?>(
+      tooltip: 'Score',
+      initialValue: score,
+      onSelected: onChanged,
+      itemBuilder: (context) => [
+        const PopupMenuItem<int?>(value: null, child: Text('–  No score')),
+        for (final s in const [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+          PopupMenuItem<int?>(value: s, child: Text('$s')),
+      ],
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: hasScore
+                ? Colors.transparent
+                : theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              score?.toString() ?? '–',
+              style: theme.textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeight.w800,
+                color: fg,
+              ),
+            ),
+            const SizedBox(width: 2),
+            Icon(Icons.unfold_more_rounded, size: 16, color: fg),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TypePill extends StatelessWidget {
+  const _TypePill({
+    required this.label,
+    required this.color,
+    required this.textColor,
+  });
+
+  final String label;
+  final Color color;
+  final Color textColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: textColor,
+            ),
       ),
     );
   }
