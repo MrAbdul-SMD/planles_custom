@@ -32,6 +32,7 @@ class _Answer {
 class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
   final List<_Answer> _answers = [];
   final Map<int, TextEditingController> _controllers = {};
+  final Map<String, bool> _expandedCategories = {};
   bool _loading = true;
   bool _saving = false;
   Object? _error;
@@ -187,6 +188,11 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
             s +
             l.where((a) => a.text.trim().isNotEmpty || a.score != null).length,
       );
+      final categoryKey = 'lesson-cat-$categoryIndex-${category.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '')}';
+      final expanded = _expandedCategories.putIfAbsent(
+        category,
+        () => categoryIndex == 1,
+      );
 
       final first = subGroups.values.isNotEmpty &&
               subGroups.values.first.isNotEmpty
@@ -195,85 +201,123 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
       final studentType = first != null && _isStudentType(first);
 
       widgets.add(
-        Card(
-          margin: const EdgeInsets.only(bottom: 10),
-          clipBehavior: Clip.antiAlias,
-          child: ExpansionTile(
-            key: PageStorageKey('lesson-cat-$category'),
-            initiallyExpanded: categoryIndex == 1,
-            dense: true,
-            visualDensity: VisualDensity.compact,
-            tilePadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
-            childrenPadding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
-            title: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    category,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: studentType
-                        ? theme.colorScheme.secondaryContainer
-                        : theme.colorScheme.tertiaryContainer,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Text(
-                    studentType ? 'Student' : 'Instructor',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: studentType
-                          ? theme.colorScheme.onSecondaryContainer
-                          : theme.colorScheme.onTertiaryContainer,
-                    ),
-                  ),
-                ),
-              ],
+        Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Card(
+            margin: EdgeInsets.zero,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
             ),
-            subtitle: Text(
-              '$answered/$total',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+            clipBehavior: Clip.antiAlias,
+            child: Theme(
+              data: Theme.of(context).copyWith(
+                dividerColor: Colors.transparent,
               ),
-            ),
-            children: [
-              for (final entry in subGroups.entries) ...[
-                if (entry.key != uncategorized || subGroups.length > 1)
-                  Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.only(top: 6, bottom: 2),
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primaryContainer
-                          .withValues(alpha: 0.35),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      entry.key == uncategorized ? category : entry.key,
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.w700,
+              child: ExpansionTile(
+                key: ValueKey(categoryKey),
+                initiallyExpanded: expanded,
+                onExpansionChanged: (value) {
+                  setState(() => _expandedCategories[category] = value);
+                },
+                tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                collapsedShape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                backgroundColor: theme.colorScheme.surface,
+                collapsedBackgroundColor: theme.colorScheme.surface,
+                title: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        category,
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: theme.colorScheme.onSurface,
+                          letterSpacing: -0.4,
+                        ),
                       ),
                     ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: studentType
+                            ? theme.colorScheme.secondaryContainer
+                            : theme.colorScheme.tertiaryContainer,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        studentType ? 'Student' : 'Instructor',
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: studentType
+                              ? theme.colorScheme.onSecondaryContainer
+                              : theme.colorScheme.onTertiaryContainer,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                subtitle: Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    '$answered/$total',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                for (final (i, answer) in entry.value.indexed) ...[
-                  _QuestionRow(
-                    answer: answer,
-                    controller: _controllers[answer.question.id]!,
-                    editable: _canAnswer(answer.question),
+                ),
+                children: [
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primaryContainer.withValues(alpha: 0.18),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        for (final entry in subGroups.entries) ...[
+                          if (entry.key != uncategorized || subGroups.length > 1)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8, top: 2),
+                              child: Text(
+                                entry.key == uncategorized ? category : entry.key,
+                                style: theme.textTheme.labelLarge?.copyWith(
+                                  color: theme.colorScheme.primary,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ),
+                          for (final (i, answer) in entry.value.indexed) ...[
+                            Container(
+                              margin: const EdgeInsets.only(bottom: 6),
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.surface,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: theme.colorScheme.outlineVariant,
+                                  width: 1,
+                                ),
+                              ),
+                              child: _QuestionRow(
+                                answer: answer,
+                                controller: _controllers[answer.question.id]!,
+                                editable: _canAnswer(answer.question),
+                              ),
+                            ),
+                            if (i != entry.value.length - 1)
+                              const SizedBox(height: 6),
+                          ],
+                        ],
+                      ],
+                    ),
                   ),
-                  if (i != entry.value.length - 1)
-                    const Divider(height: 1, indent: 0, endIndent: 0),
                 ],
-              ],
-            ],
+              ),
+            ),
           ),
         ),
       );
@@ -472,10 +516,17 @@ class _QuestionRowState extends State<_QuestionRow> {
               width: double.infinity,
               child: TextField(
                 controller: controller,
+                keyboardType: TextInputType.multiline,
+                textInputAction: TextInputAction.newline,
                 minLines: 1,
-                maxLines: 2,
+                maxLines: 3,
                 expands: false,
                 style: theme.textTheme.bodySmall,
+                onChanged: (value) {
+                  if (!widget.editable) return;
+                  answer.text = value;
+                  answer.dirty = true;
+                },
                 decoration: InputDecoration(
                   isDense: true,
                   hintText: l10n.lessonCardAnswerLabel,
@@ -487,11 +538,11 @@ class _QuestionRowState extends State<_QuestionRow> {
                 ),
               ),
             )
-          else if (controller.text.trim().isNotEmpty)
+          else if (answer.text.trim().isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(top: 2),
               child: Text(
-                controller.text.trim(),
+                answer.text.trim(),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
