@@ -399,7 +399,7 @@ class _QuestionRowState extends State<_QuestionRow> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -468,18 +468,22 @@ class _QuestionRowState extends State<_QuestionRow> {
           ),
           const SizedBox(height: 6),
           if (editable)
-            TextField(
-              controller: controller,
-              minLines: 1,
-              maxLines: 2,
-              style: theme.textTheme.bodySmall,
-              decoration: InputDecoration(
-                isDense: true,
-                hintText: l10n.lessonCardAnswerLabel,
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
+            SizedBox(
+              width: double.infinity,
+              child: TextField(
+                controller: controller,
+                minLines: 1,
+                maxLines: 2,
+                expands: false,
+                style: theme.textTheme.bodySmall,
+                decoration: InputDecoration(
+                  isDense: true,
+                  hintText: l10n.lessonCardAnswerLabel,
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               ),
             )
