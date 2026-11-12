@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/network/api_client.dart';
 import '../../../l10n/l10n.dart';
 import '../../../shared/widgets.dart';
 import '../../auth/models/user.dart';
@@ -92,6 +93,19 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   void _clearCarImage() {
     setState(() => _carImage = null);
+  }
+
+  String? get _existingCarImageUrl {
+    final raw = (_initial.carImageUrl?.trim().isNotEmpty ?? false)
+        ? _initial.carImageUrl!.trim()
+        : _initial.carImage?.trim();
+    if (raw == null || raw.isEmpty) return null;
+    if (raw.startsWith('http://') || raw.startsWith('https://')) return raw;
+    final base = Uri.tryParse(ApiClient.resolvedBaseUrl);
+    if (base == null) return raw;
+    final origin = '${base.scheme}://${base.authority}';
+    if (raw.startsWith('/')) return '$origin$raw';
+    return '$origin/$raw';
   }
 
   Future<void> _save() async {
@@ -333,55 +347,101 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                             .withValues(alpha: 0.5),
                       ),
                     ),
-                    child: Row(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: _carImage == null
-                              ? Text(
-                                  l10n.registerCarImageSelect,
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: theme.colorScheme.onSurfaceVariant,
-                                  ),
-                                )
-                              : Row(
-                                  children: [
-                                    Icon(
-                                      Icons.check_circle_rounded,
-                                      color: theme.colorScheme.primary,
-                                      size: 20,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Text(
-                                        _carImage!.name.isNotEmpty
-                                            ? _carImage!.name
-                                            : l10n.genericSuccess,
-                                        style: theme.textTheme.bodyMedium,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  ],
+                        if (_carImage != null) ...[
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.check_circle_rounded,
+                                color: theme.colorScheme.primary,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  _carImage!.name.isNotEmpty
+                                      ? _carImage!.name
+                                      : l10n.genericSuccess,
+                                  style: theme.textTheme.bodyMedium,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                        ),
-                        const SizedBox(width: 8),
-                        if (_carImage == null)
-                          FilledButton.tonalIcon(
-                            onPressed: _pickCarImage,
-                            icon: const Icon(Icons.photo_library_outlined),
-                            label: Text(l10n.registerCarImageSelect),
-                            style: FilledButton.styleFrom(
-                              minimumSize: const Size(0, 40),
-                            ),
-                          )
-                        else
-                          OutlinedButton.icon(
-                            onPressed: _clearCarImage,
-                            icon: const Icon(Icons.delete_outline_rounded),
-                            label: Text(l10n.delete),
-                            style: OutlinedButton.styleFrom(
-                              minimumSize: const Size(0, 40),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Nieuwe afbeelding geselecteerd (wordt opgeslagen bij opslaan).',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
                             ),
                           ),
+                        ] else if (_existingCarImageUrl != null) ...[
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: Image.network(
+                              _existingCarImageUrl!,
+                              height: 140,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, _, _) => Container(
+                                height: 80,
+                                alignment: Alignment.centerLeft,
+                                padding: const EdgeInsets.all(12),
+                                color: theme.colorScheme.surface,
+                                child: Text(
+                                  _existingCarImageUrl!,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Huidige auto-afbeelding',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ] else
+                          Text(
+                            l10n.registerCarImageSelect,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            if (_carImage == null)
+                              FilledButton.tonalIcon(
+                                onPressed: _pickCarImage,
+                                icon: const Icon(Icons.photo_library_outlined),
+                                label: Text(
+                                  _existingCarImageUrl == null
+                                      ? l10n.registerCarImageSelect
+                                      : 'Vervangen',
+                                ),
+                                style: FilledButton.styleFrom(
+                                  minimumSize: const Size(0, 40),
+                                ),
+                              )
+                            else
+                              OutlinedButton.icon(
+                                onPressed: _clearCarImage,
+                                icon: const Icon(Icons.delete_outline_rounded),
+                                label: Text(l10n.delete),
+                                style: OutlinedButton.styleFrom(
+                                  minimumSize: const Size(0, 40),
+                                ),
+                              ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
