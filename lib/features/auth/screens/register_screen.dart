@@ -22,6 +22,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
 
   String _profile = 'STUDENT';
+  String? _gender = 'MALE';
   final _firstName = TextEditingController(text: 'Test');
   final _lastName = TextEditingController(text: 'Student');
   final _email = TextEditingController(text: 'test.student@example.com');
@@ -77,6 +78,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     'houseNumber': _houseNumber.text.trim(),
     'zipCode': _zipCode.text.trim(),
     'city': _city.text.trim(),
+    if (_gender != null) 'gender': _gender,
     if (_pickupLocation.text.trim().isNotEmpty)
       'pickupLocation': _pickupLocation.text.trim(),
     if (_licensePlate.text.trim().isNotEmpty)
@@ -354,6 +356,28 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                       ? l10n.registerRequired
                                       : null,
                             ),
+                            const SizedBox(height: 12),
+                            DropdownButtonFormField<String>(
+                              initialValue: _gender,
+                              decoration: InputDecoration(
+                                labelText: l10n.editProfileGender,
+                              ),
+                              items: [
+                                DropdownMenuItem(
+                                  value: 'MALE',
+                                  child: Text(l10n.editProfileGenderMale),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'FEMALE',
+                                  child: Text(l10n.editProfileGenderFemale),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'UNKNOWN',
+                                  child: Text(l10n.editProfileGenderUnknown),
+                                ),
+                              ],
+                              onChanged: (v) => setState(() => _gender = v),
+                            ),
                           ],
                           icon: Icons.person_outline_rounded,
                         ),
@@ -418,29 +442,29 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           ],
                           icon: Icons.home_outlined,
                         ),
-                        sectionCard(
-                          l10n.registerLessonDetails,
-                          [
-                            TextFormField(
-                              controller: _pickupLocation,
-                              textInputAction: TextInputAction.next,
-                              decoration: InputDecoration(
-                                labelText: l10n.registerPickupLocation,
-                                prefixIcon:
-                                    const Icon(Icons.location_on_outlined),
+                        if (_profile == 'INSTRUCTOR')
+                          sectionCard(
+                            l10n.registerLessonDetails,
+                            [
+                              TextFormField(
+                                controller: _pickupLocation,
+                                textInputAction: TextInputAction.next,
+                                decoration: InputDecoration(
+                                  labelText: l10n.registerPickupLocation,
+                                  prefixIcon:
+                                      const Icon(Icons.location_on_outlined),
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 12),
-                            TextFormField(
-                              controller: _licensePlate,
-                              textCapitalization:
-                                  TextCapitalization.characters,
-                              decoration: InputDecoration(
-                                labelText: l10n.registerLicensePlate,
-                                prefixIcon: const Icon(Icons.pin_outlined),
+                              const SizedBox(height: 12),
+                              TextFormField(
+                                controller: _licensePlate,
+                                textCapitalization:
+                                    TextCapitalization.characters,
+                                decoration: InputDecoration(
+                                  labelText: l10n.registerLicensePlate,
+                                  prefixIcon: const Icon(Icons.pin_outlined),
+                                ),
                               ),
-                            ),
-                            if (_profile == 'INSTRUCTOR') ...[
                               const SizedBox(height: 14),
                               Text(
                                 l10n.registerCarImage,
@@ -480,10 +504,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                                   size: 20,
                                                 ),
                                                 const SizedBox(width: 8),
-                                                Text(
-                                                  l10n.genericSuccess,
-                                                  style: theme
-                                                      .textTheme.bodyMedium,
+                                                Expanded(
+                                                  child: Text(
+                                                    _carImage!.name.isNotEmpty
+                                                        ? _carImage!.name
+                                                        : l10n.genericSuccess,
+                                                    style: theme
+                                                        .textTheme.bodyMedium,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
                                                 ),
                                               ],
                                             ),
@@ -514,9 +544,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 ),
                               ),
                             ],
-                          ],
-                          icon: Icons.directions_car_outlined,
-                        ),
+                            icon: Icons.directions_car_outlined,
+                          ),
                         sectionCard(
                           l10n.registerPasswordLabel,
                           [

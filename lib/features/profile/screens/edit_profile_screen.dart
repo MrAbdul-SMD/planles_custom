@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 import '../../../l10n/l10n.dart';
@@ -34,6 +35,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   String? _gender;
   bool _busy = false;
+  XFile? _carImage;
 
   @override
   void initState() {
@@ -77,6 +79,21 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     }
   }
 
+  Future<void> _pickCarImage() async {
+    final picked = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 800,
+      maxHeight: 600,
+    );
+    if (picked != null) {
+      setState(() => _carImage = picked);
+    }
+  }
+
+  void _clearCarImage() {
+    setState(() => _carImage = null);
+  }
+
   Future<void> _save() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     setState(() => _busy = true);
@@ -101,6 +118,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 'licensePlate': _plate.text.trim(),
             },
             email: _email.text.trim(),
+            carImage: _initial.profile == 'INSTRUCTOR' ? _carImage : null,
           );
       await ref.read(authControllerProvider.notifier).refreshUser();
       if (!mounted) return;
@@ -296,6 +314,78 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     labelText: l10n.profileLicensePlate,
                   ),
                 ),
+                if (_initial.profile == 'INSTRUCTOR') ...[
+                  const SizedBox(height: 14),
+                  Text(
+                    l10n.registerCarImage,
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainerLow,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: theme.colorScheme.outlineVariant
+                            .withValues(alpha: 0.5),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: _carImage == null
+                              ? Text(
+                                  l10n.registerCarImageSelect,
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                )
+                              : Row(
+                                  children: [
+                                    Icon(
+                                      Icons.check_circle_rounded,
+                                      color: theme.colorScheme.primary,
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        _carImage!.name.isNotEmpty
+                                            ? _carImage!.name
+                                            : l10n.genericSuccess,
+                                        style: theme.textTheme.bodyMedium,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                        ),
+                        const SizedBox(width: 8),
+                        if (_carImage == null)
+                          FilledButton.tonalIcon(
+                            onPressed: _pickCarImage,
+                            icon: const Icon(Icons.photo_library_outlined),
+                            label: Text(l10n.registerCarImageSelect),
+                            style: FilledButton.styleFrom(
+                              minimumSize: const Size(0, 40),
+                            ),
+                          )
+                        else
+                          OutlinedButton.icon(
+                            onPressed: _clearCarImage,
+                            icon: const Icon(Icons.delete_outline_rounded),
+                            label: Text(l10n.delete),
+                            style: OutlinedButton.styleFrom(
+                              minimumSize: const Size(0, 40),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 28),
                 FilledButton(
                   onPressed: _busy ? null : _save,
