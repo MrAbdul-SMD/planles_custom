@@ -301,32 +301,26 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       const SizedBox(height: 8),
                       Center(
                         child: Container(
-                          width: 76,
-                          height: 76,
-                          alignment: Alignment.center,
+                          width: 88,
+                          height: 88,
+                          padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [scheme.primary, scheme.secondary],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
+                            color: Colors.white,
                             borderRadius: BorderRadius.circular(22),
                             boxShadow: [
                               BoxShadow(
-                                color: scheme.primary.withValues(alpha: 0.25),
+                                color: scheme.primary.withValues(alpha: 0.18),
                                 blurRadius: 24,
                                 offset: const Offset(0, 10),
                               ),
                             ],
-                          ),
-                          child: const Text(
-                            'P',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 36,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: -1,
+                            border: Border.all(
+                              color: scheme.outlineVariant.withValues(alpha: 0.35),
                             ),
+                          ),
+                          child: Image.asset(
+                            'assets/branding/planles_logo.png',
+                            fit: BoxFit.contain,
                           ),
                         ),
                       ),

@@ -54,3 +54,4 @@ flutter:
   assets:
     # Client-side configuration loaded with flutter_dotenv.
     - .env
+    - assets/branding/
