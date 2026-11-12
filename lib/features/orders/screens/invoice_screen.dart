@@ -1,5 +1,4 @@
-import 'dart:typed_data';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:printing/printing.dart';
@@ -7,6 +6,7 @@ import 'package:printing/printing.dart';
 import '../../../l10n/l10n.dart';
 import '../../../shared/widgets.dart';
 import '../providers/orders_providers.dart';
+import 'invoice_download.dart';
 
 /// In-app viewer for an order's invoice PDF, with a download/share action.
 class InvoiceScreen extends ConsumerStatefulWidget {
@@ -50,10 +50,16 @@ class _InvoiceScreenState extends ConsumerState<InvoiceScreen> {
   Future<void> _download() async {
     final bytes = _bytes;
     if (bytes == null) return;
-    await Printing.sharePdf(
-      bytes: bytes,
-      filename: 'factuur-${widget.id}.pdf',
-    );
+    try {
+      await downloadInvoicePdf(bytes, 'factuur-${widget.id}.pdf');
+      if (mounted && !kIsWeb) {
+        showAppSnack(context, context.l10n.orderDetailDownloadInvoice);
+      }
+    } catch (e) {
+      if (mounted) {
+        showAppSnack(context, describeError(context, e), error: true);
+      }
+    }
   }
 
   @override
@@ -81,9 +87,10 @@ class _InvoiceScreenState extends ConsumerState<InvoiceScreen> {
               : PdfPreview(
                   build: (_) async => _bytes!,
                   allowPrinting: false,
-                  allowSharing: true,
+                  allowSharing: false,
                   canChangePageFormat: false,
                   canChangeOrientation: false,
+                  canDebug: false,
                   pdfFileName: 'factuur-${widget.id}.pdf',
                   loadingWidget: const Center(child: CircularProgressIndicator()),
                 ),

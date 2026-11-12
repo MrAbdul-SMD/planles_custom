@@ -39,6 +39,7 @@ dependencies:
 
   # Image picking for car image upload (instructor registration)
   image_picker: ^1.0.7
+  web: ^1.1.1
 
 dev_dependencies:
   flutter_test:
