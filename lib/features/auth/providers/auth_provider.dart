@@ -1,6 +1,5 @@
-import 'dart:io';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/providers.dart';
@@ -88,7 +87,7 @@ class AuthController extends Notifier<AuthState> {
   /// through [message]).
   Future<({bool completed, String message})> register({
     required Map<String, dynamic> payload,
-    File? carImage,
+    XFile? carImage,
   }) async {
     final storage = ref.read(tokenStorageProvider);
     final result = await _repo.register(payload: payload, carImage: carImage);

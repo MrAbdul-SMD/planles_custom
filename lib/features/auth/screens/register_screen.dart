@@ -1,16 +1,13 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../l10n/l10n.dart';
 import '../../../shared/widgets.dart';
 import '../providers/auth_provider.dart';
-
-import 'package:image_picker/image_picker.dart';
 
 /// Registration is a two-step OTP flow: fill in the form → the API mails a
 /// code → enter the code → the account is created and we are signed in.
@@ -25,25 +22,25 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
 
   String _profile = 'STUDENT';
-  final _firstName = TextEditingController();
-  final _lastName = TextEditingController();
-  final _email = TextEditingController();
-  final _phone = TextEditingController();
-  final _birthdate = TextEditingController();
-  final _street = TextEditingController();
-  final _houseNumber = TextEditingController();
-  final _zipCode = TextEditingController();
-  final _city = TextEditingController();
-  final _pickupLocation = TextEditingController();
+  final _firstName = TextEditingController(text: 'Test');
+  final _lastName = TextEditingController(text: 'Student');
+  final _email = TextEditingController(text: 'test.student@example.com');
+  final _phone = TextEditingController(text: '0612345678');
+  final _birthdate = TextEditingController(text: '2000-01-15');
+  final _street = TextEditingController(text: 'Teststraat');
+  final _houseNumber = TextEditingController(text: '1');
+  final _zipCode = TextEditingController(text: '1234AB');
+  final _city = TextEditingController(text: 'Amsterdam');
+  final _pickupLocation = TextEditingController(text: 'Teststraat 1');
   final _licensePlate = TextEditingController();
-  final _password = TextEditingController();
-  final _password2 = TextEditingController();
+  final _password = TextEditingController(text: 'Test1234');
+  final _password2 = TextEditingController(text: 'Test1234');
   final _otp = TextEditingController();
 
   bool _otpSent = false;
   bool _busy = false;
   String? _otpMessage;
-  File? _carImage;
+  XFile? _carImage;
 
   @override
   void dispose() {
@@ -88,16 +85,27 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   };
 
   Future<void> _submit() async {
-    if (!(_formKey.currentState?.validate() ?? false)) return;
+    if (!(_formKey.currentState?.validate() ?? false)) {
+      debugPrint('[Register] submit blocked: form validation failed');
+      return;
+    }
     FocusScope.of(context).unfocus();
+    final payload = _payload();
+    debugPrint(
+      '[Register] submit start | otpSent=$_otpSent profile=$_profile '
+      'carImage=${_carImage?.path ?? 'none'} payloadKeys=${payload.keys.toList()}',
+    );
     setState(() => _busy = true);
     try {
       final result = await ref
           .read(authControllerProvider.notifier)
-          .register(payload: _payload(), carImage: _carImage);
+          .register(payload: payload, carImage: _carImage);
       if (!mounted) return;
+      debugPrint(
+        '[Register] response | completed=${result.completed} message="${result.message}"',
+      );
       if (result.completed) {
-        // Redirected by the router.
+        debugPrint('[Register] registration completed, awaiting auth redirect');
         return;
       }
       final msg = result.message.toLowerCase();
@@ -112,24 +120,31 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       if (!looksLikeOtpRequest) {
         showAppSnack(context, result.message, error: true);
       }
-    } on ApiException catch (e) {
+    } on ApiException catch (e, st) {
+      debugPrint('[Register] ApiException: status=${e.statusCode} code=${e.code} message="${e.message}" errors=${e.errors}');
+      debugPrint('[Register] ApiException stack: $st');
       if (mounted) {
         showAppSnack(context, describeError(context, e), error: true);
       }
-    } catch (e) {
+    } catch (e, st) {
+      debugPrint('[Register] unexpected error: $e');
+      debugPrint('[Register] stack: $st');
       if (mounted) {
         showAppSnack(context, describeError(context, e), error: true);
       }
     } finally {
       if (mounted) setState(() => _busy = false);
+      debugPrint('[Register] submit end');
     }
   }
 
   Future<void> _pickBirthdate() async {
     final now = DateTime.now();
+    final initial = DateTime.tryParse(_birthdate.text.trim()) ??
+        DateTime(now.year - 18, now.month, now.day);
     final picked = await showDatePicker(
       context: context,
-      initialDate: DateTime(now.year - 18, now.month, now.day),
+      initialDate: initial.isAfter(now) ? now : initial,
       firstDate: DateTime(now.year - 100),
       lastDate: now,
       locale: const Locale('nl'),
@@ -145,7 +160,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       maxHeight: 600,
     );
     if (picked != null) {
-      setState(() => _carImage = File(picked.path));
+      setState(() => _carImage = picked);
     }
   }
 
