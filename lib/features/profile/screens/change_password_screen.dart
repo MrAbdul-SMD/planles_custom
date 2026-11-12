@@ -68,8 +68,10 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
     final l10n = context.l10n;
     return Scaffold(
       appBar: AppBar(title: Text(l10n.changePasswordTitle)),
-      body: Center(
-        child: ConstrainedBox(
+      body: SafeArea(
+        top: false,
+        child: Center(
+          child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 440),
           child: Form(
             key: _formKey,
@@ -121,6 +123,7 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
               ],
             ),
           ),
+        ),
         ),
       ),
     );

@@ -68,26 +68,58 @@ class _PlanningDetailScreenState extends ConsumerState<PlanningDetailScreen> {
     final controller = TextEditingController();
     final result = await showDialog<String>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.planningCancelLesson),
-        content: TextField(
-          controller: controller,
-          maxLines: 3,
-          decoration: InputDecoration(
-            labelText: l10n.planningCancelReasonLabel,
+      builder: (context) {
+        final theme = Theme.of(context);
+        final scheme = theme.colorScheme;
+        return AlertDialog(
+          titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+          contentPadding: const EdgeInsets.fromLTRB(24, 14, 24, 8),
+          title: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: scheme.errorContainer,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.event_busy_rounded,
+                  color: scheme.onErrorContainer,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(child: Text(l10n.planningCancelLesson)),
+            ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(l10n.back),
+          content: TextField(
+            controller: controller,
+            maxLines: 4,
+            minLines: 3,
+            autofocus: true,
+            decoration: InputDecoration(
+              labelText: l10n.planningCancelReasonLabel,
+              alignLabelWithHint: true,
+            ),
           ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(controller.text),
-            child: Text(l10n.cancel),
-          ),
-        ],
-      ),
+          actions: [
+            OutlinedButton(
+              onPressed: () => Navigator.of(context).pop(),
+              style: OutlinedButton.styleFrom(minimumSize: const Size(0, 44)),
+              child: Text(l10n.back),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(controller.text),
+              style: FilledButton.styleFrom(
+                minimumSize: const Size(0, 44),
+                backgroundColor: scheme.error,
+                foregroundColor: scheme.onError,
+              ),
+              child: Text(l10n.planningCancelLesson),
+            ),
+          ],
+        );
+      },
     );
     controller.dispose();
     return result;
@@ -113,25 +145,54 @@ class _PlanningDetailScreenState extends ConsumerState<PlanningDetailScreen> {
     final controller = TextEditingController(text: planning.notes ?? '');
     final result = await showDialog<String>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.planningEditNotes),
-        content: TextField(
-          controller: controller,
-          maxLines: 5,
-          autofocus: true,
-          decoration: InputDecoration(labelText: l10n.planningNotes),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(l10n.cancel),
+      builder: (context) {
+        final theme = Theme.of(context);
+        final scheme = theme.colorScheme;
+        return AlertDialog(
+          titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+          contentPadding: const EdgeInsets.fromLTRB(24, 14, 24, 8),
+          title: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: scheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.edit_note_rounded,
+                  color: scheme.onPrimaryContainer,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(child: Text(l10n.planningEditNotes)),
+            ],
           ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(controller.text),
-            child: Text(l10n.save),
+          content: TextField(
+            controller: controller,
+            maxLines: 6,
+            minLines: 4,
+            autofocus: true,
+            decoration: InputDecoration(
+              labelText: l10n.planningNotes,
+              alignLabelWithHint: true,
+            ),
           ),
-        ],
-      ),
+          actions: [
+            OutlinedButton(
+              onPressed: () => Navigator.of(context).pop(),
+              style: OutlinedButton.styleFrom(minimumSize: const Size(0, 44)),
+              child: Text(l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(controller.text),
+              style: FilledButton.styleFrom(minimumSize: const Size(0, 44)),
+              child: Text(l10n.save),
+            ),
+          ],
+        );
+      },
     );
     controller.dispose();
     if (result == null) return;

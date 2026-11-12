@@ -84,7 +84,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       'pickupLocation': _pickupLocation.text.trim(),
     if (_licensePlate.text.trim().isNotEmpty)
       'licensePlate': _licensePlate.text.trim(),
-    if (_carImage != null) 'carImage': _carImage!.path,
+    if (_otpSent && _otp.text.trim().isNotEmpty) 'otp': _otp.text.trim(),
   };
 
   Future<void> _submit() async {
@@ -100,12 +100,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         // Redirected by the router.
         return;
       }
-      final wantsOtp = result.message.toLowerCase().contains('otp');
+      final msg = result.message.toLowerCase();
+      final looksLikeOtpRequest = msg.contains('otp') ||
+          msg.contains('code') ||
+          msg.contains('bevestig') ||
+          msg.contains('verific');
       setState(() {
-        _otpSent = wantsOtp || _otpSent;
-        _otpMessage = wantsOtp ? result.message : null;
+        _otpSent = looksLikeOtpRequest || _otpSent;
+        _otpMessage = result.message;
       });
-      if (!wantsOtp) showAppSnack(context, result.message, error: true);
+      if (!looksLikeOtpRequest) {
+        showAppSnack(context, result.message, error: true);
+      }
     } on ApiException catch (e) {
       if (mounted) {
         showAppSnack(context, describeError(context, e), error: true);
@@ -151,349 +157,450 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
+    final scheme = theme.colorScheme;
     String? requiredValidator(String? v) =>
         (v == null || v.trim().isEmpty) ? l10n.registerRequired : null;
+
+    Widget sectionCard(String title, List<Widget> children, {IconData? icon}) {
+      return Container(
+        margin: const EdgeInsets.only(bottom: 14),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: scheme.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: scheme.outlineVariant.withValues(alpha: 0.45),
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                if (icon != null) ...[
+                  Icon(icon, size: 18, color: scheme.primary),
+                  const SizedBox(width: 8),
+                ],
+                Text(
+                  title,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            ...children,
+          ],
+        ),
+      );
+    }
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.registerTitle),
-      ),
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 480),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      l10n.registerAccountType,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    SegmentedButton<String>(
-                      segments: [
-                        ButtonSegment(
-                          value: 'STUDENT',
-                          label: Text(l10n.registerStudent),
-                          icon: const Icon(Icons.school_outlined),
-                        ),
-                        ButtonSegment(
-                          value: 'INSTRUCTOR',
-                          label: Text(l10n.registerInstructor),
-                          icon: const Icon(Icons.directions_car_outlined),
-                        ),
-                      ],
-                      selected: {_profile},
-                      onSelectionChanged: (v) =>
-                          setState(() => _profile = v.first),
-                    ),
-                    const SizedBox(height: 24),
-
-                    Text(
-                      l10n.registerPersonalDetails,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextFormField(
-                            controller: _firstName,
-                            textInputAction: TextInputAction.next,
-                            decoration: InputDecoration(
-                              labelText: l10n.registerFirstName,
-                            ),
-                            validator: requiredValidator,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: TextFormField(
-                            controller: _lastName,
-                            textInputAction: TextInputAction.next,
-                            decoration: InputDecoration(
-                              labelText: l10n.registerLastName,
-                            ),
-                            validator: requiredValidator,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: _email,
-                      keyboardType: TextInputType.emailAddress,
-                      textInputAction: TextInputAction.next,
-                      decoration: InputDecoration(
-                        labelText: l10n.loginEmailLabel,
-                      ),
-                      validator: (v) {
-                        final value = v?.trim() ?? '';
-                        if (value.isEmpty) return l10n.registerRequired;
-                        if (!value.contains('@')) {
-                          return l10n.loginEmailInvalid;
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: _phone,
-                      keyboardType: TextInputType.phone,
-                      textInputAction: TextInputAction.next,
-                      decoration: InputDecoration(
-                        labelText: l10n.registerPhone,
-                      ),
-                      validator: requiredValidator,
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: _birthdate,
-                      readOnly: true,
-                      onTap: _pickBirthdate,
-                      decoration: InputDecoration(
-                        labelText: l10n.registerBirthdate,
-                        suffixIcon: const Icon(Icons.calendar_today_outlined),
-                        hintText: l10n.registerBirthdateHint,
-                      ),
-                      validator: (v) => (v == null || v.trim().isEmpty)
-                          ? l10n.registerRequired
-                          : null,
-                    ),
-                    const SizedBox(height: 24),
-
-                    Text(
-                      l10n.registerAddress,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          flex: 3,
-                          child: TextFormField(
-                            controller: _street,
-                            textInputAction: TextInputAction.next,
-                            decoration: InputDecoration(
-                              labelText: l10n.registerStreet,
-                            ),
-                            validator: requiredValidator,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: TextFormField(
-                            controller: _houseNumber,
-                            textInputAction: TextInputAction.next,
-                            decoration: InputDecoration(
-                              labelText: l10n.registerHouseNumber,
-                            ),
-                            validator: requiredValidator,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextFormField(
-                            controller: _zipCode,
-                            textInputAction: TextInputAction.next,
-                            textCapitalization: TextCapitalization.characters,
-                            decoration: InputDecoration(
-                              labelText: l10n.registerZipCode,
-                            ),
-                            validator: requiredValidator,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          flex: 2,
-                          child: TextFormField(
-                            controller: _city,
-                            textInputAction: TextInputAction.next,
-                            decoration: InputDecoration(
-                              labelText: l10n.registerCity,
-                            ),
-                            validator: requiredValidator,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-
-                    Text(
-                      l10n.registerLessonDetails,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: _pickupLocation,
-                      textInputAction: TextInputAction.next,
-                      decoration: InputDecoration(
-                        labelText: l10n.registerPickupLocation,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: _licensePlate,
-                      textCapitalization: TextCapitalization.characters,
-                      decoration: InputDecoration(
-                        labelText: l10n.registerLicensePlate,
-                      ),
-                    ),
-                    if (_profile == 'INSTRUCTOR') ...[
-                      const SizedBox(height: 24),
+      appBar: AppBar(title: Text(l10n.registerTitle)),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              scheme.primary.withValues(alpha: 0.04),
+              scheme.surface,
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 520),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
                       Text(
-                        l10n.registerCarImage,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _carImage == null
-                                ? ElevatedButton.icon(
-                                    onPressed: _pickCarImage,
-                                    icon: const Icon(Icons.photo_library_outlined),
-                                    label: Text(l10n.registerCarImageSelect),
-                                  )
-                                : Row(
-                                    children: [
-                                      const Icon(Icons.check_circle_outlined,
-                                          color: Colors.green, size: 20),
-                                      const SizedBox(width: 6),
-                                      Text(
-                                        'Car image selected',
-                                        style: theme.textTheme.bodySmall,
-                                      ),
-                                    ],
-                                  ),
-                          ),
-                          const SizedBox(width: 12),
-                          ElevatedButton.icon(
-                            onPressed: _carImage != null
-                                ? _clearCarImage
-                                : null,
-                            icon: const Icon(Icons.clear_outlined),
-                            label: const Text('Clear'),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-                    ],
-
-                    Text(
-                      l10n.registerPasswordLabel,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: _password,
-                      obscureText: true,
-                      textInputAction: TextInputAction.next,
-                      decoration: InputDecoration(
-                        labelText: l10n.registerPasswordLabel,
-                        helperText: l10n.registerPasswordRules,
-                        helperMaxLines: 2,
-                      ),
-                      validator: (v) {
-                        final value = v ?? '';
-                        if (value.length < 8) {
-                          return l10n.registerPasswordMin8;
-                        }
-                        if (!value.contains(RegExp(r'[a-z]')) ||
-                            !value.contains(RegExp(r'[A-Z]')) ||
-                            !value.contains(RegExp(r'\d'))) {
-                          return l10n.registerPasswordNeedsMix;
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: _password2,
-                      obscureText: true,
-                      textInputAction: TextInputAction.done,
-                      onFieldSubmitted: (_) => _submit(),
-                      decoration: InputDecoration(
-                        labelText: l10n.registerPasswordRepeat,
-                      ),
-                      validator: (v) => v != _password.text
-                          ? l10n.registerPasswordMismatch
-                          : null,
-                    ),
-
-                    if (_otpSent) ...[
-                      const SizedBox(height: 24),
-                      Text(
-                        l10n.registerOtpTitle,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
+                        _otpSent
+                            ? l10n.registerOtpTitle
+                            : l10n.registerAccountType,
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        _otpMessage ?? l10n.registerOtpFallback,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
+                        _otpSent
+                            ? (_otpMessage ?? l10n.registerOtpFallback)
+                            : l10n.registerTitle,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                          height: 1.4,
                         ),
                       ),
-                      const SizedBox(height: 12),
-                      TextFormField(
-                        controller: _otp,
-                        keyboardType: TextInputType.number,
-                        maxLength: 6,
-                        decoration: InputDecoration(
-                          labelText: l10n.registerOtpLabel,
-                          counterText: '',
+                      const SizedBox(height: 16),
+
+                      if (!_otpSent) ...[
+                        sectionCard(
+                          l10n.registerAccountType,
+                          [
+                            SegmentedButton<String>(
+                              segments: [
+                                ButtonSegment(
+                                  value: 'STUDENT',
+                                  label: Text(l10n.registerStudent),
+                                  icon: const Icon(Icons.school_outlined),
+                                ),
+                                ButtonSegment(
+                                  value: 'INSTRUCTOR',
+                                  label: Text(l10n.registerInstructor),
+                                  icon: const Icon(
+                                      Icons.directions_car_outlined),
+                                ),
+                              ],
+                              selected: {_profile},
+                              onSelectionChanged: (v) =>
+                                  setState(() => _profile = v.first),
+                            ),
+                          ],
+                          icon: Icons.badge_outlined,
                         ),
-                        validator: (v) =>
-                            _otpSent && (v == null || v.trim().length < 4)
-                            ? l10n.registerOtpRequired
-                            : null,
+                        sectionCard(
+                          l10n.registerPersonalDetails,
+                          [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _firstName,
+                                    textInputAction: TextInputAction.next,
+                                    decoration: InputDecoration(
+                                      labelText: l10n.registerFirstName,
+                                    ),
+                                    validator: requiredValidator,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _lastName,
+                                    textInputAction: TextInputAction.next,
+                                    decoration: InputDecoration(
+                                      labelText: l10n.registerLastName,
+                                    ),
+                                    validator: requiredValidator,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            TextFormField(
+                              controller: _email,
+                              keyboardType: TextInputType.emailAddress,
+                              textInputAction: TextInputAction.next,
+                              decoration: InputDecoration(
+                                labelText: l10n.loginEmailLabel,
+                                prefixIcon:
+                                    const Icon(Icons.mail_outline_rounded),
+                              ),
+                              validator: (v) {
+                                final value = v?.trim() ?? '';
+                                if (value.isEmpty) return l10n.registerRequired;
+                                if (!value.contains('@')) {
+                                  return l10n.loginEmailInvalid;
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 12),
+                            TextFormField(
+                              controller: _phone,
+                              keyboardType: TextInputType.phone,
+                              textInputAction: TextInputAction.next,
+                              decoration: InputDecoration(
+                                labelText: l10n.registerPhone,
+                                prefixIcon: const Icon(Icons.phone_outlined),
+                              ),
+                              validator: requiredValidator,
+                            ),
+                            const SizedBox(height: 12),
+                            TextFormField(
+                              controller: _birthdate,
+                              readOnly: true,
+                              onTap: _pickBirthdate,
+                              decoration: InputDecoration(
+                                labelText: l10n.registerBirthdate,
+                                hintText: l10n.registerBirthdateHint,
+                                prefixIcon:
+                                    const Icon(Icons.calendar_today_outlined),
+                              ),
+                              validator: (v) =>
+                                  (v == null || v.trim().isEmpty)
+                                      ? l10n.registerRequired
+                                      : null,
+                            ),
+                          ],
+                          icon: Icons.person_outline_rounded,
+                        ),
+                        sectionCard(
+                          l10n.registerAddress,
+                          [
+                            Row(
+                              children: [
+                                Expanded(
+                                  flex: 3,
+                                  child: TextFormField(
+                                    controller: _street,
+                                    textInputAction: TextInputAction.next,
+                                    decoration: InputDecoration(
+                                      labelText: l10n.registerStreet,
+                                    ),
+                                    validator: requiredValidator,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _houseNumber,
+                                    textInputAction: TextInputAction.next,
+                                    decoration: InputDecoration(
+                                      labelText: l10n.registerHouseNumber,
+                                    ),
+                                    validator: requiredValidator,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _zipCode,
+                                    textInputAction: TextInputAction.next,
+                                    textCapitalization:
+                                        TextCapitalization.characters,
+                                    decoration: InputDecoration(
+                                      labelText: l10n.registerZipCode,
+                                    ),
+                                    validator: requiredValidator,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  flex: 2,
+                                  child: TextFormField(
+                                    controller: _city,
+                                    textInputAction: TextInputAction.next,
+                                    decoration: InputDecoration(
+                                      labelText: l10n.registerCity,
+                                    ),
+                                    validator: requiredValidator,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                          icon: Icons.home_outlined,
+                        ),
+                        sectionCard(
+                          l10n.registerLessonDetails,
+                          [
+                            TextFormField(
+                              controller: _pickupLocation,
+                              textInputAction: TextInputAction.next,
+                              decoration: InputDecoration(
+                                labelText: l10n.registerPickupLocation,
+                                prefixIcon:
+                                    const Icon(Icons.location_on_outlined),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            TextFormField(
+                              controller: _licensePlate,
+                              textCapitalization:
+                                  TextCapitalization.characters,
+                              decoration: InputDecoration(
+                                labelText: l10n.registerLicensePlate,
+                                prefixIcon: const Icon(Icons.pin_outlined),
+                              ),
+                            ),
+                            if (_profile == 'INSTRUCTOR') ...[
+                              const SizedBox(height: 14),
+                              Text(
+                                l10n.registerCarImage,
+                                style: theme.textTheme.labelLarge?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: scheme.surface,
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(
+                                    color: scheme.outlineVariant
+                                        .withValues(alpha: 0.5),
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: _carImage == null
+                                          ? Text(
+                                              l10n.registerCarImageSelect,
+                                              style: theme.textTheme.bodyMedium
+                                                  ?.copyWith(
+                                                color:
+                                                    scheme.onSurfaceVariant,
+                                              ),
+                                            )
+                                          : Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.check_circle_rounded,
+                                                  color:
+                                                      scheme.primary,
+                                                  size: 20,
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Text(
+                                                  l10n.genericSuccess,
+                                                  style: theme
+                                                      .textTheme.bodyMedium,
+                                                ),
+                                              ],
+                                            ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    if (_carImage == null)
+                                      FilledButton.tonalIcon(
+                                        onPressed: _pickCarImage,
+                                        icon: const Icon(
+                                            Icons.photo_library_outlined),
+                                        label: Text(
+                                            l10n.registerCarImageSelect),
+                                        style: FilledButton.styleFrom(
+                                          minimumSize: const Size(0, 40),
+                                        ),
+                                      )
+                                    else
+                                      OutlinedButton.icon(
+                                        onPressed: _clearCarImage,
+                                        icon: const Icon(
+                                            Icons.delete_outline_rounded),
+                                        label: Text(l10n.delete),
+                                        style: OutlinedButton.styleFrom(
+                                          minimumSize: const Size(0, 40),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ],
+                          icon: Icons.directions_car_outlined,
+                        ),
+                        sectionCard(
+                          l10n.registerPasswordLabel,
+                          [
+                            TextFormField(
+                              controller: _password,
+                              obscureText: true,
+                              textInputAction: TextInputAction.next,
+                              decoration: InputDecoration(
+                                labelText: l10n.registerPasswordLabel,
+                                prefixIcon:
+                                    const Icon(Icons.lock_outline_rounded),
+                                helperText: l10n.registerPasswordRules,
+                                helperMaxLines: 2,
+                              ),
+                              validator: (v) {
+                                final value = v ?? '';
+                                if (value.length < 8) {
+                                  return l10n.registerPasswordMin8;
+                                }
+                                if (!value.contains(RegExp(r'[a-z]')) ||
+                                    !value.contains(RegExp(r'[A-Z]')) ||
+                                    !value.contains(RegExp(r'\d'))) {
+                                  return l10n.registerPasswordNeedsMix;
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 12),
+                            TextFormField(
+                              controller: _password2,
+                              obscureText: true,
+                              textInputAction: TextInputAction.done,
+                              onFieldSubmitted: (_) => _submit(),
+                              decoration: InputDecoration(
+                                labelText: l10n.registerPasswordRepeat,
+                                prefixIcon:
+                                    const Icon(Icons.lock_reset_rounded),
+                              ),
+                              validator: (v) => v != _password.text
+                                  ? l10n.registerPasswordMismatch
+                                  : null,
+                            ),
+                          ],
+                          icon: Icons.shield_outlined,
+                        ),
+                      ] else ...[
+                        sectionCard(
+                          l10n.registerOtpTitle,
+                          [
+                            Text(
+                              _otpMessage ?? l10n.registerOtpFallback,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: scheme.onSurfaceVariant,
+                                height: 1.45,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            TextFormField(
+                              controller: _otp,
+                              keyboardType: TextInputType.number,
+                              maxLength: 6,
+                              decoration: InputDecoration(
+                                labelText: l10n.registerOtpLabel,
+                                prefixIcon: const Icon(Icons.pin_outlined),
+                                counterText: '',
+                              ),
+                              validator: (v) => _otpSent &&
+                                      (v == null || v.trim().length < 4)
+                                  ? l10n.registerOtpRequired
+                                  : null,
+                            ),
+                          ],
+                          icon: Icons.mark_email_read_outlined,
+                        ),
+                      ],
+
+                      FilledButton(
+                        onPressed: _busy ? null : _submit,
+                        child: _busy
+                            ? const SizedBox(
+                                width: 22,
+                                height: 22,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.4,
+                                ),
+                              )
+                            : Text(
+                                _otpSent
+                                    ? l10n.registerSubmitCreate
+                                    : l10n.registerSubmitCode,
+                              ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextButton(
+                        onPressed: () => context.pop(),
+                        child: Text(l10n.registerHaveAccount),
                       ),
                     ],
-
-                    const SizedBox(height: 24),
-                    FilledButton(
-                      onPressed: _busy ? null : _submit,
-                      child: _busy
-                          ? const SizedBox(
-                              width: 22,
-                              height: 22,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.4,
-                              ),
-                            )
-                          : Text(
-                              _otpSent
-                                  ? l10n.registerSubmitCreate
-                                  : l10n.registerSubmitCode,
-                            ),
-                    ),
-                    const SizedBox(height: 12),
-                    TextButton(
-                      onPressed: () => context.pop(),
-                      child: Text(l10n.registerHaveAccount),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),

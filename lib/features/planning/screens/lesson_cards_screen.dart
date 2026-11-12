@@ -332,7 +332,7 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
                         ],
                       ),
                     ),
-                  for (final (i, answer) in entry.value.indexed)
+                  for (final answer in entry.value)
                     _QuestionRow(
                       answer: answer,
                       controller: _controllers[answer.question.id]!,

@@ -29,13 +29,15 @@ class _StudentsScreenState extends ConsumerState<StudentsScreen> {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.studentsTitle)),
-      body: students.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => ErrorView(
-          message: describeError(context, e),
-          onRetry: () => ref.invalidate(myStudentsProvider),
-        ),
-        data: (list) {
+      body: SafeArea(
+        top: false,
+        child: students.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, _) => ErrorView(
+            message: describeError(context, e),
+            onRetry: () => ref.invalidate(myStudentsProvider),
+          ),
+          data: (list) {
           final filtered = _query.isEmpty
               ? list
               : list
@@ -85,6 +87,7 @@ class _StudentsScreenState extends ConsumerState<StudentsScreen> {
             ],
           );
         },
+        ),
       ),
     );
   }
@@ -119,56 +122,105 @@ class _StudentTile extends StatelessWidget {
         onTap: () => showModalBottomSheet<void>(
           context: context,
           showDragHandle: true,
-          builder: (context) => SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    student.displayName(l10n),
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
+          isScrollControlled: true,
+          builder: (context) {
+            final theme = Theme.of(context);
+            final scheme = theme.colorScheme;
+            return SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        AppAvatar(initials: student.initials, size: 52),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                student.displayName(l10n),
+                                style: theme.textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: -0.2,
+                                ),
+                              ),
+                              if ((student.email ?? '').isNotEmpty)
+                                Text(
+                                  student.email!,
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: scheme.onSurfaceVariant,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  InfoRow(
-                    l10n.studentsEmailLabel,
-                    student.email ?? '–',
-                    icon: Icons.mail_outline,
-                  ),
-                  InfoRow(
-                    l10n.studentsPhoneLabel,
-                    student.phone ?? '–',
-                    icon: Icons.phone_outlined,
-                  ),
-                  InfoRow(
-                    l10n.studentsAddressLabel,
-                    [
-                      student.street,
-                      student.houseNumber,
-                      student.zipCode,
-                      student.city,
-                    ].where((e) => e != null && e.isNotEmpty).join(' '),
-                    icon: Icons.home_outlined,
-                  ),
-                  if (student.pickupLocation != null &&
-                      student.pickupLocation!.isNotEmpty)
-                    InfoRow(
-                      l10n.studentsPickupLabel,
-                      student.pickupLocation!,
-                      icon: Icons.location_on_outlined,
+                    const SizedBox(height: 16),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: scheme.surfaceContainerLow,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: scheme.outlineVariant.withValues(alpha: 0.45),
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          InfoRow(
+                            l10n.studentsEmailLabel,
+                            student.email ?? '–',
+                            icon: Icons.mail_outline,
+                          ),
+                          const Divider(height: 12),
+                          InfoRow(
+                            l10n.studentsPhoneLabel,
+                            student.phone ?? '–',
+                            icon: Icons.phone_outlined,
+                          ),
+                          const Divider(height: 12),
+                          InfoRow(
+                            l10n.studentsAddressLabel,
+                            [
+                              student.street,
+                              student.houseNumber,
+                              student.zipCode,
+                              student.city,
+                            ].where((e) => e != null && e.isNotEmpty).join(' '),
+                            icon: Icons.home_outlined,
+                          ),
+                          if (student.pickupLocation != null &&
+                              student.pickupLocation!.isNotEmpty) ...[
+                            const Divider(height: 12),
+                            InfoRow(
+                              l10n.studentsPickupLabel,
+                              student.pickupLocation!,
+                              icon: Icons.location_on_outlined,
+                            ),
+                          ],
+                          const Divider(height: 12),
+                          InfoRow(
+                            l10n.dashboardBalanceLabel,
+                            student.balance?.toStringAsFixed(2) ?? '–',
+                            icon: Icons.account_balance_wallet_outlined,
+                          ),
+                        ],
+                      ),
                     ),
-                  InfoRow(
-                    l10n.dashboardBalanceLabel,
-                    student.balance?.toStringAsFixed(2) ?? '–',
-                    icon: Icons.account_balance_wallet_outlined,
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ),
+            );
+          },
         ),
       ),
     );

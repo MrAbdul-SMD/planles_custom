@@ -23,9 +23,11 @@ class OrdersScreen extends ConsumerWidget {
         icon: const Icon(Icons.add),
         label: Text(l10n.ordersBuyButton),
       ),
-      body: RefreshIndicator(
-        onRefresh: () async => ref.refresh(ordersListProvider.future),
-        child: AsyncView<OrdersPage>(
+      body: SafeArea(
+        top: false,
+        child: RefreshIndicator(
+          onRefresh: () async => ref.refresh(ordersListProvider.future),
+          child: AsyncView<OrdersPage>(
           value: orders,
           onRetry: () => ref.refresh(ordersListProvider.future),
           data: (page) {
@@ -49,6 +51,7 @@ class OrdersScreen extends ConsumerWidget {
                   _OrderCard(order: page.items[index]),
             );
           },
+          ),
         ),
       ),
     );

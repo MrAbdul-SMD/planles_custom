@@ -122,8 +122,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.editProfileTitle)),
-      body: Center(
-        child: ConstrainedBox(
+      body: SafeArea(
+        top: false,
+        child: Center(
+          child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 480),
           child: Form(
             key: _formKey,
@@ -308,6 +310,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               ],
             ),
           ),
+        ),
         ),
       ),
     );

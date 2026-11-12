@@ -97,16 +97,20 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
           const SizedBox(width: 4),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: _refresh,
-        child: NotificationListener<ScrollNotification>(
-          onNotification: (scroll) {
-            if (scroll.metrics.pixels >= scroll.metrics.maxScrollExtent - 200) {
-              ref.read(notificationsProvider.notifier).loadMore();
-            }
-            return false;
-          },
-          child: _buildBody(state, theme),
+      body: SafeArea(
+        top: false,
+        child: RefreshIndicator(
+          onRefresh: _refresh,
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (scroll) {
+              if (scroll.metrics.pixels >=
+                  scroll.metrics.maxScrollExtent - 200) {
+                ref.read(notificationsProvider.notifier).loadMore();
+              }
+              return false;
+            },
+            child: _buildBody(state, theme),
+          ),
         ),
       ),
     );

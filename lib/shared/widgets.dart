@@ -407,23 +407,60 @@ Future<bool> confirmAction(
   bool destructive = false,
 }) async {
   final l10n = context.l10n;
+  final theme = Theme.of(context);
+  final scheme = theme.colorScheme;
+  final accent = destructive ? scheme.error : scheme.primary;
+  final accentContainer =
+      destructive ? scheme.errorContainer : scheme.primaryContainer;
+  final onAccentContainer =
+      destructive ? scheme.onErrorContainer : scheme.onPrimaryContainer;
+
   final result = await showDialog<bool>(
     context: context,
     builder: (context) => AlertDialog(
-      title: Text(title),
-      content: Text(message),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+      contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
+      titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: accentContainer,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(
+              destructive
+                  ? Icons.warning_amber_rounded
+                  : Icons.help_outline_rounded,
+              color: onAccentContainer,
+            ),
+          ),
+          const SizedBox(height: 14),
+          Text(title),
+        ],
+      ),
+      content: Padding(
+        padding: const EdgeInsets.only(top: 4),
+        child: Text(message),
+      ),
       actions: [
-        TextButton(
+        OutlinedButton(
           onPressed: () => Navigator.of(context).pop(false),
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size(0, 44),
+          ),
           child: Text(l10n.cancel),
         ),
         FilledButton(
           onPressed: () => Navigator.of(context).pop(true),
-          style: destructive
-              ? FilledButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.error,
-                )
-              : null,
+          style: FilledButton.styleFrom(
+            minimumSize: const Size(0, 44),
+            backgroundColor: accent,
+            foregroundColor: destructive ? scheme.onError : scheme.onPrimary,
+          ),
           child: Text(confirmLabel ?? l10n.confirm),
         ),
       ],

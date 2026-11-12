@@ -54,11 +54,13 @@ class DashboardScreen extends ConsumerWidget {
           const SizedBox(width: 8),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: () => _refresh(ref),
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 10, 20, 36),
-          children: [
+      body: SafeArea(
+        top: false,
+        child: RefreshIndicator(
+          onRefresh: () => _refresh(ref),
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(20, 10, 20, 36),
+            children: [
             // ------------------------------------------------ Titanium Balance Card
             _BalanceTelemetryCard(user: user),
             const SizedBox(height: 24),
@@ -199,6 +201,7 @@ class DashboardScreen extends ConsumerWidget {
             ],
           ],
         ),
+      ),
       ),
     );
   }

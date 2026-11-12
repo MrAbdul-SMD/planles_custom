@@ -72,11 +72,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.profileTitle)),
-      body: RefreshIndicator(
-        onRefresh: () =>
-            ref.read(authControllerProvider.notifier).refreshUser(),
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+      body: SafeArea(
+        top: false,
+        child: RefreshIndicator(
+          onRefresh: () =>
+              ref.read(authControllerProvider.notifier).refreshUser(),
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
           children: [
             // ------------------------------------------------------ header
             Card(
@@ -272,6 +274,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
           ],
         ),
+      ),
       ),
     );
   }

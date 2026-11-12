@@ -53,7 +53,8 @@ class AuthRepository {
   }) async {
     final form = FormData()..fields.add(MapEntry('data', jsonEncode(payload)));
 
-    if (carImage != null) {
+    final otp = payload['otp']?.toString();
+    if (carImage != null && (otp == null || otp.isEmpty)) {
       form.files.add(
         MapEntry(
           'carImage',

@@ -88,25 +88,28 @@ class _PlanningListScreenState extends ConsumerState<PlanningListScreen>
           ],
         ),
       ),
-      body: TabBarView(
-        controller: _tabs,
-        children: [
-          _PlanningTab(
-            selector: (p) => p.upcoming,
-            groupByDay: true,
-            isUpcoming: true,
-          ),
-          _PlanningTab(
-            selector: (p) => p.past,
-            groupByDay: true,
-            isUpcoming: false,
-          ),
-          _PlanningTab(
-            selector: (p) => p.cancelled,
-            groupByDay: false,
-            isUpcoming: false,
-          ),
-        ],
+      body: SafeArea(
+        top: false,
+        child: TabBarView(
+          controller: _tabs,
+          children: [
+            _PlanningTab(
+              selector: (p) => p.upcoming,
+              groupByDay: true,
+              isUpcoming: true,
+            ),
+            _PlanningTab(
+              selector: (p) => p.past,
+              groupByDay: true,
+              isUpcoming: false,
+            ),
+            _PlanningTab(
+              selector: (p) => p.cancelled,
+              groupByDay: false,
+              isUpcoming: false,
+            ),
+          ],
+        ),
       ),
     );
   }

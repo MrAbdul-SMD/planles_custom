@@ -116,10 +116,12 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
         ),
         title: Text(l10n.orderDetailTitle(widget.id)),
       ),
-      body: AsyncView<Order>(
-        value: async,
-        onRetry: () => ref.invalidate(orderDetailProvider(widget.id)),
-        data: (order) {
+      body: SafeArea(
+        top: false,
+        child: AsyncView<Order>(
+          value: async,
+          onRetry: () => ref.invalidate(orderDetailProvider(widget.id)),
+          data: (order) {
           final payment = order.payment;
           final (label, tone) = _paymentTone(payment, l10n);
           final isStudent = user?.isInstructor != true;
@@ -333,7 +335,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
                   ),
                   const SizedBox(height: 10),
                 ],
-                if (!isStudent) ...[
+                if (!isStudent && payment?.isPaid != true) ...[
                   OutlinedButton.icon(
                     onPressed: () => _run(
                       () => ref
@@ -355,6 +357,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
             ],
           );
         },
+        ),
       ),
     );
   }
