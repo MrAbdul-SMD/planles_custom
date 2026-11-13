@@ -773,5 +773,11 @@
         "type": "int"
       }
     }
-  }
+  },
+  "vehicleTypeTrailer": "Aanhanger",
+  "vehicleTypeScooter": "Scooter",
+  "vehicleTypeMotorcycle": "Motor",
+  "vehicleTypeAutomaticCar": "Automaat",
+  "vehicleTypeTaxi": "Taxi",
+  "vehicleTypeManualCar": "Schakelauto"
 }

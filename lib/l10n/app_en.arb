@@ -350,5 +350,11 @@
   "themeModeDark": "Dark",
   "planningAwaitingConfirmation": "Waiting for the other party to confirm.",
   "planningNumber": "Lesson #{id}",
-  "planningOrderId": "Order #{id}"
+  "planningOrderId": "Order #{id}",
+  "vehicleTypeTrailer": "Trailer",
+  "vehicleTypeScooter": "Scooter",
+  "vehicleTypeMotorcycle": "Motorcycle",
+  "vehicleTypeAutomaticCar": "Automatic car",
+  "vehicleTypeTaxi": "Taxi",
+  "vehicleTypeManualCar": "Manual car"
 }

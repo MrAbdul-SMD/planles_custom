@@ -1134,4 +1134,22 @@ class AppLocalizationsNl extends AppLocalizations {
   String planningOrderId(int id) {
     return 'Bestelling #$id';
   }
+
+  @override
+  String get vehicleTypeTrailer => 'Aanhanger';
+
+  @override
+  String get vehicleTypeScooter => 'Scooter';
+
+  @override
+  String get vehicleTypeMotorcycle => 'Motor';
+
+  @override
+  String get vehicleTypeAutomaticCar => 'Automaat';
+
+  @override
+  String get vehicleTypeTaxi => 'Taxi';
+
+  @override
+  String get vehicleTypeManualCar => 'Schakelauto';
 }

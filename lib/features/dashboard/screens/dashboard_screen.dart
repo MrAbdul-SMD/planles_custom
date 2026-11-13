@@ -835,7 +835,7 @@ class _VehicleTypeCard extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             Text(
-              vehicle.name ?? context.l10n.buyLessonsVehicleFallback(vehicle.id),
+              vehicleTypeLabel(context.l10n, vehicle),
               textAlign: TextAlign.center,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,

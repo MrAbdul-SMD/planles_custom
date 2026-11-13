@@ -1128,4 +1128,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String planningOrderId(int id) {
     return 'Order #$id';
   }
+
+  @override
+  String get vehicleTypeTrailer => 'Trailer';
+
+  @override
+  String get vehicleTypeScooter => 'Scooter';
+
+  @override
+  String get vehicleTypeMotorcycle => 'Motorcycle';
+
+  @override
+  String get vehicleTypeAutomaticCar => 'Automatic car';
+
+  @override
+  String get vehicleTypeTaxi => 'Taxi';
+
+  @override
+  String get vehicleTypeManualCar => 'Manual car';
 }

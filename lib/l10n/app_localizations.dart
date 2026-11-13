@@ -2209,6 +2209,42 @@ abstract class AppLocalizations {
   /// In nl, this message translates to:
   /// **'Bestelling #{id}'**
   String planningOrderId(int id);
+
+  /// No description provided for @vehicleTypeTrailer.
+  ///
+  /// In en, this message translates to:
+  /// **'Trailer'**
+  String get vehicleTypeTrailer;
+
+  /// No description provided for @vehicleTypeScooter.
+  ///
+  /// In en, this message translates to:
+  /// **'Scooter'**
+  String get vehicleTypeScooter;
+
+  /// No description provided for @vehicleTypeMotorcycle.
+  ///
+  /// In en, this message translates to:
+  /// **'Motorcycle'**
+  String get vehicleTypeMotorcycle;
+
+  /// No description provided for @vehicleTypeAutomaticCar.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic car'**
+  String get vehicleTypeAutomaticCar;
+
+  /// No description provided for @vehicleTypeTaxi.
+  ///
+  /// In en, this message translates to:
+  /// **'Taxi'**
+  String get vehicleTypeTaxi;
+
+  /// No description provided for @vehicleTypeManualCar.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual car'**
+  String get vehicleTypeManualCar;
 }
 
 class _AppLocalizationsDelegate

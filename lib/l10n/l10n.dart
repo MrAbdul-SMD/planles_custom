@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:planles_custom/core/network/api_exception.dart';
+import 'package:planles_custom/features/orders/models/order.dart';
 import 'package:planles_custom/l10n/app_localizations.dart';
 
 export 'package:planles_custom/l10n/app_localizations.dart';
@@ -52,4 +53,47 @@ String describeError(BuildContext context, Object error) {
     AppErrorCode.paymentFailed => l10n.errPaymentFailed,
     AppErrorCode.emptyInvoice => l10n.errEmptyInvoice,
   };
+}
+
+/// Returns a localized label for known vehicle types/codes, falling back to the
+/// vehicle name or a generic label.
+String vehicleTypeLabel(AppLocalizations l10n, Vehicle vehicle) {
+  String norm(String? v) => (v ?? '')
+      .toLowerCase()
+      .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
+      .replaceAll(RegExp(r'_+'), '_')
+      .replaceAll(RegExp(r'^_|_$'), '');
+
+  final candidates = <String>{
+    norm(vehicle.code),
+    norm(vehicle.name),
+  }..removeWhere((e) => e.isEmpty);
+
+  bool has(String key) => candidates.any((c) => c == key || c.contains(key));
+
+  if (has('automatic_car') || has('automaat') || has('automatic')) {
+    // avoid misclassifying generic "car" matches before manual/auto checks below
+  }
+  if (has('manual_car') || has('schakel') || has('manual')) {
+    return l10n.vehicleTypeManualCar;
+  }
+  if (has('automatic_car') || has('automaat') || has('automatic')) {
+    return l10n.vehicleTypeAutomaticCar;
+  }
+  if (has('trailer') || has('aanhang')) {
+    return l10n.vehicleTypeTrailer;
+  }
+  if (has('scooter') || has('brom')) {
+    return l10n.vehicleTypeScooter;
+  }
+  if (has('motorcycle') || has('motor')) {
+    return l10n.vehicleTypeMotorcycle;
+  }
+  if (has('taxi')) {
+    return l10n.vehicleTypeTaxi;
+  }
+
+  final name = vehicle.name?.trim();
+  if (name != null && name.isNotEmpty) return name;
+  return l10n.buyLessonsVehicleFallback(vehicle.id);
 }
