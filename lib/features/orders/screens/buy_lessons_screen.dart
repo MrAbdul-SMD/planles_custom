@@ -108,26 +108,44 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
                   message: describeError(context, e),
                   onRetry: () => ref.invalidate(vehiclesProvider),
                 ),
-                data: (list) => Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    for (final v in list)
-                      ChoiceChip(
-                        label: Text(
-                          v.name ?? l10n.buyLessonsVehicleFallback(v.id),
-                        ),
+                data: (list) {
+                  const palette = [
+                    Color(0xFF2563EB),
+                    Color(0xFF059669),
+                    Color(0xFFEA580C),
+                    Color(0xFF7C3AED),
+                    Color(0xFFDB2777),
+                    Color(0xFF0891B2),
+                    Color(0xFFCA8A04),
+                    Color(0xFF4F46E5),
+                  ];
+                  return GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: list.length,
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                      childAspectRatio: 0.95,
+                    ),
+                    itemBuilder: (context, i) {
+                      final v = list[i];
+                      return _VehicleTypeCard(
+                        vehicle: v,
                         selected: _vehicleId == v.id,
-                        onSelected: (_) {
+                        color: palette[i % palette.length],
+                        onTap: () {
                           setState(() {
                             _vehicleId = v.id;
                             _classId = null;
                             _quantity = 1;
                           });
                         },
-                      ),
-                  ],
-                ),
+                      );
+                    },
+                  );
+                },
               ),
               const SizedBox(height: 24),
 
@@ -638,6 +656,101 @@ class _StudentPicker extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _VehicleTypeCard extends StatelessWidget {
+  const _VehicleTypeCard({
+    required this.vehicle,
+    required this.selected,
+    required this.onTap,
+    required this.color,
+  });
+
+  final Vehicle vehicle;
+  final bool selected;
+  final VoidCallback onTap;
+  final Color color;
+
+  IconData _iconFor(Vehicle v) {
+    final text = '${v.code ?? ''} ${v.name ?? ''}'.toLowerCase();
+    if (text.contains('motor')) return Icons.two_wheeler_rounded;
+    if (text.contains('brom') || text.contains('scooter') || text.contains('moped')) {
+      return Icons.moped_rounded;
+    }
+    if (text.contains('vracht') || text.contains('truck')) {
+      return Icons.local_shipping_rounded;
+    }
+    if (text.contains('bus')) return Icons.directions_bus_rounded;
+    if (text.contains('aanhang') || text.contains('trailer') || text.contains('be')) {
+      return Icons.rv_hookup_rounded;
+    }
+    return Icons.directions_car_filled_rounded;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final bg = selected ? color.withValues(alpha: 0.16) : scheme.surfaceContainerLow;
+    final border = selected ? color : color.withValues(alpha: 0.35);
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: border,
+            width: selected ? 1.8 : 1.2,
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Align(
+              alignment: Alignment.topRight,
+              child: Icon(
+                selected ? Icons.check_circle_rounded : Icons.circle_outlined,
+                size: 18,
+                color: selected ? color : scheme.outline.withValues(alpha: 0.6),
+              ),
+            ),
+            Expanded(
+              child: Center(
+                child: Container(
+                  width: 46,
+                  height: 46,
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: selected ? 0.22 : 0.14),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Icon(
+                    _iconFor(vehicle),
+                    size: 26,
+                    color: color,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              vehicle.name ?? context.l10n.buyLessonsVehicleFallback(vehicle.id),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.labelMedium?.copyWith(
+                fontWeight: FontWeight.w800,
+                color: scheme.onSurface,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
