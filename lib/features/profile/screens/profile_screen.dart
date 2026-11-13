@@ -205,6 +205,64 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
               ),
             ),
+            if (!user.isInstructor && user.instructor != null) ...[
+              const SizedBox(height: 24),
+              SectionHeader(l10n.planningInfoInstructor),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          AppAvatar(
+                            initials: user.instructor!.initials,
+                            size: 44,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  user.instructor!.displayName(l10n),
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                if ((user.instructor!.email ?? '').isNotEmpty)
+                                  Text(
+                                    user.instructor!.email!,
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: theme.colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      InfoRow(
+                        l10n.planningInfoPhone,
+                        user.instructor!.phone ?? '–',
+                      ),
+                      if ((user.instructor!.pickupLocation ?? '').isNotEmpty)
+                        InfoRow(
+                          l10n.studentsPickupLabel,
+                          user.instructor!.pickupLocation!,
+                        ),
+                      if ((user.instructor!.licensePlate ?? '').isNotEmpty)
+                        InfoRow(
+                          l10n.profileLicensePlate,
+                          user.instructor!.licensePlate!,
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
 
             // ------------------------------------------------------- actions
             const SizedBox(height: 24),

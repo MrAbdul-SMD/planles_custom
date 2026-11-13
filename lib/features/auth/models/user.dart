@@ -24,6 +24,7 @@ class User {
     this.carImageUrl,
     this.balance,
     this.instructorId,
+    this.instructor,
     this.active = true,
     this.createdAt,
     this.guardian,
@@ -49,6 +50,9 @@ class User {
     carImageUrl: json['carImageUrl']?.toString(),
     balance: F.toDouble(json['balance']?.toString()),
     instructorId: _asInt(json['instructorId']),
+    instructor: json['instructor'] is Map
+        ? User.fromJson(Map<String, dynamic>.from(json['instructor'] as Map))
+        : null,
     active: json['active'] as bool? ?? true,
     createdAt: F.date(json['createdAt']?.toString()),
     guardian: json['guardian'] is Map
@@ -75,6 +79,7 @@ class User {
   final String? carImageUrl;
   final double? balance;
   final int? instructorId;
+  final User? instructor;
   final bool active;
   final DateTime? createdAt;
   final Guardian? guardian;
@@ -104,7 +109,12 @@ class User {
     return '$a$b'.toUpperCase();
   }
 
-  User copyWith({double? balance, String? carImageUrl, String? profile}) =>
+  User copyWith({
+    double? balance,
+    String? carImageUrl,
+    String? profile,
+    User? instructor,
+  }) =>
       User(
         id: id,
         profile: profile ?? this.profile,
@@ -125,6 +135,7 @@ class User {
         carImageUrl: carImageUrl ?? this.carImageUrl,
         balance: balance ?? this.balance,
         instructorId: instructorId,
+        instructor: instructor ?? this.instructor,
         active: active,
         createdAt: createdAt,
         guardian: guardian,
