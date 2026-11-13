@@ -387,6 +387,42 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
                   selectedId: _studentId,
                   onChanged: (id) => setState(() => _studentId = id),
                 ),
+                const SizedBox(height: 24),
+                SectionHeader(l10n.buyLessonsStepPaymentInstructor),
+                SegmentedButton<String>(
+                  segments: [
+                    ButtonSegment(
+                      value: 'digital',
+                      label: Text(l10n.buyLessonsPaymentOnline),
+                      icon: const Icon(Icons.credit_card_outlined),
+                    ),
+                    ButtonSegment(
+                      value: 'balance',
+                      label: Text(l10n.buyLessonsPaymentBalance),
+                      icon: const Icon(Icons.account_balance_wallet_outlined),
+                    ),
+                    ButtonSegment(
+                      value: 'cash',
+                      label: Text(l10n.buyLessonsPaymentCash),
+                      icon: const Icon(Icons.payments_outlined),
+                    ),
+                  ],
+                  selected: {_paymentType},
+                  onSelectionChanged: (v) =>
+                      setState(() => _paymentType = v.first),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  switch (_paymentType) {
+                    'balance' =>
+                      l10n.buyLessonsBalanceNote(F.money(user?.balance ?? 0)),
+                    'cash' => l10n.buyLessonsCashNote,
+                    _ => l10n.buyLessonsMollieNote,
+                  },
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
                 const SizedBox(height: 16),
                 Text(
                   l10n.buyLessonsAfterPurchase,
@@ -409,6 +445,11 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
                       label: Text(l10n.buyLessonsPaymentBalance),
                       icon: const Icon(Icons.account_balance_wallet_outlined),
                     ),
+                    ButtonSegment(
+                      value: 'cash',
+                      label: Text(l10n.buyLessonsPaymentCash),
+                      icon: const Icon(Icons.payments_outlined),
+                    ),
                   ],
                   selected: {_paymentType},
                   onSelectionChanged: (v) =>
@@ -416,9 +457,12 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  _paymentType == 'balance'
-                      ? l10n.buyLessonsBalanceNote(F.money(user?.balance ?? 0))
-                      : l10n.buyLessonsMollieNote,
+                  switch (_paymentType) {
+                    'balance' =>
+                      l10n.buyLessonsBalanceNote(F.money(user?.balance ?? 0)),
+                    'cash' => l10n.buyLessonsCashNote,
+                    _ => l10n.buyLessonsMollieNote,
+                  },
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),

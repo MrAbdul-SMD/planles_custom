@@ -624,6 +624,42 @@ class _EmbeddedOrderCreationState extends ConsumerState<_EmbeddedOrderCreation> 
                 selectedId: _studentId,
                 onChanged: (id) => setState(() => _studentId = id),
               ),
+              const SizedBox(height: 16),
+              Text(
+                l10n.buyLessonsStepPaymentInstructor,
+                style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+              ),
+              const SizedBox(height: 8),
+              SegmentedButton<String>(
+                segments: [
+                  ButtonSegment(
+                    value: 'digital',
+                    label: Text(l10n.buyLessonsPaymentOnline),
+                    icon: const Icon(Icons.credit_card_outlined),
+                  ),
+                  ButtonSegment(
+                    value: 'balance',
+                    label: Text(l10n.buyLessonsPaymentBalance),
+                    icon: const Icon(Icons.account_balance_wallet_outlined),
+                  ),
+                  ButtonSegment(
+                    value: 'cash',
+                    label: Text(l10n.buyLessonsPaymentCash),
+                    icon: const Icon(Icons.payments_outlined),
+                  ),
+                ],
+                selected: {_paymentType},
+                onSelectionChanged: (v) => setState(() => _paymentType = v.first),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                switch (_paymentType) {
+                  'balance' => l10n.buyLessonsBalanceNote(F.money(user?.balance ?? 0)),
+                  'cash' => l10n.buyLessonsCashNote,
+                  _ => l10n.buyLessonsMollieNote,
+                },
+                style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+              ),
             ] else ...[
               const SizedBox(height: 16),
               Text(
@@ -643,15 +679,22 @@ class _EmbeddedOrderCreationState extends ConsumerState<_EmbeddedOrderCreation> 
                     label: Text(l10n.buyLessonsPaymentBalance),
                     icon: const Icon(Icons.account_balance_wallet_outlined),
                   ),
+                  ButtonSegment(
+                    value: 'cash',
+                    label: Text(l10n.buyLessonsPaymentCash),
+                    icon: const Icon(Icons.payments_outlined),
+                  ),
                 ],
                 selected: {_paymentType},
                 onSelectionChanged: (v) => setState(() => _paymentType = v.first),
               ),
               const SizedBox(height: 8),
               Text(
-                _paymentType == 'balance'
-                    ? l10n.buyLessonsBalanceNote(F.money(user?.balance ?? 0))
-                    : l10n.buyLessonsMollieNote,
+                switch (_paymentType) {
+                  'balance' => l10n.buyLessonsBalanceNote(F.money(user?.balance ?? 0)),
+                  'cash' => l10n.buyLessonsCashNote,
+                  _ => l10n.buyLessonsMollieNote,
+                },
                 style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
               ),
             ],

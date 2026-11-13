@@ -925,6 +925,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get buyLessonsPaymentBalance => 'Balance';
 
   @override
+  String get buyLessonsPaymentCash => 'Cash';
+
+  @override
   String buyLessonsBalanceNote(String balance) {
     return 'The amount will be deducted from your balance. Your balance: $balance';
   }
@@ -932,6 +935,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get buyLessonsMollieNote =>
       'You will be redirected to Mollie\'s secure payment page.';
+
+  @override
+  String get buyLessonsCashNote => 'The order will be marked for cash payment.';
 
   @override
   String get buyLessonsAfterPurchase =>

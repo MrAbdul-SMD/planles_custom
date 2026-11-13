@@ -929,6 +929,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get buyLessonsPaymentBalance => 'Saldo';
 
   @override
+  String get buyLessonsPaymentCash => 'Contant';
+
+  @override
   String buyLessonsBalanceNote(String balance) {
     return 'Het bedrag wordt van je saldo afgeschreven. Je saldo: $balance';
   }
@@ -936,6 +939,10 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String get buyLessonsMollieNote =>
       'Je doorgestuurd naar de veilige betaalpagina van Mollie.';
+
+  @override
+  String get buyLessonsCashNote =>
+      'De bestelling wordt aangemaakt voor contante betaling.';
 
   @override
   String get buyLessonsAfterPurchase =>

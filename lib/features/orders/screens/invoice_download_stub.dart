@@ -1,7 +1,13 @@
 import 'dart:typed_data';
 
-import 'package:printing/printing.dart';
+import 'package:file_picker/file_picker.dart';
 
 Future<void> downloadInvoicePdf(Uint8List bytes, String filename) async {
-  await Printing.sharePdf(bytes: bytes, filename: filename);
+  await FilePicker.platform.saveFile(
+    dialogTitle: 'Save invoice PDF',
+    fileName: filename,
+    type: FileType.custom,
+    allowedExtensions: const ['pdf'],
+    bytes: bytes,
+  );
 }

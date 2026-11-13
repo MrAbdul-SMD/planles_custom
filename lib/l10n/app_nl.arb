@@ -672,6 +672,7 @@
   "buyLessonsStepPaymentStudent": "4. Betaalwijze",
   "buyLessonsPaymentOnline": "Online",
   "buyLessonsPaymentBalance": "Saldo",
+  "buyLessonsPaymentCash": "Contant",
   "buyLessonsBalanceNote": "Het bedrag wordt van je saldo afgeschreven. Je saldo: {balance}",
   "@buyLessonsBalanceNote": {
     "placeholders": {
@@ -681,6 +682,7 @@
     }
   },
   "buyLessonsMollieNote": "Je doorgestuurd naar de veilige betaalpagina van Mollie.",
+  "buyLessonsCashNote": "De bestelling wordt aangemaakt voor contante betaling.",
   "buyLessonsAfterPurchase": "Na de aankoop plan je je lessen in vanuit de bestelling.",
   "buyLessonsOrderPlaced": "Bestelling geplaatst",
   "buyLessonsCompletePayment": "Rond de betaling af",

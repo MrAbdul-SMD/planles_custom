@@ -1826,6 +1826,12 @@ abstract class AppLocalizations {
   /// **'Saldo'**
   String get buyLessonsPaymentBalance;
 
+  /// No description provided for @buyLessonsPaymentCash.
+  ///
+  /// In nl, this message translates to:
+  /// **'Contant'**
+  String get buyLessonsPaymentCash;
+
   /// No description provided for @buyLessonsBalanceNote.
   ///
   /// In nl, this message translates to:
@@ -1837,6 +1843,12 @@ abstract class AppLocalizations {
   /// In nl, this message translates to:
   /// **'Je doorgestuurd naar de veilige betaalpagina van Mollie.'**
   String get buyLessonsMollieNote;
+
+  /// No description provided for @buyLessonsCashNote.
+  ///
+  /// In nl, this message translates to:
+  /// **'De bestelling wordt aangemaakt voor contante betaling.'**
+  String get buyLessonsCashNote;
 
   /// No description provided for @buyLessonsAfterPurchase.
   ///
@@ -2212,38 +2224,38 @@ abstract class AppLocalizations {
 
   /// No description provided for @vehicleTypeTrailer.
   ///
-  /// In en, this message translates to:
-  /// **'Trailer'**
+  /// In nl, this message translates to:
+  /// **'Aanhanger'**
   String get vehicleTypeTrailer;
 
   /// No description provided for @vehicleTypeScooter.
   ///
-  /// In en, this message translates to:
+  /// In nl, this message translates to:
   /// **'Scooter'**
   String get vehicleTypeScooter;
 
   /// No description provided for @vehicleTypeMotorcycle.
   ///
-  /// In en, this message translates to:
-  /// **'Motorcycle'**
+  /// In nl, this message translates to:
+  /// **'Motor'**
   String get vehicleTypeMotorcycle;
 
   /// No description provided for @vehicleTypeAutomaticCar.
   ///
-  /// In en, this message translates to:
-  /// **'Automatic car'**
+  /// In nl, this message translates to:
+  /// **'Automaat'**
   String get vehicleTypeAutomaticCar;
 
   /// No description provided for @vehicleTypeTaxi.
   ///
-  /// In en, this message translates to:
+  /// In nl, this message translates to:
   /// **'Taxi'**
   String get vehicleTypeTaxi;
 
   /// No description provided for @vehicleTypeManualCar.
   ///
-  /// In en, this message translates to:
-  /// **'Manual car'**
+  /// In nl, this message translates to:
+  /// **'Schakelauto'**
   String get vehicleTypeManualCar;
 }
 
