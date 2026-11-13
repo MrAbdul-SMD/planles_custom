@@ -1,25 +1,30 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/deep_links.dart';
+import '../../../core/network/api_exception.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../l10n/l10n.dart';
 import '../../../shared/widgets.dart';
 import '../../auth/models/user.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../notifications/providers/notifications_providers.dart';
+import '../../orders/models/order.dart';
 import '../../orders/providers/orders_providers.dart';
 import '../../planning/models/planning.dart';
-import '../../planning/providers/planning_providers.dart';
+import '../../students/providers/directory_providers.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
 
   Future<void> _refresh(WidgetRef ref) async {
     await Future.wait([
-      ref.refresh(planningListProvider.future),
       ref.refresh(ordersListProvider.future),
       ref.refresh(unreadCountProvider.future),
+      ref.refresh(vehiclesProvider.future),
       ref.read(authControllerProvider.notifier).refreshUser(),
     ]);
   }
@@ -27,7 +32,6 @@ class DashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(currentUserProvider);
-    final planning = ref.watch(planningListProvider);
     final unread = ref.watch(unreadCountProvider).value ?? 0;
     final notifications = ref
         .watch(notificationsProvider)
@@ -61,147 +65,67 @@ class DashboardScreen extends ConsumerWidget {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 10, 20, 36),
             children: [
-            // ------------------------------------------------ Titanium Balance Card
-            _BalanceTelemetryCard(user: user),
-            const SizedBox(height: 24),
+              // ------------------------------------------------ Titanium Balance Card
+              _BalanceTelemetryCard(user: user),
+              const SizedBox(height: 24),
 
-            // ------------------------------------------------ Next Drive / Upcoming
-            SectionHeader(
-              l10n.dashboardUpcomingLessons,
-              trailing: TextButton(
-                onPressed: () => context.go('/planning'),
-                child: Text(l10n.dashboardViewAll),
-              ),
-            ),
-            planning.when(
-              skipLoadingOnReload: true,
-              loading: () => const Padding(
-                padding: EdgeInsets.symmetric(vertical: 32),
-                child: Center(child: CircularProgressIndicator()),
-              ),
-              error: (e, _) => ErrorView(
-                message: describeError(context, e),
-                onRetry: () => ref.invalidate(planningListProvider),
-              ),
-              data: (page) {
-                final upcoming = page.upcoming;
-                if (upcoming.isEmpty) {
-                  return const _NoLessons();
-                }
-                final firstLesson = upcoming.first;
-                final otherLessons = upcoming.skip(1).take(2).toList();
+              // ------------------------------------------------ Embedded Order Creation
+              SectionHeader(l10n.buyLessonsTitle),
+              const SizedBox(height: 8),
+              const _EmbeddedOrderCreation(),
 
-                return Column(
-                  children: [
-                    _NextLessonBoardingPass(planning: firstLesson),
-                    if (otherLessons.isNotEmpty) ...[
-                      const SizedBox(height: 12),
-                      for (final p in otherLessons) ...[
-                        PlanningTile(planning: p),
-                        const SizedBox(height: 8),
-                      ],
-                    ],
-                  ],
-                );
-              },
-            ),
-            const SizedBox(height: 24),
-
-            // ------------------------------------------------ Cockpit Quick Actions
-            SectionHeader(l10n.dashboardQuickActions),
-            Row(
-              children: [
-                Expanded(
-                  child: _TactileActionCard(
-                    icon: Icons.add_shopping_cart_rounded,
-                    label: l10n.dashboardBuyLessons,
-                    subtitle: 'Pakket of losse les',
-                    onTap: () => context.push('/orders/new'),
+              // ------------------------------------------------ Notifications Preview
+              if (notifications.isNotEmpty) ...[
+                const SizedBox(height: 28),
+                SectionHeader(
+                  l10n.dashboardRecentNotifications,
+                  trailing: TextButton(
+                    onPressed: () => context.go('/notifications'),
+                    child: Text(l10n.dashboardAllNotifications),
                   ),
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _TactileActionCard(
-                    icon: Icons.account_balance_wallet_rounded,
-                    label: l10n.dashboardTopUpBalance,
-                    subtitle: 'iDEAL direct',
-                    onTap: () => context.push('/balance/topup'),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _TactileActionCard(
-                    icon: Icons.receipt_long_rounded,
-                    label: l10n.navOrders,
-                    subtitle: 'Facturen & status',
-                    onTap: () => context.go('/orders'),
-                  ),
-                ),
-              ],
-            ),
-            if (user?.isInstructor == true) ...[
-              const SizedBox(height: 10),
-              _TactileActionCard(
-                icon: Icons.groups_rounded,
-                label: l10n.studentsTitle,
-                subtitle: 'Bekijk leerlingendossiers & vorderingen',
-                onTap: () => context.push('/students'),
-                horizontal: true,
-              ),
-            ],
-
-            // ------------------------------------------------ Notifications Preview
-            if (notifications.isNotEmpty) ...[
-              const SizedBox(height: 28),
-              SectionHeader(
-                l10n.dashboardRecentNotifications,
-                trailing: TextButton(
-                  onPressed: () => context.go('/notifications'),
-                  child: Text(l10n.dashboardAllNotifications),
-                ),
-              ),
-              for (final n in notifications)
-                Card(
-                  child: ListTile(
-                    leading: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primaryContainer,
-                        borderRadius: BorderRadius.circular(10),
+                for (final n in notifications)
+                  Card(
+                    child: ListTile(
+                      leading: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primaryContainer,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(
+                          n.isRead
+                              ? Icons.notifications_none_rounded
+                              : Icons.notifications_active_rounded,
+                          color: theme.colorScheme.primary,
+                          size: 20,
+                        ),
                       ),
-                      child: Icon(
-                        n.isRead
-                            ? Icons.notifications_none_rounded
-                            : Icons.notifications_active_rounded,
-                        color: theme.colorScheme.primary,
-                        size: 20,
+                      title: Text(
+                        n.title ?? l10n.dashboardNotificationFallback,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontWeight: FontWeight.w700),
                       ),
-                    ),
-                    title: Text(
-                      n.title ?? l10n.dashboardNotificationFallback,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontWeight: FontWeight.w700),
-                    ),
-                    subtitle: Text(
-                      n.body ?? '',
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    trailing: n.createdAt == null
-                        ? null
-                        : Text(
-                            F.relativeDay(l10n, n.createdAt),
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.outline,
+                      subtitle: Text(
+                        n.body ?? '',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      trailing: n.createdAt == null
+                          ? null
+                          : Text(
+                              F.relativeDay(l10n, n.createdAt),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.outline,
+                              ),
                             ),
-                          ),
+                    ),
                   ),
-                ),
+              ],
             ],
-          ],
+          ),
         ),
-      ),
       ),
     );
   }
@@ -360,360 +284,582 @@ class _BalanceTelemetryCard extends ConsumerWidget {
   }
 }
 
-/// Editorial Boarding-Pass style upcoming lesson card.
-class _NextLessonBoardingPass extends StatelessWidget {
-  const _NextLessonBoardingPass({required this.planning});
 
-  final Planning planning;
+class _DashCartItem {
+  _DashCartItem({required this.drivingClass, required this.quantity});
+
+  final DrivingClass drivingClass;
+  int quantity;
+}
+
+/// Embedded order creation for dashboard (replaces upcoming lessons + quick actions).
+class _EmbeddedOrderCreation extends ConsumerStatefulWidget {
+  const _EmbeddedOrderCreation();
+
+  @override
+  ConsumerState<_EmbeddedOrderCreation> createState() => _EmbeddedOrderCreationState();
+}
+
+class _EmbeddedOrderCreationState extends ConsumerState<_EmbeddedOrderCreation> {
+  int? _vehicleId;
+  int? _classId;
+  int _quantity = 1;
+  String _paymentType = 'digital';
+  int? _studentId;
+  bool _busy = false;
+  final List<_DashCartItem> _cart = [];
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final start = planning.startDate;
-    final end = planning.endDate;
+    final vehicles = ref.watch(vehiclesProvider);
+    final user = ref.watch(currentUserProvider);
+    final isInstructor = user?.isInstructor == true;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: theme.colorScheme.outlineVariant.withValues(alpha: isDark ? 0.3 : 0.6),
-          width: 1,
-        ),
-      ),
-      child: Column(
-        children: [
-          InkWell(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-            onTap: () => context.push('/planning/${planning.id}'),
-            child: Padding(
-              padding: const EdgeInsets.all(18),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primaryContainer,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          'VOLGENDE LES',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w800,
-                            color: theme.colorScheme.onPrimaryContainer,
-                            letterSpacing: 0.5,
+    AsyncValue<List<DrivingClass>>? classes;
+    if (_vehicleId != null) classes = ref.watch(classesProvider(_vehicleId!));
+    final classList = classes?.value ?? const <DrivingClass>[];
+    DrivingClass? selectedClass;
+    for (final c in classList) {
+      if (c.id == _classId) selectedClass = c;
+    }
+
+    final canSubmit = !_busy && _cart.isNotEmpty && (!isInstructor || _studentId != null);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              l10n.buyLessonsStepVehicle,
+              style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 10),
+            vehicles.when(
+              loading: () => const Padding(
+                padding: EdgeInsets.symmetric(vertical: 20),
+                child: Center(child: CircularProgressIndicator()),
+              ),
+              error: (e, _) => ErrorView(
+                message: describeError(context, e),
+                onRetry: () => ref.invalidate(vehiclesProvider),
+              ),
+              data: (list) {
+                if (list.isEmpty) {
+                  return Text(l10n.buyLessonsNoPackages);
+                }
+                return Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: [
+                    for (final v in list)
+                      _VehicleTypeCard(
+                        vehicle: v,
+                        selected: _vehicleId == v.id,
+                        onTap: () {
+                          setState(() {
+                            _vehicleId = v.id;
+                            _classId = null;
+                            _quantity = 1;
+                          });
+                        },
+                      ),
+                  ],
+                );
+              },
+            ),
+            const SizedBox(height: 18),
+            Text(
+              l10n.buyLessonsStepLesson,
+              style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 8),
+            if (_vehicleId == null)
+              Text(
+                l10n.buyLessonsChooseVehicleFirst,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              )
+            else if (classes == null)
+              const SizedBox.shrink()
+            else
+              classes.when(
+                loading: () => const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+                error: (e, _) => ErrorView(
+                  message: describeError(context, e),
+                  onRetry: () => ref.invalidate(classesProvider(_vehicleId!)),
+                ),
+                data: (list) {
+                  if (list.isEmpty) return Text(l10n.buyLessonsNoPackages);
+                  final sorted = [...list]
+                    ..sort((a, b) => _lessonOrder(a.lessonType).compareTo(_lessonOrder(b.lessonType)));
+                  String? group;
+                  final children = <Widget>[];
+                  for (final c in sorted) {
+                    final g = c.lessonType ?? '';
+                    if (g != group) {
+                      group = g;
+                      final label = _lessonTypeLabel(l10n, g);
+                      if (label != null) {
+                        children.add(Padding(
+                          padding: const EdgeInsets.only(top: 6, bottom: 4),
+                          child: Text(
+                            label,
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ));
+                      }
+                    }
+                    children.add(
+                      InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: () => setState(() {
+                          _classId = c.id;
+                          _quantity = 1;
+                        }),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          margin: const EdgeInsets.only(bottom: 8),
+                          decoration: BoxDecoration(
+                            color: _classId == c.id
+                                ? theme.colorScheme.primaryContainer
+                                : theme.colorScheme.surfaceContainerLow,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: _classId == c.id
+                                  ? theme.colorScheme.primary
+                                  : theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                _classId == c.id ? Icons.radio_button_checked : Icons.radio_button_off,
+                                size: 20,
+                                color: _classId == c.id ? theme.colorScheme.primary : theme.colorScheme.outline,
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      c.name ?? l10n.orderDetailLesson,
+                                      style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+                                    ),
+                                    if (c.duration != null)
+                                      Text(
+                                        F.durationLabel(l10n, c.duration),
+                                        style: theme.textTheme.bodySmall?.copyWith(
+                                          color: theme.colorScheme.onSurfaceVariant,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                              Text(
+                                F.money(c.priceValue),
+                                style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                      const Spacer(),
-                      StatusChip(
-                        label: planning.statusLabel(l10n),
-                        tone: PlanningTone.forStatus(planning.status),
-                      ),
-                    ],
+                    );
+                  }
+                  return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: children);
+                },
+              ),
+
+            if (selectedClass != null) ...[
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      l10n.buyLessonsStepQuantity,
+                      style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+                    ),
                   ),
-                  const SizedBox(height: 14),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Date block
-                      Container(
-                        width: 64,
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        decoration: BoxDecoration(
-                          color: isDark
-                              ? const Color(0xFF1E293B)
-                              : theme.colorScheme.primaryContainer.withValues(alpha: 0.6),
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: Column(
+                  IconButton(
+                    onPressed: _quantity > 1 ? () => setState(() => _quantity--) : null,
+                    icon: const Icon(Icons.remove_circle_outline),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  Text('$_quantity', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+                  IconButton(
+                    onPressed: () => setState(() => _quantity++),
+                    icon: const Icon(Icons.add_circle_outline),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                ],
+              ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: OutlinedButton.icon(
+                  onPressed: () => _addToCart(selectedClass!),
+                  icon: const Icon(Icons.add_shopping_cart_outlined),
+                  label: Text(l10n.buyLessonsAddItem),
+                ),
+              ),
+            ],
+
+            if (_cart.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              Text(
+                l10n.orderDetailSectionLessons,
+                style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceContainerLow,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4)),
+                ),
+                child: Column(
+                  children: [
+                    for (final (i, item) in _cart.indexed) ...[
+                      if (i > 0) const Divider(height: 1),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        child: Row(
                           children: [
-                            Text(
-                              start == null ? '–' : F.dayLabel(l10n, start),
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: theme.colorScheme.primary,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              start == null ? '' : '${start.day}',
-                              style: theme.textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: -0.5,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              planning.drivingClass?.name ?? l10n.dashboardLessonFallback,
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: -0.2,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              [
-                                if (start != null && end != null)
-                                  '${F.time(start)} – ${F.time(end)}',
-                                if (planning.durationMinutes > 0)
-                                  F.minutesLabel(l10n, planning.durationMinutes),
-                              ].join(' · '),
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            if (planning.instructor != null) ...[
-                              const SizedBox(height: 6),
-                              Row(
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  AppAvatar(
-                                    initials: planning.instructor!.initials,
-                                    size: 20,
-                                  ),
-                                  const SizedBox(width: 6),
                                   Text(
-                                    planning.instructor!.displayName(l10n),
+                                    item.drivingClass.name ?? l10n.orderDetailLesson,
+                                    style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+                                  ),
+                                  Text(
+                                    '${l10n.orderDetailLessonCount(item.quantity)} · ${F.money(_itemTotal(item.drivingClass, item.quantity))}',
                                     style: theme.textTheme.bodySmall?.copyWith(
-                                      fontWeight: FontWeight.w600,
+                                      color: theme.colorScheme.onSurfaceVariant,
                                     ),
                                   ),
                                 ],
                               ),
-                            ],
+                            ),
+                            IconButton(
+                              visualDensity: VisualDensity.compact,
+                              onPressed: item.quantity > 1 ? () => setState(() => item.quantity--) : null,
+                              icon: const Icon(Icons.remove_circle_outline, size: 20),
+                            ),
+                            Text('${item.quantity}', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
+                            IconButton(
+                              visualDensity: VisualDensity.compact,
+                              onPressed: () => setState(() => item.quantity++),
+                              icon: const Icon(Icons.add_circle_outline, size: 20),
+                            ),
+                            IconButton(
+                              visualDensity: VisualDensity.compact,
+                              onPressed: () => setState(() => _cart.removeAt(i)),
+                              icon: const Icon(Icons.delete_outline, size: 20),
+                            ),
                           ],
                         ),
                       ),
                     ],
+                    const Divider(height: 1),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Totaal',
+                              style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+                            ),
+                          ),
+                          Text(
+                            F.money(_cartTotal()),
+                            style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+
+            if (isInstructor) ...[
+              const SizedBox(height: 16),
+              Text(
+                l10n.buyLessonsStepStudent,
+                style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+              ),
+              const SizedBox(height: 8),
+              _DashboardStudentPicker(
+                selectedId: _studentId,
+                onChanged: (id) => setState(() => _studentId = id),
+              ),
+            ] else ...[
+              const SizedBox(height: 16),
+              Text(
+                l10n.buyLessonsStepPaymentStudent,
+                style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+              ),
+              const SizedBox(height: 8),
+              SegmentedButton<String>(
+                segments: [
+                  ButtonSegment(
+                    value: 'digital',
+                    label: Text(l10n.buyLessonsPaymentOnline),
+                    icon: const Icon(Icons.credit_card_outlined),
+                  ),
+                  ButtonSegment(
+                    value: 'balance',
+                    label: Text(l10n.buyLessonsPaymentBalance),
+                    icon: const Icon(Icons.account_balance_wallet_outlined),
                   ),
                 ],
+                selected: {_paymentType},
+                onSelectionChanged: (v) => setState(() => _paymentType = v.first),
               ),
-            ),
-          ),
-          Divider(
-            height: 1,
-            color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            child: Row(
-              children: [
-                Flexible(
-                  child: TextButton.icon(
-                    onPressed: () => context.push('/planning/${planning.id}'),
-                    icon: const Icon(Icons.info_outline_rounded, size: 16),
-                    label: const Text(
-                      'Details bekijken',
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Flexible(
-                  child: OutlinedButton.icon(
-                    onPressed: () =>
-                        context.push('/planning/${planning.id}/reschedule'),
-                    icon: const Icon(Icons.event_repeat_rounded, size: 16),
-                    label: Text(
-                      l10n.planningRescheduleLesson,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      visualDensity: VisualDensity.compact,
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+              const SizedBox(height: 8),
+              Text(
+                _paymentType == 'balance'
+                    ? l10n.buyLessonsBalanceNote(F.money(user?.balance ?? 0))
+                    : l10n.buyLessonsMollieNote,
+                style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+              ),
+            ],
 
-class _NoLessons extends StatelessWidget {
-  const _NoLessons();
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
-          width: 1,
+            const SizedBox(height: 16),
+            FilledButton(
+              onPressed: canSubmit ? _submit : null,
+              child: _busy
+                  ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.4))
+                  : Text(
+                      _cart.isEmpty
+                          ? l10n.buyLessonsChoosePackage
+                          : (isInstructor
+                              ? '${l10n.confirm} — ${F.money(_cartTotal())}'
+                              : l10n.buyLessonsPayButton(F.money(_cartTotal()))),
+                    ),
+            ),
+          ],
         ),
       ),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primaryContainer,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.event_available_rounded,
-              size: 28,
-              color: theme.colorScheme.primary,
-            ),
-          ),
-          const SizedBox(height: 14),
-          Text(
-            l10n.dashboardNoLessonsTitle,
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            l10n.dashboardNoLessonsSubtitle,
-            textAlign: TextAlign.center,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 16),
-          FilledButton.tonal(
-            onPressed: () => context.push('/orders/new'),
-            child: Text(l10n.dashboardBuyLessons),
-          ),
-        ],
-      ),
     );
+  }
+
+  int _lessonOrder(String? type) => switch (type) {
+        'trial' => 0,
+        'base' => 1,
+        'pack' => 2,
+        'exam' => 3,
+        _ => 99,
+      };
+
+  String? _lessonTypeLabel(AppLocalizations l10n, String type) => switch (type) {
+        'trial' => l10n.buyLessonsLessonTypeTrial,
+        'base' => l10n.buyLessonsLessonTypeBase,
+        'pack' => l10n.buyLessonsLessonTypePack,
+        'exam' => l10n.buyLessonsLessonTypeExam,
+        _ => null,
+      };
+
+  double _itemTotal(DrivingClass c, int quantity) => (c.priceValue ?? 0) * quantity;
+
+  double _cartTotal() => _cart.fold<double>(0, (sum, item) => sum + _itemTotal(item.drivingClass, item.quantity));
+
+  void _addToCart(DrivingClass selectedClass) {
+    setState(() {
+      final existing = _cart.indexWhere((item) => item.drivingClass.id == selectedClass.id);
+      if (existing >= 0) {
+        _cart[existing].quantity += _quantity;
+      } else {
+        _cart.add(_DashCartItem(drivingClass: selectedClass, quantity: _quantity));
+      }
+      _quantity = 1;
+    });
+  }
+
+  Future<void> _submit() async {
+    final l10n = context.l10n;
+    if (_cart.isEmpty) return;
+    final user = ref.read(currentUserProvider);
+    final isInstructor = user?.isInstructor == true;
+    setState(() => _busy = true);
+    try {
+      final result = await ref.read(ordersRepositoryProvider).create(
+            paymentType: _paymentType,
+            items: [
+              for (final item in _cart)
+                (id: item.drivingClass.id, quantity: item.quantity),
+            ],
+            studentId: _studentId,
+            redirectUrl: isInstructor ? null : paymentRedirectUrl(),
+          );
+
+      ref.invalidate(ordersListProvider);
+      ref.read(authControllerProvider.notifier).refreshUser();
+
+      final checkoutUrl = result.checkoutUrl;
+      if (!isInstructor && checkoutUrl != null && checkoutUrl.isNotEmpty) {
+        final uri = Uri.tryParse(checkoutUrl);
+        if (uri != null) {
+          await launchUrl(
+            uri,
+            mode: kIsWeb ? LaunchMode.platformDefault : LaunchMode.externalApplication,
+            webOnlyWindowName: kIsWeb ? '_self' : null,
+          );
+        }
+      }
+
+      if (!mounted) return;
+      setState(() {
+        _cart.clear();
+        _classId = null;
+        _quantity = 1;
+      });
+      final orderId = result.orderId;
+      if (orderId != null) {
+        context.push('/orders/$orderId');
+      } else {
+        context.go('/orders');
+      }
+      showAppSnack(context, l10n.buyLessonsOrderPlaced);
+    } on ApiException catch (e) {
+      if (mounted) showAppSnack(context, describeError(context, e), error: true);
+    } catch (e) {
+      if (mounted) showAppSnack(context, describeError(context, e), error: true);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 }
 
-class _TactileActionCard extends StatelessWidget {
-  const _TactileActionCard({
-    required this.icon,
-    required this.label,
-    required this.subtitle,
-    required this.onTap,
-    this.horizontal = false,
-  });
+class _VehicleTypeCard extends StatelessWidget {
+  const _VehicleTypeCard({required this.vehicle, required this.selected, required this.onTap});
 
-  final IconData icon;
-  final String label;
-  final String subtitle;
+  final Vehicle vehicle;
+  final bool selected;
   final VoidCallback onTap;
-  final bool horizontal;
+
+  IconData _iconFor(Vehicle v) {
+    final text = '${v.code ?? ''} ${v.name ?? ''}'.toLowerCase();
+    if (text.contains('motor')) return Icons.two_wheeler_rounded;
+    if (text.contains('brom') || text.contains('scooter') || text.contains('moped')) return Icons.moped_rounded;
+    if (text.contains('vracht') || text.contains('truck')) return Icons.local_shipping_rounded;
+    if (text.contains('bus')) return Icons.directions_bus_rounded;
+    if (text.contains('aanhang') || text.contains('trailer') || text.contains('be')) return Icons.rv_hookup_rounded;
+    return Icons.directions_car_filled_rounded;
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
+    final scheme = theme.colorScheme;
     return InkWell(
       borderRadius: BorderRadius.circular(16),
-      mouseCursor: SystemMouseCursors.click,
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        width: 112,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
         decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerLow,
+          color: selected ? scheme.primaryContainer : scheme.surfaceContainerLow,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: theme.colorScheme.outlineVariant.withValues(alpha: isDark ? 0.3 : 0.5),
-            width: 1,
+            color: selected ? scheme.primary : scheme.outlineVariant.withValues(alpha: 0.45),
+            width: selected ? 1.6 : 1,
           ),
         ),
-        child: horizontal
-            ? Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(icon, color: theme.colorScheme.primary, size: 20),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          label,
-                          style: theme.textTheme.labelMedium?.copyWith(
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        Text(
-                          subtitle,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                            fontSize: 11.5,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(
-                    Icons.chevron_right_rounded,
-                    color: theme.colorScheme.outline,
-                    size: 18,
-                  ),
-                ],
-              )
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(icon, color: theme.colorScheme.primary, size: 20),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                      fontSize: 11,
-                    ),
-                  ),
-                ],
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: selected
+                    ? scheme.primary.withValues(alpha: 0.12)
+                    : scheme.surface,
+                borderRadius: BorderRadius.circular(14),
               ),
+              child: Icon(
+                _iconFor(vehicle),
+                size: 30,
+                color: selected ? scheme.primary : scheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              vehicle.name ?? context.l10n.buyLessonsVehicleFallback(vehicle.id),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.labelMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: selected ? scheme.onPrimaryContainer : scheme.onSurface,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
+class _DashboardStudentPicker extends ConsumerWidget {
+  const _DashboardStudentPicker({required this.selectedId, required this.onChanged});
+
+  final int? selectedId;
+  final ValueChanged<int?> onChanged;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final students = ref.watch(myStudentsProvider);
+    return students.when(
+      loading: () => const Padding(
+        padding: EdgeInsets.all(12),
+        child: Center(child: CircularProgressIndicator()),
+      ),
+      error: (e, _) => ErrorView(
+        message: describeError(context, e),
+        onRetry: () => ref.invalidate(myStudentsProvider),
+      ),
+      data: (list) {
+        if (list.isEmpty) {
+          return Card(child: Padding(padding: const EdgeInsets.all(12), child: Text(l10n.buyLessonsNoStudents)));
+        }
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<int>(
+                isExpanded: true,
+                value: selectedId,
+                hint: Text(l10n.buyLessonsChooseStudent),
+                items: [
+                  for (final User s in list)
+                    DropdownMenuItem(value: s.id, child: Text(s.displayName(l10n))),
+                ],
+                onChanged: onChanged,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
 /// Ticket-style planning card for lesson lists and timeline.
 class PlanningTile extends StatelessWidget {
   const PlanningTile({super.key, required this.planning, this.trailing});
