@@ -85,7 +85,9 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
                 : Text(
                     _cart.isEmpty
                         ? l10n.buyLessonsChoosePackage
-                        : l10n.buyLessonsPayButton(F.money(_cartTotal())),
+                        : (isInstructor
+                            ? '${l10n.confirm} — ${F.money(_cartTotal())}'
+                            : l10n.buyLessonsPayButton(F.money(_cartTotal()))),
                   ),
           ),
         ),
@@ -367,47 +369,50 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
                   selectedId: _studentId,
                   onChanged: (id) => setState(() => _studentId = id),
                 ),
+                const SizedBox(height: 16),
+                Text(
+                  l10n.buyLessonsAfterPurchase,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ] else ...[
+                const SizedBox(height: 24),
+                SectionHeader(l10n.buyLessonsStepPaymentStudent),
+                SegmentedButton<String>(
+                  segments: [
+                    ButtonSegment(
+                      value: 'digital',
+                      label: Text(l10n.buyLessonsPaymentOnline),
+                      icon: const Icon(Icons.credit_card_outlined),
+                    ),
+                    ButtonSegment(
+                      value: 'balance',
+                      label: Text(l10n.buyLessonsPaymentBalance),
+                      icon: const Icon(Icons.account_balance_wallet_outlined),
+                    ),
+                  ],
+                  selected: {_paymentType},
+                  onSelectionChanged: (v) =>
+                      setState(() => _paymentType = v.first),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  _paymentType == 'balance'
+                      ? l10n.buyLessonsBalanceNote(F.money(user?.balance ?? 0))
+                      : l10n.buyLessonsMollieNote,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  l10n.buyLessonsAfterPurchase,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
               ],
-
-              const SizedBox(height: 24),
-              SectionHeader(
-                isInstructor
-                    ? l10n.buyLessonsStepPaymentInstructor
-                    : l10n.buyLessonsStepPaymentStudent,
-              ),
-              SegmentedButton<String>(
-                segments: [
-                  ButtonSegment(
-                    value: 'digital',
-                    label: Text(l10n.buyLessonsPaymentOnline),
-                    icon: const Icon(Icons.credit_card_outlined),
-                  ),
-                  ButtonSegment(
-                    value: 'balance',
-                    label: Text(l10n.buyLessonsPaymentBalance),
-                    icon: const Icon(Icons.account_balance_wallet_outlined),
-                  ),
-                ],
-                selected: {_paymentType},
-                onSelectionChanged: (v) =>
-                    setState(() => _paymentType = v.first),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                _paymentType == 'balance'
-                    ? l10n.buyLessonsBalanceNote(F.money(user?.balance ?? 0))
-                    : l10n.buyLessonsMollieNote,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                l10n.buyLessonsAfterPurchase,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
             ],
           ),
         ),
@@ -446,6 +451,8 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
   Future<void> _submit() async {
     final l10n = context.l10n;
     if (_cart.isEmpty) return;
+    final user = ref.read(currentUserProvider);
+    final isInstructor = user?.isInstructor == true;
     setState(() => _busy = true);
     try {
       final result = await ref.read(ordersRepositoryProvider).create(
@@ -455,7 +462,7 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
                 (id: item.drivingClass.id, quantity: item.quantity),
             ],
             studentId: _studentId,
-            redirectUrl: paymentRedirectUrl(),
+            redirectUrl: isInstructor ? null : paymentRedirectUrl(),
           );
 
       ref.invalidate(ordersListProvider);
@@ -464,7 +471,7 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
       final orderId = result.orderId;
       final checkoutUrl = result.checkoutUrl;
 
-      if (checkoutUrl != null && checkoutUrl.isNotEmpty) {
+      if (!isInstructor && checkoutUrl != null && checkoutUrl.isNotEmpty) {
         final uri = Uri.tryParse(checkoutUrl);
         if (uri != null) {
           await launchUrl(
