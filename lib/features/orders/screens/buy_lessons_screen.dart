@@ -61,6 +61,381 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
     final canSubmit =
         !_busy && _cart.isNotEmpty && (!isInstructor || _studentId != null);
 
+    final submitButton = FilledButton(
+      onPressed: canSubmit ? _submit : null,
+      child: _busy
+          ? const SizedBox(
+              width: 22,
+              height: 22,
+              child: CircularProgressIndicator(strokeWidth: 2.4),
+            )
+          : Text(
+              _cart.isEmpty
+                  ? l10n.buyLessonsChoosePackage
+                  : (isInstructor
+                      ? '${l10n.confirm} — ${F.money(_cartTotal())}'
+                      : l10n.buyLessonsPayButton(F.money(_cartTotal()))),
+            ),
+    );
+
+    final vehicleSection = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionHeader(l10n.buyLessonsStepVehicle),
+        vehicles.when(
+          loading: () => const Padding(
+            padding: EdgeInsets.all(20),
+            child: Center(child: CircularProgressIndicator()),
+          ),
+          error: (e, _) => ErrorView(
+            message: describeError(context, e),
+            onRetry: () => ref.invalidate(vehiclesProvider),
+          ),
+          data: (list) {
+            const palette = [
+              Color(0xFF2563EB),
+              Color(0xFF059669),
+              Color(0xFFEA580C),
+              Color(0xFF7C3AED),
+              Color(0xFFDB2777),
+              Color(0xFF0891B2),
+              Color(0xFFCA8A04),
+              Color(0xFF4F46E5),
+            ];
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                final cols = constraints.maxWidth >= 700
+                    ? 6
+                    : constraints.maxWidth >= 420
+                        ? 4
+                        : 3;
+                return GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: list.length,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: cols,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                    childAspectRatio: 0.95,
+                  ),
+                  itemBuilder: (context, i) {
+                    final v = list[i];
+                    return _VehicleTypeCard(
+                      vehicle: v,
+                      selected: _vehicleId == v.id,
+                      color: palette[i % palette.length],
+                      onTap: () {
+                        setState(() {
+                          _vehicleId = v.id;
+                          _classId = null;
+                          _quantity = 1;
+                        });
+                      },
+                    );
+                  },
+                );
+              },
+            );
+          },
+        ),
+      ],
+    );
+
+    final lessonSection = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionHeader(l10n.buyLessonsStepLesson),
+        if (_vehicleId == null)
+          Text(
+            l10n.buyLessonsChooseVehicleFirst,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          )
+        else if (classes == null)
+          const SizedBox.shrink()
+        else
+          classes.when(
+            loading: () => const Padding(
+              padding: EdgeInsets.all(20),
+              child: Center(child: CircularProgressIndicator()),
+            ),
+            error: (e, _) => ErrorView(
+              message: describeError(context, e),
+              onRetry: () => ref.invalidate(classesProvider(_vehicleId!)),
+            ),
+            data: (list) {
+              if (list.isEmpty) {
+                return Text(l10n.buyLessonsNoPackages);
+              }
+              const order = <String, int>{
+                'trial': 0,
+                'base': 1,
+                'pack': 2,
+                'exam': 3,
+              };
+              final sorted = [...list]
+                ..sort(
+                  (a, b) => (order[a.lessonType] ?? 99)
+                      .compareTo(order[b.lessonType] ?? 99),
+                );
+              String? currentGroup;
+              final children = <Widget>[];
+              for (final c in sorted) {
+                final group = c.lessonType ?? '';
+                if (group != currentGroup) {
+                  currentGroup = group;
+                  final label = switch (group) {
+                    'trial' => l10n.buyLessonsLessonTypeTrial,
+                    'base' => l10n.buyLessonsLessonTypeBase,
+                    'pack' => l10n.buyLessonsLessonTypePack,
+                    'exam' => l10n.buyLessonsLessonTypeExam,
+                    _ => null,
+                  };
+                  if (label != null) {
+                    children.add(
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8, bottom: 6),
+                        child: Text(
+                          label,
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                }
+                children.add(
+                  _ClassOption(
+                    drivingClass: c,
+                    selected: _classId == c.id,
+                    onTap: () => setState(() {
+                      _classId = c.id;
+                      _quantity = 1;
+                    }),
+                  ),
+                );
+                children.add(const SizedBox(height: 10));
+              }
+              return Column(children: children);
+            },
+          ),
+        if (selectedClass != null) ...[
+          const SizedBox(height: 12),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              child: Wrap(
+                spacing: 12,
+                runSpacing: 8,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                alignment: WrapAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        selectedClass.name ?? l10n.orderDetailLesson,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      Text(
+                        l10n.buyLessonsTotalLine(
+                          F.minutesLabel(
+                            l10n,
+                            (selectedClass.durationMinutes ?? 0) * _quantity,
+                          ),
+                          F.money(_itemTotal(selectedClass, _quantity)),
+                        ),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        onPressed: _quantity > 1
+                            ? () => setState(() => _quantity--)
+                            : null,
+                        icon: const Icon(Icons.remove_circle_outline),
+                      ),
+                      Text(
+                        '$_quantity',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => setState(() => _quantity++),
+                        icon: const Icon(Icons.add_circle_outline),
+                      ),
+                      const SizedBox(width: 8),
+                      FilledButton.tonalIcon(
+                        onPressed: () => _addToCart(selectedClass!),
+                        icon: const Icon(Icons.add_shopping_cart_outlined),
+                        label: Text(l10n.buyLessonsAddItem),
+                        style: FilledButton.styleFrom(
+                          minimumSize: const Size(0, 42),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+
+    final cartSection = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionHeader(l10n.orderDetailSectionLessons),
+        if (_cart.isEmpty)
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                l10n.buyLessonsChoosePackage,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+          )
+        else ...[
+          Card(
+            child: Column(
+              children: [
+                for (final (i, item) in _cart.indexed) ...[
+                  if (i > 0) const Divider(height: 1),
+                  ListTile(
+                    contentPadding:
+                        const EdgeInsets.only(left: 16, right: 4),
+                    title: Text(
+                      item.drivingClass.name ?? l10n.orderDetailLesson,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    subtitle: Text(
+                      [
+                        l10n.orderDetailLessonCount(item.quantity),
+                        if (item.drivingClass.duration != null)
+                          F.durationLabel(l10n, item.drivingClass.duration),
+                        F.money(_itemTotal(item.drivingClass, item.quantity)),
+                      ].whereType<String>().join(' · '),
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          visualDensity: VisualDensity.compact,
+                          onPressed: item.quantity > 1
+                              ? () => setState(() => item.quantity--)
+                              : null,
+                          icon: const Icon(Icons.remove_circle_outline,
+                              size: 20),
+                        ),
+                        Text(
+                          '${item.quantity}',
+                          style: theme.textTheme.titleSmall
+                              ?.copyWith(fontWeight: FontWeight.w700),
+                        ),
+                        IconButton(
+                          visualDensity: VisualDensity.compact,
+                          onPressed: () => setState(() => item.quantity++),
+                          icon:
+                              const Icon(Icons.add_circle_outline, size: 20),
+                        ),
+                        IconButton(
+                          visualDensity: VisualDensity.compact,
+                          onPressed: () => setState(() => _cart.removeAt(i)),
+                          icon: const Icon(Icons.delete_outline, size: 20),
+                          tooltip: l10n.delete,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            l10n.buyLessonsTotalLine(
+              F.minutesLabel(l10n, _cartTotalMinutes()),
+              F.money(_cartTotal()),
+            ),
+            style: theme.textTheme.bodyMedium
+                ?.copyWith(fontWeight: FontWeight.w700),
+          ),
+        ],
+      ],
+    );
+
+    final paymentSection = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (isInstructor) ...[
+          SectionHeader(l10n.buyLessonsStepStudent),
+          _StudentPicker(
+            selectedId: _studentId,
+            onChanged: (id) => setState(() => _studentId = id),
+          ),
+          const SizedBox(height: 16),
+          SectionHeader(l10n.buyLessonsStepPaymentInstructor),
+        ] else
+          SectionHeader(l10n.buyLessonsStepPaymentStudent),
+        SegmentedButton<String>(
+          segments: [
+            ButtonSegment(
+              value: 'digital',
+              label: Text(l10n.buyLessonsPaymentOnline),
+              icon: const Icon(Icons.credit_card_outlined),
+            ),
+            ButtonSegment(
+              value: 'balance',
+              label: Text(l10n.buyLessonsPaymentBalance),
+              icon: const Icon(Icons.account_balance_wallet_outlined),
+            ),
+            ButtonSegment(
+              value: 'cash',
+              label: Text(l10n.buyLessonsPaymentCash),
+              icon: const Icon(Icons.payments_outlined),
+            ),
+          ],
+          selected: {_paymentType},
+          onSelectionChanged: (v) => setState(() => _paymentType = v.first),
+        ),
+        const SizedBox(height: 10),
+        Text(
+          switch (_paymentType) {
+            'balance' => l10n.buyLessonsBalanceNote(F.money(user?.balance ?? 0)),
+            'cash' => l10n.buyLessonsCashNote,
+            _ => l10n.buyLessonsMollieNote,
+          },
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          l10n.buyLessonsAfterPurchase,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.buyLessonsTitle),
@@ -74,410 +449,72 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
-          child: FilledButton(
-            onPressed: canSubmit ? _submit : null,
-            child: _busy
-                ? const SizedBox(
-                    width: 22,
-                    height: 22,
-                    child: CircularProgressIndicator(strokeWidth: 2.4),
-                  )
-                : Text(
-                    _cart.isEmpty
-                        ? l10n.buyLessonsChoosePackage
-                        : (isInstructor
-                            ? '${l10n.confirm} — ${F.money(_cartTotal())}'
-                            : l10n.buyLessonsPayButton(F.money(_cartTotal()))),
-                  ),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1200),
+              child: submitButton,
+            ),
           ),
         ),
       ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 560),
-          child: ListView(
-            padding: const EdgeInsets.all(20),
-            children: [
-              SectionHeader(l10n.buyLessonsStepVehicle),
-              vehicles.when(
-                loading: () => const Padding(
-                  padding: EdgeInsets.all(20),
-                  child: Center(child: CircularProgressIndicator()),
-                ),
-                error: (e, _) => ErrorView(
-                  message: describeError(context, e),
-                  onRetry: () => ref.invalidate(vehiclesProvider),
-                ),
-                data: (list) {
-                  const palette = [
-                    Color(0xFF2563EB),
-                    Color(0xFF059669),
-                    Color(0xFFEA580C),
-                    Color(0xFF7C3AED),
-                    Color(0xFFDB2777),
-                    Color(0xFF0891B2),
-                    Color(0xFFCA8A04),
-                    Color(0xFF4F46E5),
-                  ];
-                  return GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: list.length,
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
-                      childAspectRatio: 0.95,
-                    ),
-                    itemBuilder: (context, i) {
-                      final v = list[i];
-                      return _VehicleTypeCard(
-                        vehicle: v,
-                        selected: _vehicleId == v.id,
-                        color: palette[i % palette.length],
-                        onTap: () {
-                          setState(() {
-                            _vehicleId = v.id;
-                            _classId = null;
-                            _quantity = 1;
-                          });
-                        },
-                      );
-                    },
-                  );
-                },
-              ),
-              const SizedBox(height: 24),
-
-              SectionHeader(l10n.buyLessonsStepLesson),
-              if (_vehicleId == null)
-                Text(
-                  l10n.buyLessonsChooseVehicleFirst,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                )
-              else if (classes == null)
-                const SizedBox.shrink()
-              else
-                classes.when(
-                  loading: () => const Padding(
-                    padding: EdgeInsets.all(20),
-                    child: Center(child: CircularProgressIndicator()),
-                  ),
-                  error: (e, _) => ErrorView(
-                    message: describeError(context, e),
-                    onRetry: () => ref.invalidate(classesProvider(_vehicleId!)),
-                  ),
-                  data: (list) {
-                    if (list.isEmpty) {
-                      return Text(l10n.buyLessonsNoPackages);
-                    }
-                    // Group by lesson type: trial → base (lesson) → pack → exam.
-                    const order = <String, int>{
-                      'trial': 0,
-                      'base': 1,
-                      'pack': 2,
-                      'exam': 3,
-                    };
-                    final sorted = [...list]
-                      ..sort(
-                        (a, b) => (order[a.lessonType] ?? 99)
-                            .compareTo(order[b.lessonType] ?? 99),
-                      );
-                    String? currentGroup;
-                    final children = <Widget>[];
-                    for (final c in sorted) {
-                      final group = c.lessonType ?? '';
-                      if (group != currentGroup) {
-                        currentGroup = group;
-                        final label = switch (group) {
-                          'trial' => l10n.buyLessonsLessonTypeTrial,
-                          'base' => l10n.buyLessonsLessonTypeBase,
-                          'pack' => l10n.buyLessonsLessonTypePack,
-                          'exam' => l10n.buyLessonsLessonTypeExam,
-                          _ => null,
-                        };
-                        if (label != null) {
-                          children.add(
-                            Padding(
-                              padding:
-                                  const EdgeInsets.only(top: 8, bottom: 6),
-                              child: Text(
-                                label,
-                                style: theme.textTheme.labelLarge?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                          );
-                        }
-                      }
-                      children.add(
-                        _ClassOption(
-                          drivingClass: c,
-                          selected: _classId == c.id,
-                          onTap: () => setState(() {
-                            _classId = c.id;
-                            _quantity = 1;
-                          }),
-                        ),
-                      );
-                      children.add(const SizedBox(height: 10));
-                    }
-                    return Column(children: children);
-                  },
-                ),
-
-              if (selectedClass != null) ...[
-                const SizedBox(height: 16),
-                SectionHeader(l10n.buyLessonsStepQuantity),
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            selectedClass.name ?? l10n.orderDetailLesson,
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: _quantity > 1
-                              ? () => setState(() => _quantity--)
-                              : null,
-                          icon: const Icon(Icons.remove_circle_outline),
-                        ),
-                        Text(
-                          '$_quantity',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: () => setState(() => _quantity++),
-                          icon: const Icon(Icons.add_circle_outline),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  l10n.buyLessonsTotalLine(
-                    F.minutesLabel(
-                      l10n,
-                      (selectedClass.durationMinutes ?? 0) * _quantity,
-                    ),
-                    F.money(_itemTotal(selectedClass, _quantity)),
-                  ),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: OutlinedButton.icon(
-                    onPressed: () => _addToCart(selectedClass!),
-                    icon: const Icon(Icons.add_shopping_cart_outlined),
-                    label: Text(l10n.buyLessonsAddItem),
-                  ),
-                ),
-              ],
-
-              if (_cart.isNotEmpty) ...[
-                const SizedBox(height: 24),
-                SectionHeader(l10n.orderDetailSectionLessons),
-                Card(
-                  child: Column(
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final wide = constraints.maxWidth >= 980;
+          final horizontal = wide ? 28.0 : 20.0;
+          if (wide) {
+            return Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1400),
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(horizontal, 16, horizontal, 16),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      for (final (i, item) in _cart.indexed) ...[
-                        if (i > 0) const Divider(height: 1),
-                        ListTile(
-                          contentPadding: const EdgeInsets.only(
-                            left: 16,
-                            right: 4,
-                          ),
-                          title: Text(
-                            item.drivingClass.name ?? l10n.orderDetailLesson,
-                            style: const TextStyle(fontWeight: FontWeight.w600),
-                          ),
-                          subtitle: Text(
-                            [
-                              l10n.orderDetailLessonCount(item.quantity),
-                              if (item.drivingClass.duration != null)
-                                F.durationLabel(
-                                  l10n,
-                                  item.drivingClass.duration,
-                                ),
-                              F.money(
-                                _itemTotal(
-                                  item.drivingClass,
-                                  item.quantity,
-                                ),
-                              ),
-                            ].whereType<String>().join(' · '),
-                          ),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                visualDensity: VisualDensity.compact,
-                                onPressed: item.quantity > 1
-                                    ? () => setState(() => item.quantity--)
-                                    : null,
-                                icon: const Icon(
-                                  Icons.remove_circle_outline,
-                                  size: 20,
-                                ),
-                              ),
-                              Text(
-                                '${item.quantity}',
-                                style: theme.textTheme.titleSmall?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              IconButton(
-                                visualDensity: VisualDensity.compact,
-                                onPressed: () =>
-                                    setState(() => item.quantity++),
-                                icon: const Icon(
-                                  Icons.add_circle_outline,
-                                  size: 20,
-                                ),
-                              ),
-                              IconButton(
-                                visualDensity: VisualDensity.compact,
-                                onPressed: () =>
-                                    setState(() => _cart.removeAt(i)),
-                                icon: const Icon(Icons.delete_outline, size: 20),
-                                tooltip: l10n.delete,
-                              ),
-                            ],
-                          ),
+                      Expanded(
+                        flex: 7,
+                        child: ListView(
+                          children: [
+                            vehicleSection,
+                            const SizedBox(height: 24),
+                            lessonSection,
+                          ],
                         ),
-                      ],
+                      ),
+                      const SizedBox(width: 24),
+                      Expanded(
+                        flex: 4,
+                        child: ListView(
+                          children: [
+                            cartSection,
+                            const SizedBox(height: 20),
+                            paymentSection,
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  l10n.buyLessonsTotalLine(
-                    F.minutesLabel(l10n, _cartTotalMinutes()),
-                    F.money(_cartTotal()),
-                  ),
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-
-              if (isInstructor) ...[
-                const SizedBox(height: 24),
-                SectionHeader(l10n.buyLessonsStepStudent),
-                _StudentPicker(
-                  selectedId: _studentId,
-                  onChanged: (id) => setState(() => _studentId = id),
-                ),
-                const SizedBox(height: 24),
-                SectionHeader(l10n.buyLessonsStepPaymentInstructor),
-                SegmentedButton<String>(
-                  segments: [
-                    ButtonSegment(
-                      value: 'digital',
-                      label: Text(l10n.buyLessonsPaymentOnline),
-                      icon: const Icon(Icons.credit_card_outlined),
-                    ),
-                    ButtonSegment(
-                      value: 'balance',
-                      label: Text(l10n.buyLessonsPaymentBalance),
-                      icon: const Icon(Icons.account_balance_wallet_outlined),
-                    ),
-                    ButtonSegment(
-                      value: 'cash',
-                      label: Text(l10n.buyLessonsPaymentCash),
-                      icon: const Icon(Icons.payments_outlined),
-                    ),
-                  ],
-                  selected: {_paymentType},
-                  onSelectionChanged: (v) =>
-                      setState(() => _paymentType = v.first),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  switch (_paymentType) {
-                    'balance' =>
-                      l10n.buyLessonsBalanceNote(F.money(user?.balance ?? 0)),
-                    'cash' => l10n.buyLessonsCashNote,
-                    _ => l10n.buyLessonsMollieNote,
-                  },
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  l10n.buyLessonsAfterPurchase,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ] else ...[
-                const SizedBox(height: 24),
-                SectionHeader(l10n.buyLessonsStepPaymentStudent),
-                SegmentedButton<String>(
-                  segments: [
-                    ButtonSegment(
-                      value: 'digital',
-                      label: Text(l10n.buyLessonsPaymentOnline),
-                      icon: const Icon(Icons.credit_card_outlined),
-                    ),
-                    ButtonSegment(
-                      value: 'balance',
-                      label: Text(l10n.buyLessonsPaymentBalance),
-                      icon: const Icon(Icons.account_balance_wallet_outlined),
-                    ),
-                    ButtonSegment(
-                      value: 'cash',
-                      label: Text(l10n.buyLessonsPaymentCash),
-                      icon: const Icon(Icons.payments_outlined),
-                    ),
-                  ],
-                  selected: {_paymentType},
-                  onSelectionChanged: (v) =>
-                      setState(() => _paymentType = v.first),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  switch (_paymentType) {
-                    'balance' =>
-                      l10n.buyLessonsBalanceNote(F.money(user?.balance ?? 0)),
-                    'cash' => l10n.buyLessonsCashNote,
-                    _ => l10n.buyLessonsMollieNote,
-                  },
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  l10n.buyLessonsAfterPurchase,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
+              ),
+            );
+          }
+          return Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 720),
+              child: ListView(
+                padding: EdgeInsets.fromLTRB(horizontal, 16, horizontal, 24),
+                children: [
+                  vehicleSection,
+                  const SizedBox(height: 24),
+                  lessonSection,
+                  const SizedBox(height: 24),
+                  cartSection,
+                  const SizedBox(height: 24),
+                  paymentSection,
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
