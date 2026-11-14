@@ -6,7 +6,7 @@ backend (`https://api.planles.nl/api`) and supports both **student** and
 
 ## Requirements
 
-- Flutter 3.47+ / Dart 3.13+
+- Flutter stable (Dart SDK >= 3.9.0, as specified in `pubspec.yaml`)
 - A running instance of [planles-backend](../planles-backend) (defaults to
   `https://api.planles.nl`, override with `--dart-define`)
 
