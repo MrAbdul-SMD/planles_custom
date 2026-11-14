@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/responsive.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../l10n/l10n.dart';
 import '../../../shared/widgets.dart';
@@ -43,12 +44,32 @@ class OrdersScreen extends ConsumerWidget {
                 ],
               );
             }
-            return ListView.separated(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 96),
-              itemCount: page.items.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 10),
-              itemBuilder: (context, index) =>
-                  _OrderCard(order: page.items[index]),
+            final wide = context.isExpanded;
+            return Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1000),
+                child: wide
+                    ? GridView.builder(
+                        padding: const EdgeInsets.fromLTRB(24, 16, 24, 96),
+                        gridDelegate:
+                            const SliverGridDelegateWithMaxCrossAxisExtent(
+                          maxCrossAxisExtent: 480,
+                          mainAxisExtent: 170,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                        ),
+                        itemCount: page.items.length,
+                        itemBuilder: (context, index) =>
+                            _OrderCard(order: page.items[index]),
+                      )
+                    : ListView.separated(
+                        padding: const EdgeInsets.fromLTRB(20, 16, 20, 96),
+                        itemCount: page.items.length,
+                        separatorBuilder: (_, _) => const SizedBox(height: 10),
+                        itemBuilder: (context, index) =>
+                            _OrderCard(order: page.items[index]),
+                      ),
+              ),
             );
           },
           ),

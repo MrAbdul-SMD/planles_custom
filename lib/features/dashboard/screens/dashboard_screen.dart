@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/deep_links.dart';
 import '../../../core/network/api_exception.dart';
+import '../../../core/responsive.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../l10n/l10n.dart';
 import '../../../shared/widgets.dart';
@@ -62,68 +63,83 @@ class DashboardScreen extends ConsumerWidget {
         top: false,
         child: RefreshIndicator(
           onRefresh: () => _refresh(ref),
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(20, 10, 20, 36),
-            children: [
-              // ------------------------------------------------ Titanium Balance Card
-              _BalanceTelemetryCard(user: user),
-              const SizedBox(height: 24),
-
-              // ------------------------------------------------ Embedded Order Creation
-              SectionHeader(l10n.buyLessonsTitle),
-              const SizedBox(height: 8),
-              const _EmbeddedOrderCreation(),
-
-              // ------------------------------------------------ Notifications Preview
-              if (notifications.isNotEmpty) ...[
-                const SizedBox(height: 28),
-                SectionHeader(
-                  l10n.dashboardRecentNotifications,
-                  trailing: TextButton(
-                    onPressed: () => context.go('/notifications'),
-                    child: Text(l10n.dashboardAllNotifications),
-                  ),
-                ),
-                for (final n in notifications)
-                  Card(
-                    child: ListTile(
-                      leading: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primaryContainer,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Icon(
-                          n.isRead
-                              ? Icons.notifications_none_rounded
-                              : Icons.notifications_active_rounded,
-                          color: theme.colorScheme.primary,
-                          size: 20,
-                        ),
-                      ),
-                      title: Text(
-                        n.title ?? l10n.dashboardNotificationFallback,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontWeight: FontWeight.w700),
-                      ),
-                      subtitle: Text(
-                        n.body ?? '',
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      trailing: n.createdAt == null
-                          ? null
-                          : Text(
-                              F.relativeDay(l10n, n.createdAt),
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.outline,
-                              ),
-                            ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final wide = constraints.maxWidth >= Breakpoints.medium;
+              final content = <Widget>[
+                _BalanceTelemetryCard(user: user),
+                const SizedBox(height: 24),
+                SectionHeader(l10n.buyLessonsTitle),
+                const SizedBox(height: 8),
+                const _EmbeddedOrderCreation(),
+                if (notifications.isNotEmpty) ...[
+                  const SizedBox(height: 28),
+                  SectionHeader(
+                    l10n.dashboardRecentNotifications,
+                    trailing: TextButton(
+                      onPressed: () => context.go('/notifications'),
+                      child: Text(l10n.dashboardAllNotifications),
                     ),
                   ),
-              ],
-            ],
+                  for (final n in notifications)
+                    Card(
+                      child: ListTile(
+                        leading: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.primaryContainer,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(
+                            n.isRead
+                                ? Icons.notifications_none_rounded
+                                : Icons.notifications_active_rounded,
+                            color: theme.colorScheme.primary,
+                            size: 20,
+                          ),
+                        ),
+                        title: Text(
+                          n.title ?? l10n.dashboardNotificationFallback,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                        subtitle: Text(
+                          n.body ?? '',
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        trailing: n.createdAt == null
+                            ? null
+                            : Text(
+                                F.relativeDay(l10n, n.createdAt),
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.outline,
+                                ),
+                              ),
+                      ),
+                    ),
+                ],
+              ];
+
+              return ListView(
+                padding: EdgeInsets.fromLTRB(
+                  wide ? 28 : 20,
+                  10,
+                  wide ? 28 : 20,
+                  36,
+                ),
+                children: [
+                  ResponsiveCenter(
+                    maxWidth: 1100,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: content,
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ),

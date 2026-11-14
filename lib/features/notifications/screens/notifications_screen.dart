@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/responsive.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../l10n/l10n.dart';
 import '../../../shared/widgets.dart';
@@ -138,40 +139,51 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
       );
     }
 
-    return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
-      itemCount: state.items.length + (state.loadingMore ? 1 : 0),
-      separatorBuilder: (_, _) => const SizedBox(height: 6),
-      itemBuilder: (context, index) {
-        if (index >= state.items.length) {
-          return const Padding(
-            padding: EdgeInsets.all(16),
-            child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
-          );
-        }
-        final n = state.items[index];
-        return Card(
-          color: n.isRead ? null : theme.colorScheme.primaryContainer,
-          child: ListTile(
-            isThreeLine: n.body != null && n.body!.isNotEmpty,
-            leading: Icon(_iconFor(n.type), color: theme.colorScheme.primary),
-            title: Text(
-              n.title ?? l10n.dashboardNotificationFallback,
-              style: TextStyle(
-                fontWeight: n.isRead ? FontWeight.w500 : FontWeight.w700,
-              ),
-            ),
-            subtitle: Text(n.body ?? '', maxLines: 3),
-            trailing: n.createdAt == null
-                ? null
-                : Text(
-                    F.relativeDay(l10n, n.createdAt),
-                    style: theme.textTheme.bodySmall,
-                  ),
-            onTap: () => _open(n),
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 900),
+        child: ListView.separated(
+          padding: EdgeInsets.fromLTRB(
+            context.isExpanded ? 28 : 20,
+            12,
+            context.isExpanded ? 28 : 20,
+            32,
           ),
-        );
-      },
+          itemCount: state.items.length + (state.loadingMore ? 1 : 0),
+          separatorBuilder: (_, _) => const SizedBox(height: 6),
+          itemBuilder: (context, index) {
+            if (index >= state.items.length) {
+              return const Padding(
+                padding: EdgeInsets.all(16),
+                child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+              );
+            }
+            final n = state.items[index];
+            return Card(
+              color: n.isRead ? null : theme.colorScheme.primaryContainer,
+              child: ListTile(
+                isThreeLine: n.body != null && n.body!.isNotEmpty,
+                leading:
+                    Icon(_iconFor(n.type), color: theme.colorScheme.primary),
+                title: Text(
+                  n.title ?? l10n.dashboardNotificationFallback,
+                  style: TextStyle(
+                    fontWeight: n.isRead ? FontWeight.w500 : FontWeight.w700,
+                  ),
+                ),
+                subtitle: Text(n.body ?? '', maxLines: 3),
+                trailing: n.createdAt == null
+                    ? null
+                    : Text(
+                        F.relativeDay(l10n, n.createdAt),
+                        style: theme.textTheme.bodySmall,
+                      ),
+                onTap: () => _open(n),
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 

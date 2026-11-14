@@ -14,11 +14,6 @@ class PlanlesApp extends ConsumerWidget {
 
   final RouterConfig<Object> router;
 
-  /// Above this width the UI is capped and centred so desktop/macOS windows
-  /// don't render mobile layouts stretched across the whole screen.
-  static const _wideBreakpoint = 900.0;
-  static const _maxContentWidth = 760.0;
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // `null` → follow the system language.
@@ -40,23 +35,8 @@ class PlanlesApp extends ConsumerWidget {
       ],
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
-      builder: (context, child) {
-        final content = child ?? const SizedBox.shrink();
-        return LayoutBuilder(
-          builder: (context, constraints) {
-            if (constraints.maxWidth <= _wideBreakpoint) return content;
-            return ColoredBox(
-              color: Theme.of(context).colorScheme.surface,
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: _maxContentWidth),
-                  child: content,
-                ),
-              ),
-            );
-          },
-        );
-      },
+      // Adaptive layout (navigation rail vs bottom bar, content widths) is
+      // handled by individual shells/screens so we can respond to size classes.
       routerConfig: router,
     );
   }

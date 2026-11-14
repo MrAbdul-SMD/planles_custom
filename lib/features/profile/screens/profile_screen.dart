@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/responsive.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../l10n/language_picker.dart';
 import '../../../l10n/l10n.dart';
@@ -77,9 +78,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         child: RefreshIndicator(
           onRefresh: () =>
               ref.read(authControllerProvider.notifier).refreshUser(),
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
-          children: [
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 900),
+              child: ListView(
+                padding: EdgeInsets.fromLTRB(
+                  context.isExpanded ? 28 : 20,
+                  8,
+                  context.isExpanded ? 28 : 20,
+                  32,
+                ),
+                children: [
             // ------------------------------------------------------ header
             Card(
               child: Padding(
@@ -331,8 +340,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ),
             ),
           ],
+              ),
+            ),
+          ),
         ),
-      ),
       ),
     );
   }

@@ -202,11 +202,16 @@ class _PlanningTab extends ConsumerWidget {
   }
 
   Widget _flat(List<Planning> items) {
-    return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-      itemCount: items.length,
-      separatorBuilder: (_, _) => const SizedBox(height: 10),
-      itemBuilder: (context, index) => PlanningTile(planning: items[index]),
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1100),
+        child: ListView.separated(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+          itemCount: items.length,
+          separatorBuilder: (_, _) => const SizedBox(height: 10),
+          itemBuilder: (context, index) => PlanningTile(planning: items[index]),
+        ),
+      ),
     );
   }
 
@@ -276,9 +281,14 @@ class _PlanningTab extends ConsumerWidget {
       children.add(const SizedBox(height: 10));
     }
 
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 6, 20, 32),
-      children: children,
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1100),
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(20, 6, 20, 32),
+          children: children,
+        ),
+      ),
     );
   }
 }
