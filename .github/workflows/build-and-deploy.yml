@@ -210,6 +210,8 @@ jobs:
           New-Item -ItemType Directory -Force -Path $outDir | Out-Null
           $src = "build/windows/x64/runner/Release"
           if (-not (Test-Path $src)) { $src = "build/windows/runner/Release" }
+          $src = (Resolve-Path $src).Path
+          $outDir = (Resolve-Path $outDir).Path
           $iscc = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
           if (-not (Test-Path $iscc)) { throw "ISCC.exe not found at $iscc" }
           & $iscc "/DMyAppVersion=$version" "/DSourceDir=$src" "/DOutputDir=$outDir" "tool\windows_installer.iss"
