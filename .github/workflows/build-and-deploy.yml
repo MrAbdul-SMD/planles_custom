@@ -198,7 +198,11 @@ jobs:
       - name: Build Windows (release, optimized)
         run: flutter build windows --release
 
-      - name: Package Windows build
+      - name: Install Inno Setup
+        shell: pwsh
+        run: choco install innosetup --no-progress -y
+
+      - name: Create Windows installer package
         shell: pwsh
         run: |
           $version = (Select-String -Path pubspec.yaml -Pattern '^version:\s*(.+)$').Matches.Groups[1].Value.Split('+')[0]
@@ -206,13 +210,16 @@ jobs:
           New-Item -ItemType Directory -Force -Path $outDir | Out-Null
           $src = "build/windows/x64/runner/Release"
           if (-not (Test-Path $src)) { $src = "build/windows/runner/Release" }
-          Compress-Archive -Path (Join-Path $src '*') -DestinationPath (Join-Path $outDir "Planles-$version-windows-x64.zip") -Force
+          $iscc = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) { throw "ISCC.exe not found at $iscc" }
+          & $iscc "/DMyAppVersion=$version" "/DSourceDir=$src" "/DOutputDir=$outDir" "tool\windows_installer.iss"
+          if ($LASTEXITCODE -ne 0) { throw "Inno Setup compiler failed with exit code $LASTEXITCODE" }
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
         with:
           name: windows-build
-          path: dist/*.zip
+          path: dist/*.exe
           if-no-files-found: error
 
   release:
@@ -259,7 +266,7 @@ jobs:
 
           # Windows
           if [ -d release-artifacts/windows-build ]; then
-            find release-artifacts/windows-build -type f -name '*.zip' -exec cp {} release-assets/ \;
+            find release-artifacts/windows-build -type f \( -name '*.exe' -o -name '*.msi' -o -name '*.zip' \) -exec cp {} release-assets/ \;
           fi
 
           echo "Prepared release assets:"
