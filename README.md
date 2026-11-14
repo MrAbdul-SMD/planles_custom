@@ -235,6 +235,18 @@ Build a release `.app` and package it as a DMG (uses built-in `hdiutil`, no extr
 
 Output: `dist/Planles-<version>-macos.dmg` (contains the app and an Applications shortcut). Version is read from `pubspec.yaml`.
 
+## CI/CD (GitHub Actions)
+
+Workflow: `.github/workflows/build-and-deploy.yml`
+
+- **Triggers:** pushes to `main`, version tags (`v*`), and manual `workflow_dispatch`.
+- **Web:** builds `flutter build web --release --base-href "/<repo>/" --pwa-strategy offline-first`, uploads `web-build` artifact, and deploys to **GitHub Pages** (enable Pages in repo settings: *Settings → Pages → Source: GitHub Actions*).
+- **Android:** builds optimized release APKs (`--obfuscate --split-debug-info`, split-per-ABI + universal) and uploads `android-apks` artifacts (plus debug symbols). Release signing uses `android/key.properties` if provided; otherwise the Gradle config falls back to debug signing for CI artifacts.
+- **macOS:** builds release `.app`, packages a DMG via `tool/build_macos_dmg.sh`, and uploads `macos-build` artifacts (`.dmg` + zipped `.app`).
+- **Windows:** builds release and uploads `windows-build` artifact (zipped `x64` runner output).
+
+> Note: `.env` is gitignored but required as a Flutter asset; CI copies `.env.example` to `.env` when missing. For production values, provide a secure `.env` via repository secrets/variables and a workflow step if needed.
+
 ### macOS pub get rsync error
 
 If `flutter pub get` fails with `rsync: mkdir .../build/macos/SourcePackages/... failed`,

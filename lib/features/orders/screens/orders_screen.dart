@@ -50,13 +50,13 @@ class OrdersScreen extends ConsumerWidget {
                 constraints: const BoxConstraints(maxWidth: 1000),
                 child: wide
                     ? GridView.builder(
-                        padding: const EdgeInsets.fromLTRB(24, 16, 24, 96),
+                        padding: const EdgeInsets.fromLTRB(28, 16, 28, 96),
                         gridDelegate:
                             const SliverGridDelegateWithMaxCrossAxisExtent(
-                          maxCrossAxisExtent: 480,
-                          mainAxisExtent: 170,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 12,
+                          maxCrossAxisExtent: 420,
+                          mainAxisExtent: 168,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
                         ),
                         itemCount: page.items.length,
                         itemBuilder: (context, index) =>

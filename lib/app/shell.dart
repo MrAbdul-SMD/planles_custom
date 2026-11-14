@@ -37,44 +37,79 @@ class HomeShell extends ConsumerWidget {
                 children: [
                   SafeArea(
                     right: false,
-                    child: NavigationRail(
-                      extended: extended,
-                      selectedIndex: navigationShell.currentIndex,
-                      onDestinationSelected: (i) => _goBranch(i, ref),
-                      labelType: extended
-                          ? NavigationRailLabelType.none
-                          : NavigationRailLabelType.all,
-                      leading: extended
-                          ? Padding(
-                              padding: const EdgeInsets.fromLTRB(8, 8, 8, 16),
-                              child: Row(
-                                children: [
-                                  Icon(Icons.school_rounded,
-                                      color: theme.colorScheme.primary),
-                                  const SizedBox(width: 10),
-                                  Text(
-                                    'Planles',
-                                    style: theme.textTheme.titleMedium?.copyWith(
-                                      fontWeight: FontWeight.w800,
-                                      color: theme.colorScheme.primary,
+                    child: Container(
+                      color: theme.colorScheme.surfaceContainerLow,
+                      child: NavigationRail(
+                        extended: extended,
+                        minExtendedWidth: 220,
+                        backgroundColor: Colors.transparent,
+                        selectedIndex: navigationShell.currentIndex,
+                        onDestinationSelected: (i) => _goBranch(i, ref),
+                        indicatorColor: theme.colorScheme.primaryContainer,
+                        labelType: extended
+                            ? NavigationRailLabelType.none
+                            : NavigationRailLabelType.all,
+                        selectedIconTheme: IconThemeData(
+                          color: theme.colorScheme.onPrimaryContainer,
+                        ),
+                        selectedLabelTextStyle:
+                            theme.textTheme.labelMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: theme.colorScheme.primary,
+                        ),
+                        unselectedLabelTextStyle:
+                            theme.textTheme.labelMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                        leading: extended
+                            ? Padding(
+                                padding:
+                                    const EdgeInsets.fromLTRB(12, 12, 12, 20),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: theme.colorScheme.primaryContainer,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Icon(Icons.school_rounded,
+                                          color: theme.colorScheme.primary),
                                     ),
+                                    const SizedBox(width: 10),
+                                    Text(
+                                      'Planles',
+                                      style:
+                                          theme.textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.w800,
+                                        color: theme.colorScheme.onSurface,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : Padding(
+                                padding:
+                                    const EdgeInsets.only(top: 8, bottom: 12),
+                                child: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: theme.colorScheme.primaryContainer,
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
-                                ],
+                                  child: Icon(Icons.school_rounded,
+                                      color: theme.colorScheme.primary),
+                                ),
                               ),
-                            )
-                          : Padding(
-                              padding: const EdgeInsets.only(bottom: 8),
-                              child: Icon(Icons.school_rounded,
-                                  color: theme.colorScheme.primary),
+                        destinations: [
+                          for (final d in destinations)
+                            NavigationRailDestination(
+                              icon: d.icon,
+                              selectedIcon: d.selectedIcon,
+                              label: Text(d.label),
                             ),
-                      destinations: [
-                        for (final d in destinations)
-                          NavigationRailDestination(
-                            icon: d.icon,
-                            selectedIcon: d.selectedIcon,
-                            label: Text(d.label),
-                          ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                   VerticalDivider(

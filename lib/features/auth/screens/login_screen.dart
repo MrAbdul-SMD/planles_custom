@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/providers.dart';
+import '../../../core/responsive.dart';
 import '../../../l10n/l10n.dart';
 import '../../../shared/form_inputs.dart';
 import '../../../shared/widgets.dart';
@@ -146,6 +147,292 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final theme = Theme.of(context);
     final l10n = context.l10n;
     final scheme = theme.colorScheme;
+    final wide = context.screenWidth >= Breakpoints.medium;
+
+    final formColumn = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Align(
+          alignment: Alignment.centerRight,
+          child: IconButton.filledTonal(
+            icon: const Icon(Icons.tune_rounded),
+            tooltip: 'Environment',
+            onPressed: () => _pickEnvironment(context),
+          ),
+        ).animate().fadeIn(duration: 300.ms),
+        if (!wide) ...[
+          const SizedBox(height: 8),
+          Center(
+            child: Container(
+              width: 88,
+              height: 88,
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(22),
+                boxShadow: [
+                  BoxShadow(
+                    color: scheme.primary.withValues(alpha: 0.18),
+                    blurRadius: 24,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+                border: Border.all(
+                  color: scheme.outlineVariant.withValues(alpha: 0.35),
+                ),
+              ),
+              child: Image.asset(
+                'assets/branding/planles_logo.png',
+                fit: BoxFit.contain,
+              ),
+            ),
+          ).animate().fadeIn(duration: 350.ms).scale(begin: const Offset(0.96, 0.96)),
+          const SizedBox(height: 20),
+          Text(
+            l10n.loginTitle,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+            ),
+          ).animate().fadeIn(delay: 60.ms).moveY(begin: 6, end: 0),
+          const SizedBox(height: 6),
+          Text(
+            l10n.loginSubtitle,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+          ).animate().fadeIn(delay: 100.ms),
+          const SizedBox(height: 24),
+        ] else ...[
+          Text(
+            l10n.loginTitle,
+            style: theme.textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+            ),
+          ).animate().fadeIn(delay: 60.ms).moveY(begin: 6, end: 0),
+          const SizedBox(height: 6),
+          Text(
+            l10n.loginSubtitle,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+          ).animate().fadeIn(delay: 100.ms),
+          const SizedBox(height: 28),
+        ],
+        Container(
+          padding: EdgeInsets.all(wide ? 24 : 18),
+          decoration: BoxDecoration(
+            color: scheme.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: scheme.outlineVariant.withValues(alpha: 0.45),
+            ),
+            boxShadow: wide
+                ? [
+                    BoxShadow(
+                      color: scheme.shadow.withValues(alpha: 0.04),
+                      blurRadius: 24,
+                      offset: const Offset(0, 8),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextField(
+                keyboardType: TextInputType.emailAddress,
+                textInputAction: TextInputAction.next,
+                autofillHints: const [AutofillHints.email],
+                decoration: InputDecoration(
+                  labelText: l10n.loginEmailLabel,
+                  prefixIcon: const Icon(Icons.mail_outline_rounded),
+                  errorText: _emailErrorText(context),
+                ),
+                onChanged: (v) => setState(() {
+                  _email = EmailInput.dirty(v);
+                }),
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                obscureText: _obscure,
+                textInputAction: TextInputAction.done,
+                autofillHints: const [AutofillHints.password],
+                onSubmitted: (_) => _submit(),
+                decoration: InputDecoration(
+                  labelText: l10n.loginPasswordLabel,
+                  prefixIcon: const Icon(Icons.lock_outline_rounded),
+                  errorText: _passwordErrorText(context),
+                  suffixIcon: IconButton(
+                    onPressed: () => setState(() => _obscure = !_obscure),
+                    icon: Icon(
+                      _obscure
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
+                    ),
+                  ),
+                ),
+                onChanged: (v) => setState(() {
+                  _password = PasswordInput.dirty(v);
+                }),
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () => context.push('/forgot-password'),
+                  child: Text(l10n.loginForgotPassword),
+                ),
+              ),
+              const SizedBox(height: 4),
+              FilledButton(
+                onPressed: _busy ? null : _submit,
+                child: _busy || _status.isInProgress
+                    ? const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(strokeWidth: 2.4),
+                      )
+                    : Text(l10n.loginSubmit),
+              ),
+              if (!_isValid && !_email.isPure && !_password.isPure)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    l10n.loginEmailInvalid,
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: scheme.error,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ).animate().fadeIn(delay: 140.ms).moveY(begin: 10, end: 0),
+        const SizedBox(height: 18),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              l10n.loginNoAccount,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+            TextButton(
+              onPressed: () => context.push('/register'),
+              child: Text(l10n.loginRegister),
+            ),
+          ],
+        ).animate().fadeIn(delay: 180.ms),
+      ],
+    );
+
+    if (wide) {
+      return Scaffold(
+        body: Row(
+          children: [
+            Expanded(
+              flex: 5,
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      scheme.primary,
+                      scheme.primary.withValues(alpha: 0.85),
+                      const Color(0xFF4CB4E7),
+                    ],
+                  ),
+                ),
+                child: SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.all(40),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 52,
+                              height: 52,
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: Image.asset(
+                                'assets/branding/planles_logo.png',
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              'Planles',
+                              style: theme.textTheme.headlineSmall?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const Spacer(),
+                        Text(
+                          l10n.loginSubtitle,
+                          style: theme.textTheme.headlineMedium?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                            height: 1.2,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Plan en beheer rijlessen, bestellingen en voortgang op elk apparaat — mobiel, web en desktop.',
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            color: Colors.white.withValues(alpha: 0.9),
+                            height: 1.5,
+                          ),
+                        ),
+                        const SizedBox(height: 28),
+                        Wrap(
+                          spacing: 10,
+                          runSpacing: 10,
+                          children: const [
+                            _LoginFeaturePill(icon: Icons.event_available_rounded, label: 'Planning'),
+                            _LoginFeaturePill(icon: Icons.receipt_long_rounded, label: 'Bestellingen'),
+                            _LoginFeaturePill(icon: Icons.notifications_rounded, label: 'Meldingen'),
+                          ],
+                        ),
+                        const Spacer(),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 4,
+              child: Container(
+                color: scheme.surface,
+                child: SafeArea(
+                  child: Center(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(32),
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 440),
+                        child: formColumn,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
     return Scaffold(
       body: Container(
@@ -167,161 +454,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 440),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: IconButton.filledTonal(
-                        icon: const Icon(Icons.tune_rounded),
-                        tooltip: 'Environment',
-                        onPressed: () => _pickEnvironment(context),
-                      ),
-                    ).animate().fadeIn(duration: 300.ms),
-                    const SizedBox(height: 8),
-                    Center(
-                      child: Container(
-                        width: 88,
-                        height: 88,
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(22),
-                          boxShadow: [
-                            BoxShadow(
-                              color: scheme.primary.withValues(alpha: 0.18),
-                              blurRadius: 24,
-                              offset: const Offset(0, 10),
-                            ),
-                          ],
-                          border: Border.all(
-                            color: scheme.outlineVariant.withValues(alpha: 0.35),
-                          ),
-                        ),
-                        child: Image.asset(
-                          'assets/branding/planles_logo.png',
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-                    ).animate().fadeIn(duration: 350.ms).scale(begin: const Offset(0.96, 0.96)),
-                    const SizedBox(height: 20),
-                    Text(
-                      l10n.loginTitle,
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ).animate().fadeIn(delay: 60.ms).moveY(begin: 6, end: 0),
-                    const SizedBox(height: 6),
-                    Text(
-                      l10n.loginSubtitle,
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: scheme.onSurfaceVariant,
-                      ),
-                    ).animate().fadeIn(delay: 100.ms),
-                    const SizedBox(height: 24),
-                    Container(
-                      padding: const EdgeInsets.all(18),
-                      decoration: BoxDecoration(
-                        color: scheme.surfaceContainerLow,
-                        borderRadius: BorderRadius.circular(24),
-                        border: Border.all(
-                          color: scheme.outlineVariant.withValues(alpha: 0.45),
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          TextField(
-                            keyboardType: TextInputType.emailAddress,
-                            textInputAction: TextInputAction.next,
-                            autofillHints: const [AutofillHints.email],
-                            decoration: InputDecoration(
-                              labelText: l10n.loginEmailLabel,
-                              prefixIcon: const Icon(Icons.mail_outline_rounded),
-                              errorText: _emailErrorText(context),
-                            ),
-                            onChanged: (v) => setState(() {
-                              _email = EmailInput.dirty(v);
-                            }),
-                          ),
-                          const SizedBox(height: 14),
-                          TextField(
-                            obscureText: _obscure,
-                            textInputAction: TextInputAction.done,
-                            autofillHints: const [AutofillHints.password],
-                            onSubmitted: (_) => _submit(),
-                            decoration: InputDecoration(
-                              labelText: l10n.loginPasswordLabel,
-                              prefixIcon: const Icon(Icons.lock_outline_rounded),
-                              errorText: _passwordErrorText(context),
-                              suffixIcon: IconButton(
-                                onPressed: () =>
-                                    setState(() => _obscure = !_obscure),
-                                icon: Icon(
-                                  _obscure
-                                      ? Icons.visibility_outlined
-                                      : Icons.visibility_off_outlined,
-                                ),
-                              ),
-                            ),
-                            onChanged: (v) => setState(() {
-                              _password = PasswordInput.dirty(v);
-                            }),
-                          ),
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: TextButton(
-                              onPressed: () => context.push('/forgot-password'),
-                              child: Text(l10n.loginForgotPassword),
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          FilledButton(
-                            onPressed: _busy ? null : _submit,
-                            child: _busy || _status.isInProgress
-                                ? const SizedBox(
-                                    width: 22,
-                                    height: 22,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2.4,
-                                    ),
-                                  )
-                                : Text(l10n.loginSubmit),
-                          ),
-                          if (!_isValid && !_email.isPure && !_password.isPure)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 8),
-                              child: Text(
-                                l10n.loginEmailInvalid,
-                                textAlign: TextAlign.center,
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: scheme.error,
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ).animate().fadeIn(delay: 140.ms).moveY(begin: 10, end: 0),
-                    const SizedBox(height: 18),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          l10n.loginNoAccount,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: scheme.onSurfaceVariant,
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () => context.push('/register'),
-                          child: Text(l10n.loginRegister),
-                        ),
-                      ],
-                    ).animate().fadeIn(delay: 180.ms),
-                  ],
-                ),
+                child: formColumn,
               ),
             ),
           ),
@@ -447,6 +580,39 @@ class _EnvironmentDialog extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _LoginFeaturePill extends StatelessWidget {
+  const _LoginFeaturePill({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.16),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.24)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: Colors.white),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }

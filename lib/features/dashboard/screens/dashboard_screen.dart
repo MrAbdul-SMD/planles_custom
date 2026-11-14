@@ -66,76 +66,126 @@ class DashboardScreen extends ConsumerWidget {
           child: LayoutBuilder(
             builder: (context, constraints) {
               final wide = constraints.maxWidth >= Breakpoints.medium;
-              final content = <Widget>[
-                _BalanceTelemetryCard(user: user),
-                const SizedBox(height: 24),
-                SectionHeader(l10n.buyLessonsTitle),
-                const SizedBox(height: 8),
-                const _EmbeddedOrderCreation(),
-                if (notifications.isNotEmpty) ...[
-                  const SizedBox(height: 28),
-                  SectionHeader(
-                    l10n.dashboardRecentNotifications,
-                    trailing: TextButton(
-                      onPressed: () => context.go('/notifications'),
-                      child: Text(l10n.dashboardAllNotifications),
-                    ),
-                  ),
-                  for (final n in notifications)
-                    Card(
-                      child: ListTile(
-                        leading: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.primaryContainer,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Icon(
-                            n.isRead
-                                ? Icons.notifications_none_rounded
-                                : Icons.notifications_active_rounded,
-                            color: theme.colorScheme.primary,
-                            size: 20,
+              final isDesktop = constraints.maxWidth >= Breakpoints.expanded;
+              final horizontal = isDesktop ? 32.0 : (wide ? 24.0 : 20.0);
+
+              final notificationsSection = notifications.isEmpty
+                  ? const SizedBox.shrink()
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        SectionHeader(
+                          l10n.dashboardRecentNotifications,
+                          trailing: TextButton(
+                            onPressed: () => context.go('/notifications'),
+                            child: Text(l10n.dashboardAllNotifications),
                           ),
                         ),
-                        title: Text(
-                          n.title ?? l10n.dashboardNotificationFallback,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontWeight: FontWeight.w700),
-                        ),
-                        subtitle: Text(
-                          n.body ?? '',
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        trailing: n.createdAt == null
-                            ? null
-                            : Text(
-                                F.relativeDay(l10n, n.createdAt),
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.outline,
+                        for (final n in notifications)
+                          Card(
+                            child: ListTile(
+                              leading: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: theme.colorScheme.primaryContainer,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Icon(
+                                  n.isRead
+                                      ? Icons.notifications_none_rounded
+                                      : Icons.notifications_active_rounded,
+                                  color: theme.colorScheme.primary,
+                                  size: 20,
                                 ),
                               ),
+                              title: Text(
+                                n.title ?? l10n.dashboardNotificationFallback,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style:
+                                    const TextStyle(fontWeight: FontWeight.w700),
+                              ),
+                              subtitle: Text(
+                                n.body ?? '',
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              trailing: n.createdAt == null
+                                  ? null
+                                  : Text(
+                                      F.relativeDay(l10n, n.createdAt),
+                                      style:
+                                          theme.textTheme.bodySmall?.copyWith(
+                                        color: theme.colorScheme.outline,
+                                      ),
+                                    ),
+                            ),
+                          ),
+                      ],
+                    );
+
+              Widget body;
+              if (wide) {
+                body = Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      flex: 5,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _BalanceTelemetryCard(user: user),
+                          const SizedBox(height: 24),
+                          if (notifications.isNotEmpty) ...[
+                            notificationsSection,
+                          ] else ...[
+                            _DesktopHintCard(
+                              icon: Icons.dashboard_customize_outlined,
+                              title: l10n.navHome,
+                              subtitle:
+                                  'Beheer je lessen, bestellingen en meldingen overzichtelijk op één plek.',
+                            ),
+                          ],
+                        ],
                       ),
                     ),
-                ],
-              ];
+                    const SizedBox(width: 24),
+                    Expanded(
+                      flex: 7,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          SectionHeader(l10n.buyLessonsTitle),
+                          const SizedBox(height: 8),
+                          const _EmbeddedOrderCreation(),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              } else {
+                body = Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _BalanceTelemetryCard(user: user),
+                    const SizedBox(height: 24),
+                    SectionHeader(l10n.buyLessonsTitle),
+                    const SizedBox(height: 8),
+                    const _EmbeddedOrderCreation(),
+                    if (notifications.isNotEmpty) ...[
+                      const SizedBox(height: 28),
+                      notificationsSection,
+                    ],
+                  ],
+                );
+              }
 
               return ListView(
-                padding: EdgeInsets.fromLTRB(
-                  wide ? 28 : 20,
-                  10,
-                  wide ? 28 : 20,
-                  36,
-                ),
+                padding: EdgeInsets.fromLTRB(horizontal, 16, horizontal, 40),
                 children: [
                   ResponsiveCenter(
-                    maxWidth: 1100,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: content,
-                    ),
+                    maxWidth: 1280,
+                    child: body,
                   ),
                 ],
               );
@@ -377,28 +427,37 @@ class _EmbeddedOrderCreationState extends ConsumerState<_EmbeddedOrderCreation> 
                   Color(0xFFCA8A04),
                   Color(0xFF4F46E5),
                 ];
-                return GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: list.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                    childAspectRatio: 0.95,
-                  ),
-                  itemBuilder: (context, i) {
-                    final v = list[i];
-                    return _VehicleTypeCard(
-                      vehicle: v,
-                      selected: _vehicleId == v.id,
-                      color: palette[i % palette.length],
-                      onTap: () {
-                        setState(() {
-                          _vehicleId = v.id;
-                          _classId = null;
-                          _quantity = 1;
-                        });
+                return LayoutBuilder(
+                  builder: (context, box) {
+                    final cols = box.maxWidth >= 700
+                        ? 5
+                        : box.maxWidth >= 420
+                            ? 4
+                            : 3;
+                    return GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: list.length,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: cols,
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 10,
+                        childAspectRatio: 0.95,
+                      ),
+                      itemBuilder: (context, i) {
+                        final v = list[i];
+                        return _VehicleTypeCard(
+                          vehicle: v,
+                          selected: _vehicleId == v.id,
+                          color: palette[i % palette.length],
+                          onTap: () {
+                            setState(() {
+                              _vehicleId = v.id;
+                              _classId = null;
+                              _quantity = 1;
+                            });
+                          },
+                        );
                       },
                     );
                   },
@@ -954,6 +1013,64 @@ class _DashboardStudentPicker extends ConsumerWidget {
     );
   }
 }
+class _DesktopHintCard extends StatelessWidget {
+  const _DesktopHintCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: scheme.primaryContainer,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(icon, color: scheme.primary),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    subtitle,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                      height: 1.45,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 /// Ticket-style planning card for lesson lists and timeline.
 class PlanningTile extends StatelessWidget {
   const PlanningTile({super.key, required this.planning, this.trailing});
