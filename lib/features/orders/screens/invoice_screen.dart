@@ -22,8 +22,11 @@ class InvoiceScreen extends ConsumerStatefulWidget {
 
 class _InvoiceScreenState extends ConsumerState<InvoiceScreen> {
   Uint8List? _bytes;
+  List<PdfRaster>? _pages;
   String? _error;
   bool _loading = true;
+  final TransformationController _transformController =
+      TransformationController();
 
   String get _fileName => 'factuur-${widget.id}.pdf';
 
@@ -33,18 +36,34 @@ class _InvoiceScreenState extends ConsumerState<InvoiceScreen> {
     _load();
   }
 
+  @override
+  void dispose() {
+    _transformController.dispose();
+    super.dispose();
+  }
+
   Future<void> _load() async {
     setState(() {
       _loading = true;
       _error = null;
+      _pages = null;
+      _bytes = null;
     });
     try {
       final bytes = await ref.read(ordersRepositoryProvider).invoice(widget.id);
       if (bytes.isEmpty) {
         throw Exception('empty');
       }
+      final data = Uint8List.fromList(bytes);
+      final pages = <PdfRaster>[];
+      await for (final page in Printing.raster(data, dpi: 144)) {
+        pages.add(page);
+      }
       if (!mounted) return;
-      setState(() => _bytes = Uint8List.fromList(bytes));
+      setState(() {
+        _bytes = data;
+        _pages = pages;
+      });
     } catch (e) {
       if (!mounted) return;
       setState(() => _error = describeError(context, e));
@@ -80,6 +99,10 @@ class _InvoiceScreenState extends ConsumerState<InvoiceScreen> {
     }
   }
 
+  void _resetZoom() {
+    _transformController.value = Matrix4.identity();
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -89,6 +112,12 @@ class _InvoiceScreenState extends ConsumerState<InvoiceScreen> {
       appBar: AppBar(
         title: Text(l10n.orderDetailOpenInvoice),
         actions: [
+          if (_pages != null && _pages!.isNotEmpty)
+            IconButton(
+              tooltip: 'Reset zoom',
+              onPressed: _resetZoom,
+              icon: const Icon(Icons.zoom_out_map_rounded),
+            ),
           if (_bytes != null) ...[
             IconButton(
               tooltip: l10n.orderDetailDownloadInvoice,
@@ -111,11 +140,7 @@ class _InvoiceScreenState extends ConsumerState<InvoiceScreen> {
     );
   }
 
-  Widget _buildBody(
-    BuildContext context,
-    dynamic l10n,
-    ColorScheme scheme,
-  ) {
+  Widget _buildBody(BuildContext context, dynamic l10n, ColorScheme scheme) {
     if (_loading) {
       return KeyedSubtree(
         key: const ValueKey('loading'),
@@ -129,7 +154,8 @@ class _InvoiceScreenState extends ConsumerState<InvoiceScreen> {
                 decoration: BoxDecoration(
                   color: scheme.surfaceContainerLow,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.4)),
+                  border:
+                      Border.all(color: scheme.outlineVariant.withValues(alpha: 0.4)),
                 ),
                 child: Row(
                   children: [
@@ -154,7 +180,7 @@ class _InvoiceScreenState extends ConsumerState<InvoiceScreen> {
       );
     }
 
-    if (_error != null || _bytes == null) {
+    if (_error != null || _pages == null || _pages!.isEmpty) {
       return KeyedSubtree(
         key: const ValueKey('error'),
         child: ErrorView(
@@ -175,7 +201,8 @@ class _InvoiceScreenState extends ConsumerState<InvoiceScreen> {
             decoration: BoxDecoration(
               color: scheme.surfaceContainerLow,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.4)),
+              border:
+                  Border.all(color: scheme.outlineVariant.withValues(alpha: 0.4)),
             ),
             child: Row(
               children: [
@@ -190,42 +217,106 @@ class _InvoiceScreenState extends ConsumerState<InvoiceScreen> {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
+                const SizedBox(width: 8),
+                Text(
+                  '${_pages!.length} ${_pages!.length == 1 ? 'pagina' : 'pagina’s'}',
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                ),
               ],
             ),
           ).animate().fadeIn().slideY(begin: -0.05, end: 0),
           Expanded(
-            child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-              child: PdfPreview(
-                build: (_) async => _bytes!,
-                allowPrinting: false,
-                allowSharing: false,
-                canChangePageFormat: false,
-                canChangeOrientation: false,
-                canDebug: false,
-                useActions: false,
-                scrollViewDecoration: BoxDecoration(color: scheme.surfaceContainer),
-                pdfPreviewPageDecoration: BoxDecoration(
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.08),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
+            child: Container(
+              color: scheme.surfaceContainer,
+              child: InteractiveViewer(
+                transformationController: _transformController,
+                minScale: 1.0,
+                maxScale: 5.0,
+                boundaryMargin: const EdgeInsets.all(24),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(12, 4, 12, 24),
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 900),
+                      child: Column(
+                        children: [
+                          for (var i = 0; i < _pages!.length; i++) ...[
+                            _PdfPageImage(
+                              raster: _pages![i],
+                              pageNumber: i + 1,
+                              total: _pages!.length,
+                            ),
+                            if (i != _pages!.length - 1)
+                              const SizedBox(height: 12),
+                          ],
+                        ],
+                      ),
                     ),
-                  ],
-                ),
-                pdfFileName: _fileName,
-                loadingWidget: const Center(child: CircularProgressIndicator()),
-                onError: (context, error) => ErrorView(
-                  message: describeError(context, error),
-                  onRetry: _load,
+                  ),
                 ),
               ),
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _PdfPageImage extends StatelessWidget {
+  const _PdfPageImage({
+    required this.raster,
+    required this.pageNumber,
+    required this.total,
+  });
+
+  final PdfRaster raster;
+  final int pageNumber;
+  final int total;
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<Uint8List>(
+      future: raster.toPng(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return AspectRatio(
+            aspectRatio: raster.width / raster.height,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Center(
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ),
+          );
+        }
+        return DecoratedBox(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.10),
+                blurRadius: 14,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.memory(
+              snapshot.data!,
+              fit: BoxFit.contain,
+              filterQuality: FilterQuality.medium,
+            ),
+          ),
+        );
+      },
     );
   }
 }
