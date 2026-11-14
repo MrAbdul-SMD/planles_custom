@@ -74,13 +74,21 @@ class _InvoiceScreenState extends ConsumerState<InvoiceScreen> {
 
   Future<void> _download() async {
     final bytes = _bytes;
-    if (bytes == null) return;
+    if (bytes == null) {
+      debugPrint('[InvoiceScreen] download skipped: no bytes loaded');
+      return;
+    }
+    debugPrint(
+      '[InvoiceScreen] download requested | file=$_fileName bytes=${bytes.length} platform=${defaultTargetPlatform.name} kIsWeb=$kIsWeb',
+    );
     try {
       await downloadInvoicePdf(bytes, _fileName);
+      debugPrint('[InvoiceScreen] download completed');
       if (mounted && !kIsWeb) {
         showAppSnack(context, context.l10n.orderDetailDownloadInvoice);
       }
-    } catch (e) {
+    } catch (e, st) {
+      debugPrint('[InvoiceScreen] download failed: $e\n$st');
       if (mounted) {
         showAppSnack(context, describeError(context, e), error: true);
       }
