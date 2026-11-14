@@ -220,7 +220,10 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
                 );
                 children.add(const SizedBox(height: 10));
               }
-              return Column(children: children);
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: children,
+              );
             },
           ),
         if (selectedClass != null) ...[
@@ -452,7 +455,7 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 1200),
-              child: submitButton,
+              child: SizedBox(width: double.infinity, child: submitButton),
             ),
           ),
         ),
