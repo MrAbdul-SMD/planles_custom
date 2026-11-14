@@ -36,8 +36,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: stable
-          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: ${{ env.FLUTTER_CHANNEL }}
           cache: true
 
       - name: Install dependencies
@@ -46,8 +45,7 @@ jobs:
       - name: Build web (release, optimized)
         run: |
           flutter build web --release \
-            --base-href "/${{ github.event.repository.name }}/" \
-            --pwa-strategy offline-first
+            --base-href "/${{ github.event.repository.name }}/"
 
       - name: Upload web artifact
         uses: actions/upload-artifact@v4
@@ -57,17 +55,23 @@ jobs:
           if-no-files-found: error
 
       - name: Setup Pages
+        id: pages
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+        continue-on-error: true
         uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       - name: Upload Pages artifact
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') && steps.pages.outcome == 'success'
+        continue-on-error: true
         uses: actions/upload-pages-artifact@v3
         with:
           path: build/web
 
       - name: Deploy to GitHub Pages
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') && steps.pages.outcome == 'success'
+        continue-on-error: true
         id: deployment
         uses: actions/deploy-pages@v4
 
@@ -141,7 +145,7 @@ jobs:
         run: flutter config --enable-macos-desktop
 
       - name: Build macOS (release, optimized)
-        run: flutter build macos --release
+        run: flutter build macos --release --no-codesign
 
       - name: Create DMG installer
         run: ./tool/build_macos_dmg.sh --no-build
