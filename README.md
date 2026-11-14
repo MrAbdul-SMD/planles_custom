@@ -221,6 +221,20 @@ Android may treat each APK as a different app and require re-trusting/reinstalli
 when present (and falls back to debug only if missing, for local dev). Keep the
 same keystore for all future releases/updates of the same app.
 
+### macOS DMG installer
+
+Build a release `.app` and package it as a DMG (uses built-in `hdiutil`, no extra tools required):
+
+```bash
+# Build release and create DMG
+./tool/build_macos_dmg.sh
+
+# Package an existing Release build only
+./tool/build_macos_dmg.sh --no-build
+```
+
+Output: `dist/Planles-<version>-macos.dmg` (contains the app and an Applications shortcut). Version is read from `pubspec.yaml`.
+
 ### macOS pub get rsync error
 
 If `flutter pub get` fails with `rsync: mkdir .../build/macos/SourcePackages/... failed`,

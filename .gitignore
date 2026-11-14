@@ -51,3 +51,6 @@ app.*.map.json
 .widget_preview/
 .l10n.lock
 upload-keystore.jks
+
+# macOS DMG installer output
+dist/
