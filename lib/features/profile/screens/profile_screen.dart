@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../../core/responsive.dart';
 import '../../../core/update/app_update_prompt.dart';
@@ -184,18 +186,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           const LanguageListTile(),
           const Divider(),
           const ThemeModeListTile(),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.system_update_alt_outlined),
-            title: const Text('Check for updates'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => AppUpdatePrompt.checkAndPrompt(
-              context,
-              force: true,
-              silent: false,
-              includePrereleases: true,
+          if (!kIsWeb) ...[
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.system_update_alt_outlined),
+              title: const Text('Check for updates'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => AppUpdatePrompt.checkAndPrompt(
+                context,
+                force: true,
+                silent: false,
+                includePrereleases: true,
+              ),
             ),
-          ),
+          ],
           if (user.isInstructor) ...[
             const Divider(),
             ListTile(
@@ -227,11 +231,32 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ),
         const SizedBox(height: 8),
         Center(
-          child: Text(
-            'Planles',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.outline,
-            ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Planles',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.outline,
+                ),
+              ),
+              const SizedBox(height: 2),
+              FutureBuilder<PackageInfo>(
+                future: PackageInfo.fromPlatform(),
+                builder: (context, snapshot) {
+                  final info = snapshot.data;
+                  final label = info == null
+                      ? 'Version —'
+                      : 'Version ${info.version}${info.buildNumber.isNotEmpty ? ' (${info.buildNumber})' : ''}';
+                  return Text(
+                    label,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.outline,
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
         ),
       ],

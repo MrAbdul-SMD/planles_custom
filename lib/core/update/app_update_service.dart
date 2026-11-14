@@ -56,7 +56,7 @@ class AppUpdateService {
     final latestRaw = tag.isNotEmpty ? tag : (release['name'] as String? ?? '');
     final latest = _normalizeVersion(latestRaw);
     final latestBuild = _parseBuildNumber(latestRaw);
-    final currentBuild = _parseBuildNumber(packageInfo.version);
+    final currentBuild = _parseBuildNumber(packageInfo.version) ?? int.tryParse(packageInfo.buildNumber);
 
     final hasUpdate = _isNewerVersion(
       latest: latest,

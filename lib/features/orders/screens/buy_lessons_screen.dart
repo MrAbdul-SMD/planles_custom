@@ -476,6 +476,7 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
                       Expanded(
                         flex: 7,
                         child: ListView(
+                          padding: const EdgeInsets.only(bottom: 24),
                           children: [
                             vehicleSection,
                             const SizedBox(height: 24),
@@ -487,6 +488,7 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
                       Expanded(
                         flex: 4,
                         child: ListView(
+                          padding: const EdgeInsets.only(bottom: 24),
                           children: [
                             cartSection,
                             const SizedBox(height: 20),
@@ -504,7 +506,7 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 720),
               child: ListView(
-                padding: EdgeInsets.fromLTRB(horizontal, 16, horizontal, 24),
+                padding: EdgeInsets.fromLTRB(horizontal, 16, horizontal, 32),
                 children: [
                   vehicleSection,
                   const SizedBox(height: 24),

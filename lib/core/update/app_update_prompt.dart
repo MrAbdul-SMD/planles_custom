@@ -17,6 +17,7 @@ class AppUpdatePrompt {
     bool silent = true,
     bool includePrereleases = false,
   }) async {
+    if (kIsWeb) return;
     if (_checking) return;
     if (!force && _checkedThisSession) return;
     _checking = true;
