@@ -144,8 +144,15 @@ jobs:
       - name: Enable macOS desktop
         run: flutter config --enable-macos-desktop
 
+      - name: Disable macOS code signing (CI)
+        run: |
+          PBXPROJ="macos/Runner.xcodeproj/project.pbxproj"
+          sed -i '' 's/"CODE_SIGN_IDENTITY\[sdk=macosx\*\]" = "Apple Development";/CODE_SIGN_IDENTITY = "-";/g' "$PBXPROJ"
+          sed -i '' 's/DEVELOPMENT_TEAM = LH2AN4V894;/DEVELOPMENT_TEAM = "";/g' "$PBXPROJ"
+          sed -i '' 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' "$PBXPROJ"
+
       - name: Build macOS (release, optimized)
-        run: flutter build macos --release --no-codesign
+        run: flutter build macos --release
 
       - name: Create DMG installer
         run: ./tool/build_macos_dmg.sh --no-build
