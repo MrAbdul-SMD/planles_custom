@@ -139,14 +139,15 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
       );
     }
 
+    final wide = context.isExpanded;
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 900),
+        constraints: BoxConstraints(maxWidth: wide ? 1200 : 900),
         child: ListView.separated(
           padding: EdgeInsets.fromLTRB(
-            context.isExpanded ? 28 : 20,
+            wide ? 32 : 20,
             12,
-            context.isExpanded ? 28 : 20,
+            wide ? 32 : 20,
             32,
           ),
           itemCount: state.items.length + (state.loadingMore ? 1 : 0),

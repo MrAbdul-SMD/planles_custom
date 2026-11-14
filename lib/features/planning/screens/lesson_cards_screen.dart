@@ -389,12 +389,13 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
                     )
                   : Center(
                       child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 1000),
+                        constraints: BoxConstraints(
+                            maxWidth: context.isWideDesktop ? 1500 : 1200),
                         child: ListView(
                           padding: EdgeInsets.fromLTRB(
-                            context.isExpanded ? 28 : 16,
+                            context.isExpanded ? 32 : 16,
                             12,
-                            context.isExpanded ? 28 : 16,
+                            context.isExpanded ? 32 : 16,
                             24,
                           ),
                           children: [
@@ -486,7 +487,8 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
                 ),
                 child: Center(
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 1000),
+                    constraints: BoxConstraints(
+                        maxWidth: context.isWideDesktop ? 1500 : 1200),
                     child: FilledButton.icon(
                       onPressed: _saving ? null : _save,
                       icon: _saving

@@ -374,7 +374,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 padding: EdgeInsets.fromLTRB(horizontal, 12, horizontal, 32),
                 children: [
                   ResponsiveCenter(
-                    maxWidth: 1100,
+                    maxWidth: context.isWideDesktop ? 1500 : 1200,
                     child: content,
                   ),
                 ],

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/responsive.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../l10n/l10n.dart';
 import '../../../shared/widgets.dart';
@@ -194,17 +195,37 @@ class _PlanningTab extends ConsumerWidget {
               ],
             );
           }
-          if (!groupByDay) return _flat(items);
+          if (!groupByDay) return _flat(context, items);
           return _grouped(context, items);
         },
       ),
     );
   }
 
-  Widget _flat(List<Planning> items) {
+  Widget _flat(BuildContext context, List<Planning> items) {
+    final wide = context.isExpanded;
+    if (wide) {
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final crossAxisCount = constraints.maxWidth >= 1200 ? 3 : 2;
+          return GridView.builder(
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount,
+              mainAxisExtent: 112,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+            ),
+            itemCount: items.length,
+            itemBuilder: (context, index) =>
+                PlanningTile(planning: items[index]),
+          );
+        },
+      );
+    }
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 1100),
+        constraints: const BoxConstraints(maxWidth: 900),
         child: ListView.separated(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
           itemCount: items.length,
@@ -281,11 +302,13 @@ class _PlanningTab extends ConsumerWidget {
       children.add(const SizedBox(height: 10));
     }
 
-    return Center(
+    final wide = context.isExpanded;
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: wide ? 8 : 0),
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 1100),
+        constraints: BoxConstraints(maxWidth: wide ? 1400 : 900),
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 6, 20, 32),
+          padding: EdgeInsets.fromLTRB(wide ? 20 : 20, 6, wide ? 20 : 20, 32),
           children: children,
         ),
       ),

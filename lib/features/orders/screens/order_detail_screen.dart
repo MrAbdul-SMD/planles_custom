@@ -130,9 +130,9 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
           final wide = context.isExpanded;
           return Center(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1000),
+              constraints: BoxConstraints(maxWidth: wide ? 1400 : 1000),
               child: ListView(
-                padding: EdgeInsets.fromLTRB(wide ? 28 : 20, 12, wide ? 28 : 20, 32),
+                padding: EdgeInsets.fromLTRB(wide ? 32 : 20, 12, wide ? 32 : 20, 32),
                 children: [
               Container(
                 padding: const EdgeInsets.all(20),

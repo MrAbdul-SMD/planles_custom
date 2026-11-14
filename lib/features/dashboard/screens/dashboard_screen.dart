@@ -184,7 +184,7 @@ class DashboardScreen extends ConsumerWidget {
                 padding: EdgeInsets.fromLTRB(horizontal, 16, horizontal, 40),
                 children: [
                   ResponsiveCenter(
-                    maxWidth: 1280,
+                    maxWidth: 1600,
                     child: body,
                   ),
                 ],

@@ -45,31 +45,35 @@ class OrdersScreen extends ConsumerWidget {
               );
             }
             final wide = context.isExpanded;
-            return Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1000),
-                child: wide
-                    ? GridView.builder(
-                        padding: const EdgeInsets.fromLTRB(28, 16, 28, 96),
-                        gridDelegate:
-                            const SliverGridDelegateWithMaxCrossAxisExtent(
-                          maxCrossAxisExtent: 420,
-                          mainAxisExtent: 168,
-                          crossAxisSpacing: 16,
-                          mainAxisSpacing: 16,
-                        ),
-                        itemCount: page.items.length,
-                        itemBuilder: (context, index) =>
-                            _OrderCard(order: page.items[index]),
-                      )
-                    : ListView.separated(
-                        padding: const EdgeInsets.fromLTRB(20, 16, 20, 96),
-                        itemCount: page.items.length,
-                        separatorBuilder: (_, _) => const SizedBox(height: 10),
-                        itemBuilder: (context, index) =>
-                            _OrderCard(order: page.items[index]),
+            return Padding(
+              padding: EdgeInsets.symmetric(horizontal: wide ? 8 : 0),
+              child: wide
+                  ? GridView.builder(
+                      padding: const EdgeInsets.fromLTRB(24, 16, 24, 96),
+                      gridDelegate:
+                          const SliverGridDelegateWithMaxCrossAxisExtent(
+                        maxCrossAxisExtent: 460,
+                        mainAxisExtent: 168,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
                       ),
-              ),
+                      itemCount: page.items.length,
+                      itemBuilder: (context, index) =>
+                          _OrderCard(order: page.items[index]),
+                    )
+                  : Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 900),
+                        child: ListView.separated(
+                          padding: const EdgeInsets.fromLTRB(20, 16, 20, 96),
+                          itemCount: page.items.length,
+                          separatorBuilder: (_, _) =>
+                              const SizedBox(height: 10),
+                          itemBuilder: (context, index) =>
+                              _OrderCard(order: page.items[index]),
+                        ),
+                      ),
+                    ),
             );
           },
           ),

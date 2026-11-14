@@ -55,44 +55,71 @@ class _StudentsScreenState extends ConsumerState<StudentsScreen> {
                     .toList();
 
           final wide = context.isExpanded;
-          return Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1000),
-              child: Column(
-                children: [
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(wide ? 28 : 20, 16, wide ? 28 : 20, 8),
-                    child: TextField(
-                      onChanged: (v) => setState(() => _query = v),
-                      decoration: InputDecoration(
-                        hintText: l10n.studentsSearchHint,
-                        prefixIcon: const Icon(Icons.search_rounded),
+          return Padding(
+            padding: EdgeInsets.symmetric(horizontal: wide ? 8 : 0),
+            child: Column(
+              children: [
+                Padding(
+                  padding: EdgeInsets.fromLTRB(
+                      wide ? 24 : 20, 16, wide ? 24 : 20, 8),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: wide ? 720 : 700),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextField(
+                        onChanged: (v) => setState(() => _query = v),
+                        decoration: InputDecoration(
+                          hintText: l10n.studentsSearchHint,
+                          prefixIcon: const Icon(Icons.search_rounded),
+                        ),
                       ),
                     ),
                   ),
-                  Expanded(
-                    child: filtered.isEmpty
-                        ? EmptyState(
-                            icon: Icons.groups_outlined,
-                            title: l10n.studentsEmptyTitle,
-                            subtitle: l10n.studentsEmptySubtitle,
-                          )
-                        : RefreshIndicator(
-                            onRefresh: () async =>
-                                ref.invalidate(myStudentsProvider),
-                            child: ListView.separated(
-                              padding: EdgeInsets.fromLTRB(
-                                  wide ? 28 : 20, 8, wide ? 28 : 20, 32),
-                              itemCount: filtered.length,
-                              separatorBuilder: (_, _) =>
-                                  const SizedBox(height: 8),
-                              itemBuilder: (context, index) =>
-                                  _StudentTile(student: filtered[index]),
-                            ),
-                          ),
-                  ),
-                ],
-              ),
+                ),
+                Expanded(
+                  child: filtered.isEmpty
+                      ? EmptyState(
+                          icon: Icons.groups_outlined,
+                          title: l10n.studentsEmptyTitle,
+                          subtitle: l10n.studentsEmptySubtitle,
+                        )
+                      : RefreshIndicator(
+                          onRefresh: () async =>
+                              ref.invalidate(myStudentsProvider),
+                          child: wide
+                              ? LayoutBuilder(
+                                  builder: (context, constraints) {
+                                    final cols =
+                                        constraints.maxWidth >= 1400 ? 3 : 2;
+                                    return GridView.builder(
+                                      padding: const EdgeInsets.fromLTRB(
+                                          24, 8, 24, 32),
+                                      gridDelegate:
+                                          SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: cols,
+                                        mainAxisExtent: 88,
+                                        crossAxisSpacing: 12,
+                                        mainAxisSpacing: 12,
+                                      ),
+                                      itemCount: filtered.length,
+                                      itemBuilder: (context, index) =>
+                                          _StudentTile(
+                                              student: filtered[index]),
+                                    );
+                                  },
+                                )
+                              : ListView.separated(
+                                  padding: const EdgeInsets.fromLTRB(
+                                      20, 8, 20, 32),
+                                  itemCount: filtered.length,
+                                  separatorBuilder: (_, _) =>
+                                      const SizedBox(height: 8),
+                                  itemBuilder: (context, index) =>
+                                      _StudentTile(student: filtered[index]),
+                                ),
+                        ),
+                ),
+              ],
             ),
           );
         },

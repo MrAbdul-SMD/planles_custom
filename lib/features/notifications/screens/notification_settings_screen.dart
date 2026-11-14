@@ -46,9 +46,9 @@ class _NotificationSettingsScreenState
           return SafeArea(
             child: Center(
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 760),
+                constraints: BoxConstraints(maxWidth: wide ? 1000 : 760),
                 child: ListView(
-                  padding: EdgeInsets.fromLTRB(wide ? 28 : 20, 12, wide ? 28 : 20, 32),
+                  padding: EdgeInsets.fromLTRB(wide ? 32 : 20, 12, wide ? 32 : 20, 32),
                   children: [
               SectionHeader(l10n.notifSettingsQuietSection),
               Card(
