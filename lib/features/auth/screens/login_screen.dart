@@ -149,20 +149,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final scheme = theme.colorScheme;
     final wide = context.screenWidth >= Breakpoints.medium;
 
+    Widget envButton() => IconButton.filledTonal(
+          icon: const Icon(Icons.tune_rounded),
+          tooltip: 'Environment',
+          onPressed: () => _pickEnvironment(context),
+        ).animate().fadeIn(duration: 300.ms);
+
     final formColumn = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Align(
-          alignment: Alignment.centerRight,
-          child: IconButton.filledTonal(
-            icon: const Icon(Icons.tune_rounded),
-            tooltip: 'Environment',
-            onPressed: () => _pickEnvironment(context),
+        if (wide)
+          Align(
+            alignment: Alignment.centerRight,
+            child: envButton(),
           ),
-        ).animate().fadeIn(duration: 300.ms),
         if (!wide) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: 40),
           Center(
             child: Container(
               width: 88,
@@ -435,30 +438,43 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
 
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              scheme.primary.withValues(alpha: 0.10),
-              scheme.surface,
-              scheme.surface,
-            ],
-            stops: const [0, 0.35, 1],
-          ),
-        ),
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 440),
-                child: formColumn,
+      body: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  scheme.primary.withValues(alpha: 0.10),
+                  scheme.surface,
+                  scheme.surface,
+                ],
+                stops: const [0, 0.35, 1],
+              ),
+            ),
+            child: SafeArea(
+              child: Center(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 440),
+                    child: formColumn,
+                  ),
+                ),
               ),
             ),
           ),
-        ),
+          SafeArea(
+            child: Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 4, right: 8),
+                child: envButton(),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

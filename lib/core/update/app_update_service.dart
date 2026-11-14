@@ -138,8 +138,10 @@ class AppUpdateService {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         return _pickByPriority(parsed, const [
-          'app-release.apk',
           'arm64-v8a-release.apk',
+          'armeabi-v7a-release.apk',
+          'x86_64-release.apk',
+          'app-release.apk',
           '.apk',
         ]);
       case TargetPlatform.windows:
