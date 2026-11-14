@@ -195,6 +195,32 @@ Setup:
 Token registration / unregistration is wired into `AuthController`
 (`login`, `register`, `restore`, `signOut`).
 
+### Android release signing (avoid "trust/install" issues)
+
+Release builds must be signed with a **stable** keystore/certificate; otherwise
+Android may treat each APK as a different app and require re-trusting/reinstalling.
+
+1. Create a keystore once (keep it safe, do not commit it):
+   ```bash
+   keytool -genkey -v -keystore ~/upload-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+   ```
+2. Create `android/key.properties` (gitignored) from `android/key.properties.example`:
+   ```properties
+   storePassword=...
+   keyPassword=...
+   keyAlias=upload
+   storeFile=/absolute/path/to/upload-keystore.jks
+   ```
+3. Build a signed release:
+   ```bash
+   flutter build apk --release
+   # or: flutter build appbundle --release
+   ```
+
+`android/app/build.gradle.kts` uses `android/key.properties` for release signing
+when present (and falls back to debug only if missing, for local dev). Keep the
+same keystore for all future releases/updates of the same app.
+
 ### macOS pub get rsync error
 
 If `flutter pub get` fails with `rsync: mkdir .../build/macos/SourcePackages/... failed`,
