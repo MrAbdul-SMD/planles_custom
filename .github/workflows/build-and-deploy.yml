@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -214,3 +214,76 @@ jobs:
           name: windows-build
           path: dist/*.zip
           if-no-files-found: error
+
+  release:
+    name: Create GitHub Release
+    needs: [web, android, macos, windows]
+    runs-on: ubuntu-latest
+    if: always() && needs.web.result == 'success' && needs.android.result == 'success' && needs.macos.result == 'success' && needs.windows.result == 'success'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+
+      - name: Prepare release assets
+        run: |
+          set -euo pipefail
+          mkdir -p release-assets
+          VERSION="$(grep '^version:' pubspec.yaml | awk '{print $2}' | cut -d+ -f1)"
+          VERSION="${VERSION:-0.0.0}"
+          echo "APP_VERSION=$VERSION" >> "$GITHUB_ENV"
+
+          # Web
+          if [ -d release-artifacts/web-build ]; then
+            (cd release-artifacts/web-build && zip -r "../../release-assets/Planles-${VERSION}-web.zip" .)
+          fi
+
+          # Android APKs and symbols
+          if [ -d release-artifacts/android-apks ]; then
+            find release-artifacts/android-apks -type f -name '*.apk' -exec cp {} release-assets/ \;
+            if [ -d release-artifacts/android-apks/build/symbols ]; then
+              (cd release-artifacts/android-apks/build && zip -r "../../../release-assets/Planles-${VERSION}-android-symbols.zip" symbols)
+            elif [ -d release-artifacts/android-apks/symbols ]; then
+              (cd release-artifacts/android-apks && zip -r "../../release-assets/Planles-${VERSION}-android-symbols.zip" symbols)
+            fi
+          fi
+
+          # macOS
+          if [ -d release-artifacts/macos-build ]; then
+            find release-artifacts/macos-build -type f \( -name '*.dmg' -o -name '*.zip' \) -exec cp {} release-assets/ \;
+          fi
+
+          # Windows
+          if [ -d release-artifacts/windows-build ]; then
+            find release-artifacts/windows-build -type f -name '*.zip' -exec cp {} release-assets/ \;
+          fi
+
+          echo "Prepared release assets:"
+          ls -lah release-assets
+
+      - name: Set release metadata
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            echo "RELEASE_TAG=${GITHUB_REF_NAME}" >> "$GITHUB_ENV"
+            echo "RELEASE_NAME=${GITHUB_REF_NAME}" >> "$GITHUB_ENV"
+            echo "PRERELEASE=false" >> "$GITHUB_ENV"
+          else
+            echo "RELEASE_TAG=build-${GITHUB_RUN_NUMBER}" >> "$GITHUB_ENV"
+            echo "RELEASE_NAME=Planles ${APP_VERSION} build ${GITHUB_RUN_NUMBER}" >> "$GITHUB_ENV"
+            echo "PRERELEASE=true" >> "$GITHUB_ENV"
+          fi
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.RELEASE_TAG }}
+          name: ${{ env.RELEASE_NAME }}
+          target_commitish: ${{ github.sha }}
+          generate_release_notes: true
+          prerelease: ${{ env.PRERELEASE }}
+          make_latest: ${{ env.PRERELEASE == 'false' }}
+          files: release-assets/*
