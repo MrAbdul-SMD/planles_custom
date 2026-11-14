@@ -240,7 +240,7 @@ Output: `dist/Planles-<version>-macos.dmg` (contains the app and an Applications
 Workflow: `.github/workflows/build-and-deploy.yml`
 
 - **Triggers:** pushes to `main`, version tags (`v*`), and manual `workflow_dispatch`.
-- **Web:** builds `flutter build web --release --base-href "/<repo>/"`, uploads `web-build` artifact, and attempts to deploy to **GitHub Pages** when Pages is enabled for GitHub Actions (configure uses `enablement: true`; deployment steps are non-blocking so the web artifact still succeeds if Pages is not configured). Enable Pages in repo settings if needed: *Settings → Pages → Source: GitHub Actions*.
+- **Web:** builds `flutter build web --release --base-href "/planles/"`, uploads `web-build` artifact, and attempts to deploy to **GitHub Pages** when Pages is enabled for GitHub Actions (configure uses `enablement: true`; deployment steps are non-blocking so the web artifact still succeeds if Pages is not configured). Enable Pages in repo settings if needed: *Settings → Pages → Source: GitHub Actions*.
 - **Android:** builds optimized release APKs (`--obfuscate --split-debug-info`, split-per-ABI + universal) and uploads `android-apks` artifacts (plus debug symbols). Release signing uses `android/key.properties` if provided; otherwise the Gradle config falls back to debug signing for CI artifacts.
 - **macOS:** builds an unsigned release `.app` for CI (`--no-codesign`), packages a DMG via `tool/build_macos_dmg.sh`, and uploads `macos-build` artifacts (`.dmg` + zipped `.app`). For a signed/notarized distribution build, configure signing certificates/profiles outside CI.
 - **Windows:** builds release and uploads `windows-build` artifact (zipped `x64` runner output).
