@@ -52,23 +52,25 @@ class AuthController extends Notifier<AuthState> {
   /// Called once from `main()` before the first frame.
   Future<void> restore() async {
     final storage = ref.read(tokenStorageProvider);
-    if (storage.read() == null) {
-      _set(const AuthUnauthenticated());
-      return;
-    }
     try {
-      final user = await _repo.me();
-      _set(Authenticated(user));
-      _registerFcm();
-    } on ApiException catch (e) {
-      if (e.isUnauthorized) {
-        await storage.clear();
+      if (storage.read() == null) {
         _set(const AuthUnauthenticated());
-      } else {
-        // Offline / server trouble: let the user reach the login screen and
-        // surface the error there instead of blocking the whole app.
+        return;
+      }
+      try {
+        final user = await _repo.me();
+        _set(Authenticated(user));
+        _registerFcm();
+      } on ApiException catch (e) {
+        if (e.isUnauthorized) {
+          await storage.clear();
+        }
+        _set(const AuthUnauthenticated());
+      } catch (_) {
         _set(const AuthUnauthenticated());
       }
+    } catch (_) {
+      _set(const AuthUnauthenticated());
     }
   }
 

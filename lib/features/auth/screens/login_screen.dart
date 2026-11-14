@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:formz/formz.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -8,6 +10,7 @@ import '../../../core/network/api_client.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/providers.dart';
 import '../../../l10n/l10n.dart';
+import '../../../shared/form_inputs.dart';
 import '../../../shared/widgets.dart';
 import '../providers/auth_provider.dart';
 
@@ -19,27 +22,28 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _email = TextEditingController();
-  final _password = TextEditingController();
+  EmailInput _email = const EmailInput.pure();
+  PasswordInput _password = const PasswordInput.pure();
   bool _obscure = true;
   bool _busy = false;
+  FormzSubmissionStatus _status = FormzSubmissionStatus.initial;
 
-  @override
-  void dispose() {
-    _email.dispose();
-    _password.dispose();
-    super.dispose();
-  }
+  bool get _isValid => Formz.validate([_email, _password]);
 
   Future<void> _pickEnvironment(BuildContext context) async {
     final l10n = context.l10n;
     final prefs = await SharedPreferences.getInstance();
     final current = ApiClient.resolvedBaseUrl;
 
-    final devUrl = dotenv.maybeGet('API_BASE_URL_DEV', fallback: 'http://localhost:8000/api') ?? 'http://localhost:8000/api';
-    final stagingUrl = dotenv.maybeGet('API_BASE_URL_STAGING', fallback: 'https://staging.planles.nl/api') ?? 'https://staging.planles.nl/api';
-    final prodUrl = dotenv.maybeGet('API_BASE_URL', fallback: ApiClient.defaultBaseUrl) ?? ApiClient.defaultBaseUrl;
+    final devUrl = dotenv.maybeGet('API_BASE_URL_DEV',
+            fallback: 'http://localhost:8000/api') ??
+        'http://localhost:8000/api';
+    final stagingUrl = dotenv.maybeGet('API_BASE_URL_STAGING',
+            fallback: 'https://staging.planles.nl/api') ??
+        'https://staging.planles.nl/api';
+    final prodUrl = dotenv.maybeGet('API_BASE_URL',
+            fallback: ApiClient.defaultBaseUrl) ??
+        ApiClient.defaultBaseUrl;
 
     final options = <MapEntry<String, String>>[
       MapEntry('Production', prodUrl),
@@ -50,121 +54,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (!context.mounted) return;
     final picked = await showDialog<String>(
       context: context,
-      builder: (ctx) {
-        final theme = Theme.of(ctx);
-        final scheme = theme.colorScheme;
-        return Dialog(
-          insetPadding:
-              const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: scheme.primaryContainer,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(
-                        Icons.dns_rounded,
-                        color: scheme.onPrimaryContainer,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      'Environment',
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 14),
-                for (final e in options)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Material(
-                      color: e.value == current
-                          ? scheme.primaryContainer.withValues(alpha: 0.45)
-                          : scheme.surfaceContainerLow,
-                      borderRadius: BorderRadius.circular(14),
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(14),
-                        onTap: () => Navigator.of(ctx).pop(e.value),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 12,
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                e.value == current
-                                    ? Icons.check_circle_rounded
-                                    : Icons.circle_outlined,
-                                size: 20,
-                                color: e.value == current
-                                    ? scheme.primary
-                                    : scheme.outline,
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      e.key,
-                                      style:
-                                          theme.textTheme.titleSmall?.copyWith(
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      e.value,
-                                      style:
-                                          theme.textTheme.bodySmall?.copyWith(
-                                        color: scheme.onSurfaceVariant,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: OutlinedButton.icon(
-                    onPressed: () => Navigator.of(ctx).pop('__custom__'),
-                    icon: const Icon(Icons.edit_outlined),
-                    label: const Text('Custom URL'),
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: const Size.fromHeight(44),
-                    ),
-                  ),
-                ),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () => Navigator.of(ctx).pop(),
-                    child: Text(l10n.cancel),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
+      builder: (ctx) => _EnvironmentDialog(
+        l10nCancel: l10n.cancel,
+        current: current,
+        options: options,
+      ),
     );
 
     if (picked == null || !context.mounted) return;
@@ -174,55 +68,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       final controller = TextEditingController(text: current);
       final result = await showDialog<String>(
         context: context,
-        builder: (ctx) {
-          final theme = Theme.of(ctx);
-          final scheme = theme.colorScheme;
-          return AlertDialog(
-            titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
-            contentPadding: const EdgeInsets.fromLTRB(24, 14, 24, 8),
-            title: Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: scheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(Icons.link_rounded,
-                      color: scheme.onPrimaryContainer),
-                ),
-                const SizedBox(width: 12),
-                const Expanded(child: Text('Custom base URL')),
-              ],
-            ),
-            content: TextField(
-              controller: controller,
-              autofocus: true,
-              keyboardType: TextInputType.url,
-              decoration: const InputDecoration(
-                labelText: 'API base URL',
-                hintText: 'https://...',
-              ),
-            ),
-            actions: [
-              OutlinedButton(
-                onPressed: () => Navigator.of(ctx).pop(),
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size(0, 44),
-                ),
-                child: Text(l10n.cancel),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
-                style: FilledButton.styleFrom(
-                  minimumSize: const Size(0, 44),
-                ),
-                child: Text(l10n.confirm),
-              ),
-            ],
-          );
-        },
+        builder: (ctx) => _CustomUrlDialog(
+          controller: controller,
+          cancelLabel: l10n.cancel,
+          confirmLabel: l10n.confirm,
+        ),
       );
       controller.dispose();
       if (result == null || result.isEmpty || !context.mounted) return;
@@ -238,25 +88,57 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       showAppSnack(context, 'Base URL: $url');
     }
   }
+
   Future<void> _submit() async {
-    if (!(_formKey.currentState?.validate() ?? false)) return;
+    final email = EmailInput.dirty(_email.value);
+    final password = PasswordInput.dirty(_password.value);
+    setState(() {
+      _email = email;
+      _password = password;
+      _status = FormzSubmissionStatus.inProgress;
+    });
+    if (!Formz.validate([email, password])) {
+      setState(() => _status = FormzSubmissionStatus.failure);
+      return;
+    }
+
     setState(() => _busy = true);
     try {
       await ref
           .read(authControllerProvider.notifier)
-          .login(email: _email.text, password: _password.text);
-      // The router redirect takes over from here.
+          .login(email: email.value.trim(), password: password.value);
+      setState(() => _status = FormzSubmissionStatus.success);
     } on ApiException catch (e) {
       if (mounted) {
         showAppSnack(context, describeError(context, e), error: true);
       }
+      setState(() => _status = FormzSubmissionStatus.failure);
     } catch (e) {
       if (mounted) {
         showAppSnack(context, describeError(context, e), error: true);
       }
+      setState(() => _status = FormzSubmissionStatus.failure);
     } finally {
       if (mounted) setState(() => _busy = false);
     }
+  }
+
+  String? _emailErrorText(BuildContext context) {
+    if (_email.isPure) return null;
+    return switch (_email.error) {
+      EmailValidationError.empty => context.l10n.loginEmailRequired,
+      EmailValidationError.invalid => context.l10n.loginEmailInvalid,
+      null => null,
+    };
+  }
+
+  String? _passwordErrorText(BuildContext context) {
+    if (_password.isPure) return null;
+    return switch (_password.error) {
+      PasswordValidationError.empty => context.l10n.loginPasswordRequired,
+      PasswordValidationError.tooShort => context.l10n.loginPasswordRequired,
+      null => null,
+    };
   }
 
   @override
@@ -285,166 +167,345 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 440),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: IconButton.filledTonal(
-                          icon: const Icon(Icons.tune_rounded),
-                          tooltip: 'Environment',
-                          onPressed: () => _pickEnvironment(context),
-                        ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: IconButton.filledTonal(
+                        icon: const Icon(Icons.tune_rounded),
+                        tooltip: 'Environment',
+                        onPressed: () => _pickEnvironment(context),
                       ),
-                      const SizedBox(height: 8),
-                      Center(
-                        child: Container(
-                          width: 88,
-                          height: 88,
-                          padding: const EdgeInsets.all(14),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(22),
-                            boxShadow: [
-                              BoxShadow(
-                                color: scheme.primary.withValues(alpha: 0.18),
-                                blurRadius: 24,
-                                offset: const Offset(0, 10),
-                              ),
-                            ],
-                            border: Border.all(
-                              color: scheme.outlineVariant.withValues(alpha: 0.35),
-                            ),
-                          ),
-                          child: Image.asset(
-                            'assets/branding/planles_logo.png',
-                            fit: BoxFit.contain,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      Text(
-                        l10n.loginTitle,
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        l10n.loginSubtitle,
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: scheme.onSurfaceVariant,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Container(
-                        padding: const EdgeInsets.all(18),
+                    ).animate().fadeIn(duration: 300.ms),
+                    const SizedBox(height: 8),
+                    Center(
+                      child: Container(
+                        width: 88,
+                        height: 88,
+                        padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
-                          color: scheme.surfaceContainerLow,
-                          borderRadius: BorderRadius.circular(24),
-                          border: Border.all(
-                            color: scheme.outlineVariant.withValues(alpha: 0.45),
-                          ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            TextFormField(
-                              controller: _email,
-                              keyboardType: TextInputType.emailAddress,
-                              textInputAction: TextInputAction.next,
-                              autofillHints: const [AutofillHints.email],
-                              decoration: InputDecoration(
-                                labelText: l10n.loginEmailLabel,
-                                prefixIcon:
-                                    const Icon(Icons.mail_outline_rounded),
-                              ),
-                              validator: (value) {
-                                final v = value?.trim() ?? '';
-                                if (v.isEmpty) return l10n.loginEmailRequired;
-                                if (!v.contains('@')) {
-                                  return l10n.loginEmailInvalid;
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 14),
-                            TextFormField(
-                              controller: _password,
-                              obscureText: _obscure,
-                              textInputAction: TextInputAction.done,
-                              autofillHints: const [AutofillHints.password],
-                              onFieldSubmitted: (_) => _submit(),
-                              decoration: InputDecoration(
-                                labelText: l10n.loginPasswordLabel,
-                                prefixIcon:
-                                    const Icon(Icons.lock_outline_rounded),
-                                suffixIcon: IconButton(
-                                  onPressed: () =>
-                                      setState(() => _obscure = !_obscure),
-                                  icon: Icon(
-                                    _obscure
-                                        ? Icons.visibility_outlined
-                                        : Icons.visibility_off_outlined,
-                                  ),
-                                ),
-                              ),
-                              validator: (value) => (value ?? '').isEmpty
-                                  ? l10n.loginPasswordRequired
-                                  : null,
-                            ),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: TextButton(
-                                onPressed: () =>
-                                    context.push('/forgot-password'),
-                                child: Text(l10n.loginForgotPassword),
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            FilledButton(
-                              onPressed: _busy ? null : _submit,
-                              child: _busy
-                                  ? const SizedBox(
-                                      width: 22,
-                                      height: 22,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2.4,
-                                      ),
-                                    )
-                                  : Text(l10n.loginSubmit),
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(22),
+                          boxShadow: [
+                            BoxShadow(
+                              color: scheme.primary.withValues(alpha: 0.18),
+                              blurRadius: 24,
+                              offset: const Offset(0, 10),
                             ),
                           ],
+                          border: Border.all(
+                            color: scheme.outlineVariant.withValues(alpha: 0.35),
+                          ),
+                        ),
+                        child: Image.asset(
+                          'assets/branding/planles_logo.png',
+                          fit: BoxFit.contain,
                         ),
                       ),
-                      const SizedBox(height: 18),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                    ).animate().fadeIn(duration: 350.ms).scale(begin: const Offset(0.96, 0.96)),
+                    const SizedBox(height: 20),
+                    Text(
+                      l10n.loginTitle,
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ).animate().fadeIn(delay: 60.ms).moveY(begin: 6, end: 0),
+                    const SizedBox(height: 6),
+                    Text(
+                      l10n.loginSubtitle,
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ).animate().fadeIn(delay: 100.ms),
+                    const SizedBox(height: 24),
+                    Container(
+                      padding: const EdgeInsets.all(18),
+                      decoration: BoxDecoration(
+                        color: scheme.surfaceContainerLow,
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(
+                          color: scheme.outlineVariant.withValues(alpha: 0.45),
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Text(
-                            l10n.loginNoAccount,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: scheme.onSurfaceVariant,
+                          TextField(
+                            keyboardType: TextInputType.emailAddress,
+                            textInputAction: TextInputAction.next,
+                            autofillHints: const [AutofillHints.email],
+                            decoration: InputDecoration(
+                              labelText: l10n.loginEmailLabel,
+                              prefixIcon: const Icon(Icons.mail_outline_rounded),
+                              errorText: _emailErrorText(context),
+                            ),
+                            onChanged: (v) => setState(() {
+                              _email = EmailInput.dirty(v);
+                            }),
+                          ),
+                          const SizedBox(height: 14),
+                          TextField(
+                            obscureText: _obscure,
+                            textInputAction: TextInputAction.done,
+                            autofillHints: const [AutofillHints.password],
+                            onSubmitted: (_) => _submit(),
+                            decoration: InputDecoration(
+                              labelText: l10n.loginPasswordLabel,
+                              prefixIcon: const Icon(Icons.lock_outline_rounded),
+                              errorText: _passwordErrorText(context),
+                              suffixIcon: IconButton(
+                                onPressed: () =>
+                                    setState(() => _obscure = !_obscure),
+                                icon: Icon(
+                                  _obscure
+                                      ? Icons.visibility_outlined
+                                      : Icons.visibility_off_outlined,
+                                ),
+                              ),
+                            ),
+                            onChanged: (v) => setState(() {
+                              _password = PasswordInput.dirty(v);
+                            }),
+                          ),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: () => context.push('/forgot-password'),
+                              child: Text(l10n.loginForgotPassword),
                             ),
                           ),
-                          TextButton(
-                            onPressed: () => context.push('/register'),
-                            child: Text(l10n.loginRegister),
+                          const SizedBox(height: 4),
+                          FilledButton(
+                            onPressed: _busy ? null : _submit,
+                            child: _busy || _status.isInProgress
+                                ? const SizedBox(
+                                    width: 22,
+                                    height: 22,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2.4,
+                                    ),
+                                  )
+                                : Text(l10n.loginSubmit),
                           ),
+                          if (!_isValid && !_email.isPure && !_password.isPure)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8),
+                              child: Text(
+                                l10n.loginEmailInvalid,
+                                textAlign: TextAlign.center,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: scheme.error,
+                                ),
+                              ),
+                            ),
                         ],
                       ),
-                    ],
-                  ),
+                    ).animate().fadeIn(delay: 140.ms).moveY(begin: 10, end: 0),
+                    const SizedBox(height: 18),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          l10n.loginNoAccount,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () => context.push('/register'),
+                          child: Text(l10n.loginRegister),
+                        ),
+                      ],
+                    ).animate().fadeIn(delay: 180.ms),
+                  ],
                 ),
               ),
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class _EnvironmentDialog extends StatelessWidget {
+  const _EnvironmentDialog({
+    required this.l10nCancel,
+    required this.current,
+    required this.options,
+  });
+
+  final String l10nCancel;
+  final String current;
+  final List<MapEntry<String, String>> options;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: scheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(Icons.dns_rounded, color: scheme.onPrimaryContainer),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Environment',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            for (final e in options)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Material(
+                  color: e.value == current
+                      ? scheme.primaryContainer.withValues(alpha: 0.45)
+                      : scheme.surfaceContainerLow,
+                  borderRadius: BorderRadius.circular(14),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(14),
+                    onTap: () => Navigator.of(context).pop(e.value),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 12),
+                      child: Row(
+                        children: [
+                          Icon(
+                            e.value == current
+                                ? Icons.check_circle_rounded
+                                : Icons.circle_outlined,
+                            size: 20,
+                            color: e.value == current
+                                ? scheme.primary
+                                : scheme.outline,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  e.key,
+                                  style: theme.textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  e.value,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: scheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: OutlinedButton.icon(
+                onPressed: () => Navigator.of(context).pop('__custom__'),
+                icon: const Icon(Icons.edit_outlined),
+                label: const Text('Custom URL'),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(44),
+                ),
+              ),
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(l10nCancel),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CustomUrlDialog extends StatelessWidget {
+  const _CustomUrlDialog({
+    required this.controller,
+    required this.cancelLabel,
+    required this.confirmLabel,
+  });
+
+  final TextEditingController controller;
+  final String cancelLabel;
+  final String confirmLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return AlertDialog(
+      titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+      contentPadding: const EdgeInsets.fromLTRB(24, 14, 24, 8),
+      title: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: scheme.primaryContainer,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(Icons.link_rounded, color: scheme.onPrimaryContainer),
+          ),
+          const SizedBox(width: 12),
+          const Expanded(child: Text('Custom base URL')),
+        ],
+      ),
+      content: TextField(
+        controller: controller,
+        autofocus: true,
+        keyboardType: TextInputType.url,
+        decoration: const InputDecoration(
+          labelText: 'API base URL',
+          hintText: 'https://...',
+        ),
+      ),
+      actions: [
+        OutlinedButton(
+          onPressed: () => Navigator.of(context).pop(),
+          style: OutlinedButton.styleFrom(minimumSize: const Size(0, 44)),
+          child: Text(cancelLabel),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.of(context).pop(controller.text.trim()),
+          style: FilledButton.styleFrom(minimumSize: const Size(0, 44)),
+          child: Text(confirmLabel),
+        ),
+      ],
     );
   }
 }

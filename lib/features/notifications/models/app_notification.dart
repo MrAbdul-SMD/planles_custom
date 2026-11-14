@@ -50,9 +50,7 @@ class NotificationPreference {
 
   factory NotificationPreference.fromJson(Map<String, dynamic> json) =>
       NotificationPreference(
-        category: json['category']?.toString() ??
-            json['type']?.toString() ??
-            '',
+        category: json['category']?.toString() ?? json['type']?.toString() ?? '',
         inAppEnabled: json['inAppEnabled'] as bool? ??
             (json['pushEnabled'] as bool? ?? true),
         pushEnabled: json['pushEnabled'] as bool? ?? true,
@@ -64,22 +62,21 @@ class NotificationPreference {
   bool pushEnabled;
   final bool locked;
 
-  /// Backwards-compatible alias used by older call sites.
   String get type => category;
 
   Map<String, dynamic> toJson() => {
-    'category': category,
-    'pushEnabled': pushEnabled,
-  };
+        'category': category,
+        'pushEnabled': pushEnabled,
+      };
 
   String label(AppLocalizations l10n) => switch (category) {
-    'LESSONS' => l10n.notifPrefLessons,
-    'PAYMENTS' => l10n.notifPrefPayments,
-    'EXAMS' => l10n.notifPrefExams,
-    'LESSON_CARDS' => l10n.notifPrefLessonCards,
-    'ACCOUNT' => l10n.notifPrefAccount,
-    _ => category,
-  };
+        'LESSONS' => l10n.notifPrefLessons,
+        'PAYMENTS' => l10n.notifPrefPayments,
+        'EXAMS' => l10n.notifPrefExams,
+        'LESSON_CARDS' => l10n.notifPrefLessonCards,
+        'ACCOUNT' => l10n.notifPrefAccount,
+        _ => category,
+      };
 }
 
 class QuietHours {
@@ -91,11 +88,11 @@ class QuietHours {
   });
 
   factory QuietHours.fromJson(Map<String, dynamic> json) => QuietHours(
-    enabled: json['enabled'] as bool? ?? true,
-    start: json['start']?.toString() ?? '22:00',
-    end: json['end']?.toString() ?? '07:00',
-    timeZone: json['timeZone']?.toString() ?? 'Europe/Amsterdam',
-  );
+        enabled: json['enabled'] as bool? ?? true,
+        start: json['start']?.toString() ?? '22:00',
+        end: json['end']?.toString() ?? '07:00',
+        timeZone: json['timeZone']?.toString() ?? 'Europe/Amsterdam',
+      );
 
   final bool enabled;
   final String start;
@@ -111,11 +108,11 @@ class QuietHours {
       );
 
   Map<String, dynamic> toJson() => {
-    'enabled': enabled,
-    'start': start,
-    'end': end,
-    if (timeZone.isNotEmpty) 'timeZone': timeZone,
-  };
+        'enabled': enabled,
+        'start': start,
+        'end': end,
+        if (timeZone.isNotEmpty) 'timeZone': timeZone,
+      };
 }
 
 class NotificationSettings {
@@ -131,13 +128,13 @@ class NotificationSettings {
             : const QuietHours(),
         preferences: json['preferences'] is List
             ? (json['preferences'] as List)
-                  .whereType<Map>()
-                  .map(
-                    (e) => NotificationPreference.fromJson(
-                      Map<String, dynamic>.from(e),
-                    ),
-                  )
-                  .toList()
+                .whereType<Map>()
+                .map(
+                  (e) => NotificationPreference.fromJson(
+                    Map<String, dynamic>.from(e),
+                  ),
+                )
+                .toList()
             : const [],
       );
 
@@ -145,7 +142,7 @@ class NotificationSettings {
   final List<NotificationPreference> preferences;
 
   Map<String, dynamic> toJson() => {
-    'quietHours': quietHours.toJson(),
-    'preferences': preferences.map((e) => e.toJson()).toList(),
-  };
+        'quietHours': quietHours.toJson(),
+        'preferences': preferences.map((e) => e.toJson()).toList(),
+      };
 }

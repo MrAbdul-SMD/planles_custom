@@ -18,14 +18,15 @@ import 'features/auth/providers/auth_provider.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Firebase Cloud Messaging (best-effort — requires google-services.json /
-  // GoogleService-Info.plist, which the developer must add).
-  await FcmService.initialize();
-  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  // Firebase Cloud Messaging (best-effort — optional on web/dev).
+  try {
+    await FcmService.initialize();
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  } catch (_) {
+    // Ignore: app can run without push notifications.
+  }
 
   // Client-side configuration (API_BASE_URL, …) from the bundled .env asset.
-  // A missing file must not brick the app — ApiClient falls back to its
-  // compiled-in default in that case.
   try {
     await dotenv.load();
   } catch (_) {
@@ -55,19 +56,26 @@ Future<void> main() async {
     container.read(authControllerProvider.notifier).forceLogout();
   };
 
-  // Resolve the stored session before the first frame so the router never
-  // flashes the login screen for an already signed-in user.
-  await container.read(authControllerProvider.notifier).restore();
+  // Resolve the stored session before the first frame. Never block app start.
+  try {
+    await container.read(authControllerProvider.notifier).restore();
+  } catch (_) {
+    await tokenStorage.clear();
+  }
 
   final router = container.read(routerProvider);
 
   // Handle payment redirects coming back into the app (mobile / desktop).
   AppLinks? appLinks;
   if (!kIsWeb) {
-    appLinks = AppLinks();
-    appLinks.uriLinkStream.listen((uri) {
-      handleDeepLink(uri, router);
-    });
+    try {
+      appLinks = AppLinks();
+      appLinks.uriLinkStream.listen((uri) {
+        handleDeepLink(uri, router);
+      });
+    } catch (_) {
+      appLinks = null;
+    }
   }
 
   runApp(
@@ -78,16 +86,18 @@ Future<void> main() async {
   );
 
   if (appLinks != null) {
-    // Defer the initial-link handling until after the first frame so the
-    // router is fully mounted.
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final initial = await appLinks!.getInitialLink();
-      if (initial != null) handleDeepLink(initial, router);
+      try {
+        final initial = await appLinks!.getInitialLink();
+        if (initial != null) handleDeepLink(initial, router);
+      } catch (_) {}
     });
   }
 
-  // Show foreground FCM messages as local notifications.
-  FirebaseMessaging.onMessage.listen((message) {
-    FcmService.showForeground(message);
-  });
+  // Show foreground FCM messages as local notifications (best-effort).
+  try {
+    FirebaseMessaging.onMessage.listen((message) {
+      FcmService.showForeground(message);
+    });
+  } catch (_) {}
 }

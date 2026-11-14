@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../core/connectivity/connectivity_provider.dart';
 import '../l10n/l10n.dart';
+import 'loading.dart';
 
 /// Renders an [AsyncValue] with consistent loading / error / empty states so
 /// every feature screen stays declarative.
@@ -27,7 +30,7 @@ class AsyncView<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     return value.when(
       skipLoadingOnReload: true,
-      loading: () => const Center(child: LoadingView()),
+      loading: () => const LoadingView(),
       error: (error, _) =>
           ErrorView(message: describeError(context, error), onRetry: onRetry),
       data: (value) {
@@ -40,7 +43,7 @@ class AsyncView<T> extends StatelessWidget {
   }
 }
 
-/// Centred spinner with a short label so slow requests don't look frozen.
+/// Skeleton/shimmer loading state for async content.
 class LoadingView extends StatelessWidget {
   const LoadingView({super.key, this.label});
 
@@ -49,26 +52,66 @@ class LoadingView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const CircularProgressIndicator(strokeWidth: 3),
-            if (label != null) ...[
-              const SizedBox(height: 16),
-              Text(
-                label!,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (label != null) ...[
+            Text(
+              label!,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+          for (var i = 0; i < 4; i++) ...[
+            const AppShimmerBlock(height: 72, radius: 16),
+            const SizedBox(height: 12),
+          ],
+        ],
+      ),
+    ).animate().fadeIn(duration: 250.ms);
+  }
+}
+
+/// Subtle banner shown when the device is offline.
+class ConnectivityBanner extends ConsumerWidget {
+  const ConnectivityBanner({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final online = ref.watch(isOnlineProvider);
+    if (online) return const SizedBox.shrink();
+    final scheme = Theme.of(context).colorScheme;
+    return Material(
+      color: scheme.errorContainer,
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(
+            children: [
+              Icon(Icons.wifi_off_rounded,
+                  size: 18, color: scheme.onErrorContainer),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Offline — sommige acties werken pas weer met internet.',
+                  style: TextStyle(
+                    color: scheme.onErrorContainer,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
                 ),
               ),
             ],
-          ],
+          ),
         ),
       ),
-    );
+    ).animate().fadeIn().slideY(begin: -0.2, end: 0);
   }
 }
 

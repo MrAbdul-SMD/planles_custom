@@ -2,44 +2,43 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// Planles brand theme — distinctive identity, not the default Material look.
+/// Planles brand theme.
 ///
-/// Palette: deep sky-blue primary + warm orange accent (automotive feel),
-/// Manrope typography, generous rounding, tabular figures for money.
+/// Palette: deep blue #024089, sky blue #4CB4E7, white #FFFFFF.
 abstract final class AppTheme {
-  static const seed = Color(0xFF0F4C81);
-  static const accent = Color(0xFFEA580C);
+  static const brandDeep = Color(0xFF024089);
+  static const brandSky = Color(0xFF4CB4E7);
+  static const brandWhite = Color(0xFFFFFFFF);
 
   static ThemeData light() => _build(Brightness.light);
   static ThemeData dark() => _build(Brightness.dark);
 
   static ThemeData _build(Brightness brightness) {
+    final isLight = brightness == Brightness.light;
     final baseScheme = ColorScheme.fromSeed(
-      seedColor: seed,
+      seedColor: brandDeep,
       brightness: brightness,
-      surface: brightness == Brightness.light ? const Color(0xFFF8FAFC) : const Color(0xFF090D16),
+      surface: isLight ? brandWhite : const Color(0xFF0A1426),
     );
-    // High-contrast, tactile automotive-grade palette
     final scheme = baseScheme.copyWith(
-      primary: brightness == Brightness.light ? const Color(0xFF0F4C81) : const Color(0xFF38BDF8),
-      onPrimary: brightness == Brightness.light ? Colors.white : const Color(0xFF0C243B),
-      primaryContainer: brightness == Brightness.light
-          ? const Color(0xFFE0F2FE)
-          : const Color(0xFF162D4A),
-      onPrimaryContainer: brightness == Brightness.light
-          ? const Color(0xFF034A75)
-          : const Color(0xFFBAE6FD),
-      secondary: accent,
-      onSecondary: Colors.white,
-      secondaryContainer: accent.withValues(alpha: brightness == Brightness.light ? 0.12 : 0.22),
-      onSecondaryContainer: brightness == Brightness.light
-          ? const Color(0xFF9A3412)
-          : const Color(0xFFFDBA74),
-      surfaceContainerLowest: brightness == Brightness.light ? Colors.white : const Color(0xFF0B101D),
-      surfaceContainerLow: brightness == Brightness.light ? Colors.white : const Color(0xFF11192C),
-      surfaceContainer: brightness == Brightness.light ? const Color(0xFFF1F5F9) : const Color(0xFF17223B),
-      surfaceContainerHigh: brightness == Brightness.light ? const Color(0xFFE2E8F0) : const Color(0xFF1E2C4D),
-      surfaceContainerHighest: brightness == Brightness.light ? const Color(0xFFCBD5E1) : const Color(0xFF26375E),
+      primary: isLight ? brandDeep : brandSky,
+      onPrimary: isLight ? brandWhite : const Color(0xFF06213F),
+      primaryContainer: isLight ? const Color(0xFFD9EEFA) : const Color(0xFF123055),
+      onPrimaryContainer: isLight ? brandDeep : const Color(0xFFD6F0FF),
+      secondary: brandSky,
+      onSecondary: isLight ? const Color(0xFF06213F) : const Color(0xFF06213F),
+      secondaryContainer: isLight ? const Color(0xFFE6F6FD) : const Color(0xFF173A5E),
+      onSecondaryContainer: isLight ? brandDeep : const Color(0xFFD6F0FF),
+      tertiary: brandSky,
+      onTertiary: const Color(0xFF06213F),
+      surface: isLight ? brandWhite : const Color(0xFF0A1426),
+      onSurface: isLight ? const Color(0xFF102033) : const Color(0xFFEAF4FF),
+      surfaceContainerLowest: isLight ? brandWhite : const Color(0xFF08101E),
+      surfaceContainerLow: isLight ? const Color(0xFFF7FBFE) : const Color(0xFF0E1A2E),
+      surfaceContainer: isLight ? const Color(0xFFF0F7FC) : const Color(0xFF13223A),
+      surfaceContainerHigh: isLight ? const Color(0xFFE6F1F8) : const Color(0xFF19304D),
+      surfaceContainerHighest: isLight ? const Color(0xFFDCEAF4) : const Color(0xFF213B5E),
+      outlineVariant: isLight ? const Color(0xFFCFE3F1) : const Color(0xFF2C4A6B),
     );
 
     final base = ThemeData(brightness: brightness).textTheme;
@@ -99,7 +98,7 @@ abstract final class AppTheme {
     return ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
-      scaffoldBackgroundColor: scheme.surface,
+      scaffoldBackgroundColor: isLight ? brandWhite : scheme.surface,
       textTheme: textTheme,
       appBarTheme: AppBarTheme(
         backgroundColor: scheme.surface,

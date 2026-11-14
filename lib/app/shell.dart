@@ -7,6 +7,7 @@ import '../features/orders/providers/orders_providers.dart';
 import '../features/planning/providers/planning_providers.dart';
 import '../features/auth/providers/auth_provider.dart';
 import '../l10n/l10n.dart';
+import '../shared/widgets.dart';
 
 /// Bottom navigation shell shared by the five primary tabs.
 class HomeShell extends ConsumerWidget {
@@ -23,7 +24,12 @@ class HomeShell extends ConsumerWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      body: navigationShell,
+      body: Column(
+        children: [
+          const ConnectivityBanner(),
+          Expanded(child: navigationShell),
+        ],
+      ),
       bottomNavigationBar: SafeArea(
         top: false,
         bottom: true,

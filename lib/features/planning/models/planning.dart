@@ -3,7 +3,6 @@ import '../../../l10n/app_localizations.dart';
 import '../../auth/models/user.dart';
 import '../../orders/models/order.dart';
 
-/// A booked lesson slot (`order_planning` row).
 class Planning {
   const Planning({
     required this.id,
@@ -25,42 +24,42 @@ class Planning {
   });
 
   factory Planning.fromJson(Map<String, dynamic> json) => Planning(
-    id: int.tryParse(json['id'].toString()) ?? 0,
-    orderItemId: int.tryParse(json['orderItemId'].toString()),
-    startDate: F.date(json['startDate']?.toString()),
-    endDate: F.date(json['endDate']?.toString()),
-    status: json['status']?.toString() ?? 'pending',
-    instructorId: int.tryParse(json['instructorId'].toString()),
-    notes: json['notes']?.toString(),
-    cancelReason: json['cancelReason']?.toString(),
-    studentConfirmation: json['studentConfirmation'] is bool
-        ? json['studentConfirmation'] as bool
-        : null,
-    order: json['order'] is Map
-        ? Order.fromJson(json['order'] as Map<String, dynamic>)
-        : null,
-    drivingClass: json['drivingClass'] is Map
-        ? DrivingClass.fromJson(json['drivingClass'] as Map<String, dynamic>)
-        : null,
-    orderItem: json['orderItem'] is Map
-        ? OrderItem.fromJson(json['orderItem'] as Map<String, dynamic>)
-        : null,
-    payment: json['payment'] is Map
-        ? Payment.fromJson(json['payment'] as Map<String, dynamic>)
-        : null,
-    student: json['student'] is Map
-        ? User.fromJson(json['student'] as Map<String, dynamic>)
-        : null,
-    instructor: json['instructor'] is Map
-        ? User.fromJson(json['instructor'] as Map<String, dynamic>)
-        : null,
-    logs: json['logs'] is List
-        ? (json['logs'] as List)
-              .whereType<Map>()
-              .map((e) => PlanningLog.fromJson(Map<String, dynamic>.from(e)))
-              .toList()
-        : const [],
-  );
+        id: int.tryParse(json['id'].toString()) ?? 0,
+        orderItemId: int.tryParse(json['orderItemId'].toString()),
+        startDate: F.date(json['startDate']?.toString()),
+        endDate: F.date(json['endDate']?.toString()),
+        status: json['status']?.toString() ?? 'pending',
+        instructorId: int.tryParse(json['instructorId'].toString()),
+        notes: json['notes']?.toString(),
+        cancelReason: json['cancelReason']?.toString(),
+        studentConfirmation: json['studentConfirmation'] is bool
+            ? json['studentConfirmation'] as bool
+            : null,
+        order: json['order'] is Map
+            ? Order.fromJson(json['order'] as Map<String, dynamic>)
+            : null,
+        drivingClass: json['drivingClass'] is Map
+            ? DrivingClass.fromJson(json['drivingClass'] as Map<String, dynamic>)
+            : null,
+        orderItem: json['orderItem'] is Map
+            ? OrderItem.fromJson(json['orderItem'] as Map<String, dynamic>)
+            : null,
+        payment: json['payment'] is Map
+            ? Payment.fromJson(json['payment'] as Map<String, dynamic>)
+            : null,
+        student: json['student'] is Map
+            ? User.fromJson(json['student'] as Map<String, dynamic>)
+            : null,
+        instructor: json['instructor'] is Map
+            ? User.fromJson(json['instructor'] as Map<String, dynamic>)
+            : null,
+        logs: json['logs'] is List
+            ? (json['logs'] as List)
+                .whereType<Map>()
+                .map((e) => PlanningLog.fromJson(Map<String, dynamic>.from(e)))
+                .toList()
+            : const [],
+      );
 
   final int id;
   final int? orderItemId;
@@ -84,21 +83,15 @@ class Planning {
   bool get isCompleted => status == 'completed';
   bool get isCancelled => status == 'cancelled';
 
-  /// Most recent log entry (logs are returned newest-first).
   PlanningLog? get lastLog => logs.isEmpty ? null : logs.first;
 
-  /// True when the current user is the one who proposed (created/rescheduled)
-  /// this planning, meaning they may not confirm it themselves.
   bool proposedBy(User? user) =>
       lastLog != null &&
       (lastLog!.action == 'created' || lastLog!.action == 'rescheduled') &&
       lastLog!.user?.id != null &&
       lastLog!.user!.id == user?.id;
 
-  /// Whether this planning can be confirmed by [user].
-  bool canBeConfirmedBy(User? user) =>
-      isPending && !proposedBy(user);
-
+  bool canBeConfirmedBy(User? user) => isPending && !proposedBy(user);
   bool get isPast => endDate != null && endDate!.isBefore(DateTime.now());
 
   int get durationMinutes {
@@ -107,24 +100,24 @@ class Planning {
   }
 
   String statusLabel(AppLocalizations l10n) => switch (status) {
-    'confirmed' => l10n.statusConfirmed,
-    'completed' => l10n.statusCompleted,
-    'cancelled' => l10n.statusCancelled,
-    _ => l10n.statusPending,
-  };
+        'confirmed' => l10n.statusConfirmed,
+        'completed' => l10n.statusCompleted,
+        'cancelled' => l10n.statusCancelled,
+        _ => l10n.statusPending,
+      };
 }
 
 class PlanningLog {
   const PlanningLog({this.id, this.action, this.createdAt, this.user});
 
   factory PlanningLog.fromJson(Map<String, dynamic> json) => PlanningLog(
-    id: int.tryParse(json['id'].toString()),
-    action: json['action']?.toString(),
-    createdAt: F.date(json['createdAt']?.toString()),
-    user: json['user'] is Map
-        ? User.fromJson(json['user'] as Map<String, dynamic>)
-        : null,
-  );
+        id: int.tryParse(json['id'].toString()),
+        action: json['action']?.toString(),
+        createdAt: F.date(json['createdAt']?.toString()),
+        user: json['user'] is Map
+            ? User.fromJson(json['user'] as Map<String, dynamic>)
+            : null,
+      );
 
   final int? id;
   final String? action;
@@ -132,7 +125,6 @@ class PlanningLog {
   final User? user;
 }
 
-/// A question + answer pair of a lesson card.
 class LessonCardQuestion {
   const LessonCardQuestion({
     required this.id,
@@ -151,22 +143,16 @@ class LessonCardQuestion {
         name: json['name']?.toString(),
         text: json['text']?.toString(),
         score: int.tryParse(json['score'].toString()),
-        category: json['category'] is Map<String, dynamic>
-            ? LessonCardCategory.fromJson(json['category'] as Map<String, dynamic>)
-            : json['category'] is Map
-                ? LessonCardCategory.fromJson(
-                    Map<String, dynamic>.from(json['category'] as Map),
-                  )
-                : null,
-        subCategory: json['subCategory'] is Map<String, dynamic>
+        category: json['category'] is Map
             ? LessonCardCategory.fromJson(
-                json['subCategory'] as Map<String, dynamic>,
+                Map<String, dynamic>.from(json['category'] as Map),
               )
-            : json['subCategory'] is Map
-                ? LessonCardCategory.fromJson(
-                    Map<String, dynamic>.from(json['subCategory'] as Map),
-                  )
-                : null,
+            : null,
+        subCategory: json['subCategory'] is Map
+            ? LessonCardCategory.fromJson(
+                Map<String, dynamic>.from(json['subCategory'] as Map),
+              )
+            : null,
       );
 
   final int id;

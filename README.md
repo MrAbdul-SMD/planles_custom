@@ -34,16 +34,35 @@ flutter build apk --debug
 | `flutter_riverpod` | Dependency injection + async state (`FutureProvider`, `Notifier`) |
 | `go_router` | Declarative routing with auth redirects via `refreshListenable` |
 | `shared_preferences` | Persist the JWT + last-known user between launches |
+| `json_serializable` / `json_annotation` / `build_runner` / `freezed` | Ready for model code generation when desired (see notes) |
+| `formz` | Simple, composable form input validation (e.g. login) |
+| `connectivity_plus` | Online/offline awareness surfaced in the UI |
+| `flutter_animate` + `lottie` | Lightweight motion and expressive animations |
+| `skeletonizer` + `shimmer` | Polished loading placeholders for async screens |
+| `flutter_native_splash` | Branded native splash screen configuration |
+| `app_links` | Deep links / payment redirect handling |
+| `url_launcher` | Phone/mail/web links |
 | `intl` | Dutch date/number formatting (`nl` locale) |
 | `flutter_localizations` | Dutch Material strings + date symbols |
 | `cached_network_image` | Cache profile/lesson images |
 | `printing` | Render order invoices as PDF (`Printing.layoutPdf`) |
-| `url_launcher` | Phone/mail links (support, guard contact) |
 
-**Deliberately not used:** `json_serializable` / `freezed` / `build_runner`.
-The API's JSON shapes are inconsistent (`result` vs `data`, `error` vs
-`message` keys, multipart `data` fields), so models use hand-written
-`fromJson` factories — no code generation, full control over fallbacks.
+### Code generation
+
+`build_runner`, `json_serializable`, and `freezed` are configured for generated
+models when you want to adopt them. `build.yaml` enables `explicit_to_json` and
+omits nulls. Current feature models remain hand-written/tolerant to match the
+API's inconsistent payloads; migrate individual models to codegen when stable:
+
+```bash
+dart run build_runner build --delete-conflicting-outputs
+```
+
+To generate native splash assets from the `flutter_native_splash` config:
+
+```bash
+dart run flutter_native_splash:create
+```
 
 ## Architecture
 
@@ -68,7 +87,9 @@ lib/
 
 Rules of thumb:
 
-- **Repositories** own HTTP and JSON parsing; they never touch Flutter.
+- **Repositories** own HTTP and JSON mapping; they never touch Flutter.
+- **Models** are plain data classes with tolerant `fromJson`/`toJson` for API quirks (codegen-ready).
+- **Forms** use Formz inputs for simple, testable validation where appropriate.
 - **Providers** expose async state; screens only read (`ref.watch`) and call
   action methods (`ref.read(...Provider.notifier).doThing()`).
 - **Screens** are plain widgets; navigation goes through `go_router`.
