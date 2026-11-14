@@ -45,7 +45,7 @@ jobs:
       - name: Build web (release, optimized)
         run: |
           flutter build web --release \
-            --base-href "/planles/"
+            --base-href "/${{ github.event.repository.name }}/"
 
       - name: Upload web artifact
         uses: actions/upload-artifact@v4
