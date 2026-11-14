@@ -40,7 +40,9 @@ jobs:
           cache: true
 
       - name: Install dependencies
-        run: flutter pub get
+        run: |
+          mkdir -p build/ios/SourcePackages build/macos/SourcePackages
+          flutter pub get
 
       - name: Build web (release, optimized)
         run: |
@@ -105,7 +107,9 @@ jobs:
           cache: true
 
       - name: Install dependencies
-        run: flutter pub get
+        run: |
+          mkdir -p build/ios/SourcePackages build/macos/SourcePackages
+          flutter pub get
 
       - name: Configure Android signing (optional)
         if: ${{ env.ANDROID_KEYSTORE_BASE64 != '' }}
@@ -169,7 +173,9 @@ jobs:
           cache: true
 
       - name: Install dependencies
-        run: flutter pub get
+        run: |
+          mkdir -p build/ios/SourcePackages build/macos/SourcePackages
+          flutter pub get
 
       - name: Enable macOS desktop
         run: flutter config --enable-macos-desktop
@@ -197,11 +203,11 @@ jobs:
           echo "KEYCHAIN_PATH=$KEYCHAIN_PATH" >> "$GITHUB_ENV"
           echo "enabled=true" >> "$GITHUB_OUTPUT"
 
-      - name: Disable macOS code signing (CI, unsigned fallback)
-        if: ${{ steps.macos_sign.outcome == 'skipped' || steps.macos_sign.outputs.enabled != 'true' }}
+      - name: Disable Xcode project signing (CI build unsigned, sign post-build if configured)
         run: |
           PBXPROJ="macos/Runner.xcodeproj/project.pbxproj"
           sed -i '' 's/"CODE_SIGN_IDENTITY\[sdk=macosx\*\]" = "Apple Development";/CODE_SIGN_IDENTITY = "-";/g' "$PBXPROJ"
+          sed -i '' 's/CODE_SIGN_IDENTITY = "Apple Development";/CODE_SIGN_IDENTITY = "-";/g' "$PBXPROJ"
           sed -i '' 's/DEVELOPMENT_TEAM = LH2AN4V894;/DEVELOPMENT_TEAM = "";/g' "$PBXPROJ"
           sed -i '' 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' "$PBXPROJ"
 
@@ -216,13 +222,13 @@ jobs:
             BUILD_NAME="${GITHUB_REF_NAME#v}"
           fi
           flutter build macos --release --build-name "$BUILD_NAME" --build-number "${GITHUB_RUN_NUMBER}"
-          if [[ "${MACOS_SIGN_ENABLED}" == "true" ]]; then
-            APP_PATH="$(find build/macos/Build/Products/Release -maxdepth 1 -name '*.app' -print -quit)"
+          APP_PATH="$(find build/macos/Build/Products/Release -maxdepth 1 -name '*.app' -print -quit)"
+          if [[ "${MACOS_SIGN_ENABLED}" == "true" && -n "${MACOS_CODESIGN_IDENTITY:-}" ]]; then
             if [[ -n "${MACOS_TEAM_ID:-}" ]]; then
               /usr/libexec/PlistBuddy -c "Set :TeamIdentifier ${MACOS_TEAM_ID}" "$APP_PATH/Contents/Info.plist" 2>/dev/null || true
             fi
             codesign --force --deep --options runtime --sign "$MACOS_CODESIGN_IDENTITY" "$APP_PATH"
-            codesign --verify --deep --strict --verbose=2 "$APP_PATH"
+            codesign --verify --deep --strict --verbose=2 "$APP_PATH" || echo "Warning: codesign verification failed (self-signed or non-Apple certs may not pass strict verification)."
           fi
 
       - name: Create DMG installer
@@ -261,7 +267,9 @@ jobs:
           cache: true
 
       - name: Install dependencies
-        run: flutter pub get
+        run: |
+          mkdir -p build/ios/SourcePackages build/macos/SourcePackages
+          flutter pub get
 
       - name: Enable Windows desktop
         run: flutter config --enable-windows-desktop

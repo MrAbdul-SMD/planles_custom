@@ -247,12 +247,15 @@ Workflow: `.github/workflows/build-and-deploy.yml`
 
 > Note: `.env` is gitignored but required as a Flutter asset; CI copies `.env.example` to `.env` when missing. For production values, provide a secure `.env` via repository secrets/variables and a workflow step if needed.
 
-### macOS pub get rsync error
+### macOS/iOS pub get rsync error
 
-If `flutter pub get` fails with `rsync: mkdir .../build/macos/SourcePackages/... failed`,
-create the directories manually:
+If `flutter pub get` fails with `rsync: ... mkdir ".../build/ios/SourcePackages/..." failed` or `.../build/macos/SourcePackages/... failed` (often after `flutter clean`), create the required SourcePackages directories before running pub get:
 
 ```bash
+./tool/flutter_pub_get.sh
+# or manually:
 mkdir -p build/ios/SourcePackages build/macos/SourcePackages
 flutter pub get
 ```
+
+`tool/flutter_pub_get.sh` applies this workaround and forwards any arguments to `flutter pub get`.
