@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/responsive.dart';
+import '../../../core/update/app_update_prompt.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../l10n/language_picker.dart';
 import '../../../l10n/l10n.dart';
@@ -183,6 +184,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           const LanguageListTile(),
           const Divider(),
           const ThemeModeListTile(),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.system_update_alt_outlined),
+            title: const Text('Check for updates'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => AppUpdatePrompt.checkAndPrompt(
+              context,
+              force: true,
+              silent: false,
+              includePrereleases: true,
+            ),
+          ),
           if (user.isInstructor) ...[
             const Divider(),
             ListTile(

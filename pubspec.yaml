@@ -51,6 +51,7 @@ dependencies:
   firebase_core: ^5.1.0
   firebase_messaging: ^17.0.1
   flutter_local_notifications: 17.2.3
+  package_info_plus: ^9.0.0
 
   # Image picking for car image upload (instructor registration)
   image_picker: ^1.0.7

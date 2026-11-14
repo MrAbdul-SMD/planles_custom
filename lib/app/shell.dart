@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/responsive.dart';
+import '../core/update/app_update_prompt.dart';
 import '../features/notifications/providers/notifications_providers.dart';
 import '../features/orders/providers/orders_providers.dart';
 import '../features/planning/providers/planning_providers.dart';
@@ -12,13 +13,32 @@ import '../shared/widgets.dart';
 
 /// Adaptive navigation shell: bottom bar on compact screens, navigation rail on
 /// wider (tablet/desktop/web) screens.
-class HomeShell extends ConsumerWidget {
+class HomeShell extends ConsumerStatefulWidget {
   const HomeShell({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeShell> createState() => _HomeShellState();
+}
+
+class _HomeShellState extends ConsumerState<HomeShell> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      AppUpdatePrompt.checkAndPrompt(
+        context,
+        includePrereleases: true,
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ref = this.ref;
+    final navigationShell = widget.navigationShell;
     final unread = ref.watch(unreadCountProvider).value ?? 0;
     final l10n = context.l10n;
     final theme = Theme.of(context);
@@ -212,6 +232,7 @@ class HomeShell extends ConsumerWidget {
   }
 
   void _goBranch(int index, WidgetRef ref) {
+    final navigationShell = widget.navigationShell;
     if (index != navigationShell.currentIndex) {
       switch (index) {
         case 0:
