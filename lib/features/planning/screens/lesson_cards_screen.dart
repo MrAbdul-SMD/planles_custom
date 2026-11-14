@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_exception.dart';
+import '../../../core/responsive.dart';
 import '../../../l10n/l10n.dart';
 import '../../../shared/widgets.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -386,9 +387,17 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
                       title: l10n.lessonCardEmptyTitle,
                       subtitle: l10n.lessonCardEmptySubtitle,
                     )
-                  : ListView(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                      children: [
+                  : Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 1000),
+                        child: ListView(
+                          padding: EdgeInsets.fromLTRB(
+                            context.isExpanded ? 28 : 16,
+                            12,
+                            context.isExpanded ? 28 : 16,
+                            24,
+                          ),
+                          children: [
                         Container(
                           padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
@@ -457,7 +466,9 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
                         ),
                         const SizedBox(height: 14),
                         ..._buildGroupedAnswers(theme),
-                      ],
+                          ],
+                        ),
+                      ),
                     ),
       bottomNavigationBar: !hasEditable
           ? null
@@ -473,16 +484,21 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
                     ),
                   ),
                 ),
-                child: FilledButton.icon(
-                  onPressed: _saving ? null : _save,
-                  icon: _saving
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2.2),
-                        )
-                      : const Icon(Icons.save_rounded),
-                  label: Text(l10n.lessonCardSave),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1000),
+                    child: FilledButton.icon(
+                      onPressed: _saving ? null : _save,
+                      icon: _saving
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2.2),
+                            )
+                          : const Icon(Icons.save_rounded),
+                      label: Text(l10n.lessonCardSave),
+                    ),
+                  ),
                 ),
               ),
             ),

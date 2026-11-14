@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/responsive.dart';
 import '../../../l10n/l10n.dart';
 import '../../../shared/widgets.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -96,51 +97,67 @@ class _PaymentReturnScreenState extends ConsumerState<PaymentReturnScreen> {
         ),
       ),
       body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 72,
-                height: 72,
-                decoration: BoxDecoration(
-                  color: _completed
-                      ? const Color(0xFF10B981).withValues(alpha: 0.15)
-                      : theme.colorScheme.primaryContainer,
-                  shape: BoxShape.circle,
-                ),
-                child: _completed
-                    ? const Icon(Icons.check_rounded, size: 40, color: Color(0xFF10B981))
-                    : const Padding(
-                        padding: EdgeInsets.all(20),
-                        child: CircularProgressIndicator(strokeWidth: 3),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 560),
+          child: Padding(
+            padding: EdgeInsets.all(context.isExpanded ? 40 : 32),
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(28),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: _completed
+                            ? const Color(0xFF10B981).withValues(alpha: 0.15)
+                            : theme.colorScheme.primaryContainer,
+                        shape: BoxShape.circle,
                       ),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                _completed ? 'Betaling verwerkt!' : l10n.paymentReturnProcessing,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.2,
+                      child: _completed
+                          ? const Icon(Icons.check_rounded,
+                              size: 44, color: Color(0xFF10B981))
+                          : const Padding(
+                              padding: EdgeInsets.all(22),
+                              child: CircularProgressIndicator(strokeWidth: 3),
+                            ),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      _completed
+                          ? 'Betaling verwerkt!'
+                          : l10n.paymentReturnProcessing,
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      _completed
+                          ? 'Je gegevens zijn bijgewerkt. We sturen je door...'
+                          : 'We verifiëren de betaling met je bank...',
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 28),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.tonal(
+                        onPressed: () => context.go('/home'),
+                        child: const Text('Direct naar Dashboard'),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                _completed
-                    ? 'Je gegevens zijn bijgewerkt. We sturen je door...'
-                    : 'We verifiëren de betaling met je bank...',
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 28),
-              FilledButton.tonal(
-                onPressed: () => context.go('/home'),
-                child: const Text('Direct naar Dashboard'),
-              ),
-            ],
+            ),
           ),
         ),
       ),

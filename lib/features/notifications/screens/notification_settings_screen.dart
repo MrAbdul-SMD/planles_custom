@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_exception.dart';
+import '../../../core/responsive.dart';
 import '../../../l10n/l10n.dart';
 import '../../../shared/widgets.dart';
 import '../models/app_notification.dart';
@@ -41,10 +42,14 @@ class _NotificationSettingsScreenState
           _draft ??= settings;
           final draft = _draft!;
 
+          final wide = context.isExpanded;
           return SafeArea(
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
-              children: [
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 760),
+                child: ListView(
+                  padding: EdgeInsets.fromLTRB(wide ? 28 : 20, 12, wide ? 28 : 20, 32),
+                  children: [
               SectionHeader(l10n.notifSettingsQuietSection),
               Card(
                 child: Column(
@@ -131,7 +136,9 @@ class _NotificationSettingsScreenState
                     : Text(l10n.save),
               ),
             ],
-          ),
+                ),
+              ),
+            ),
           );
         },
       ),

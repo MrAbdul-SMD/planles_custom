@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/network/api_exception.dart';
+import '../../../core/responsive.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../l10n/l10n.dart';
 import '../../../shared/widgets.dart';
@@ -252,11 +253,15 @@ class _PlanningDetailScreenState extends ConsumerState<PlanningDetailScreen> {
         ?.drivingClass;
     final drivingClass = planning.drivingClass ?? cachedClass;
 
+    final wide = context.isExpanded;
     return SafeArea(
       bottom: true,
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
-        children: [
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1000),
+          child: ListView(
+            padding: EdgeInsets.fromLTRB(wide ? 28 : 20, 12, wide ? 28 : 20, 32),
+            children: [
         // ---------------------------------------------------------- header
         Container(
           padding: const EdgeInsets.all(22),
@@ -474,7 +479,9 @@ class _PlanningDetailScreenState extends ConsumerState<PlanningDetailScreen> {
           ),
         ],
       ],
-    ),
+          ),
+        ),
+      ),
     );
   }
 

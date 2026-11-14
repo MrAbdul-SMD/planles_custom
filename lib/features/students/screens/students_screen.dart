@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/responsive.dart';
 import '../../../l10n/l10n.dart';
 import '../../../shared/widgets.dart';
 import '../../auth/models/user.dart';
@@ -53,38 +54,46 @@ class _StudentsScreenState extends ConsumerState<StudentsScreen> {
                     )
                     .toList();
 
-          return Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-                child: TextField(
-                  onChanged: (v) => setState(() => _query = v),
-                  decoration: InputDecoration(
-                    hintText: l10n.studentsSearchHint,
-                    prefixIcon: const Icon(Icons.search_rounded),
-                  ),
-                ),
-              ),
-              Expanded(
-                child: filtered.isEmpty
-                    ? EmptyState(
-                        icon: Icons.groups_outlined,
-                        title: l10n.studentsEmptyTitle,
-                        subtitle: l10n.studentsEmptySubtitle,
-                      )
-                    : RefreshIndicator(
-                        onRefresh: () async =>
-                            ref.invalidate(myStudentsProvider),
-                        child: ListView.separated(
-                          padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
-                          itemCount: filtered.length,
-                          separatorBuilder: (_, _) => const SizedBox(height: 8),
-                          itemBuilder: (context, index) =>
-                              _StudentTile(student: filtered[index]),
-                        ),
+          final wide = context.isExpanded;
+          return Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1000),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(wide ? 28 : 20, 16, wide ? 28 : 20, 8),
+                    child: TextField(
+                      onChanged: (v) => setState(() => _query = v),
+                      decoration: InputDecoration(
+                        hintText: l10n.studentsSearchHint,
+                        prefixIcon: const Icon(Icons.search_rounded),
                       ),
+                    ),
+                  ),
+                  Expanded(
+                    child: filtered.isEmpty
+                        ? EmptyState(
+                            icon: Icons.groups_outlined,
+                            title: l10n.studentsEmptyTitle,
+                            subtitle: l10n.studentsEmptySubtitle,
+                          )
+                        : RefreshIndicator(
+                            onRefresh: () async =>
+                                ref.invalidate(myStudentsProvider),
+                            child: ListView.separated(
+                              padding: EdgeInsets.fromLTRB(
+                                  wide ? 28 : 20, 8, wide ? 28 : 20, 32),
+                              itemCount: filtered.length,
+                              separatorBuilder: (_, _) =>
+                                  const SizedBox(height: 8),
+                              itemBuilder: (context, index) =>
+                                  _StudentTile(student: filtered[index]),
+                            ),
+                          ),
+                  ),
+                ],
               ),
-            ],
+            ),
           );
         },
         ),
