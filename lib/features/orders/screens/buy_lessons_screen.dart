@@ -242,22 +242,60 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
                     style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                   ),
                   const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      _QtyButton(icon: Icons.remove, onTap: _quantity > 1 ? () => setState(() => _quantity--) : null),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 14),
-                        child: Text('$_quantity', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
-                      ),
-                      _QtyButton(icon: Icons.add, onTap: () => setState(() => _quantity++)),
-                      const Spacer(),
-                      FilledButton.icon(
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final compact = constraints.maxWidth < 380;
+                      final qtyControls = Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _QtyButton(
+                            icon: Icons.remove,
+                            onTap: _quantity > 1
+                                ? () => setState(() => _quantity--)
+                                : null,
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 14),
+                            child: Text(
+                              '$_quantity',
+                              style: theme.textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.w800),
+                            ),
+                          ),
+                          _QtyButton(
+                            icon: Icons.add,
+                            onTap: () => setState(() => _quantity++),
+                          ),
+                        ],
+                      );
+                      final addButton = FilledButton.icon(
                         onPressed: () => _addToCart(selectedClass!),
                         icon: const Icon(Icons.add_shopping_cart_outlined, size: 18),
                         label: Text(l10n.buyLessonsAddItem),
-                        style: FilledButton.styleFrom(minimumSize: const Size(0, 42)),
-                      ),
-                    ],
+                        style: FilledButton.styleFrom(
+                          minimumSize: Size(compact ? double.infinity : 0, 42),
+                        ),
+                      );
+
+                      if (compact) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            qtyControls,
+                            const SizedBox(height: 10),
+                            addButton,
+                          ],
+                        );
+                      }
+
+                      return Row(
+                        children: [
+                          qtyControls,
+                          const Spacer(),
+                          addButton,
+                        ],
+                      );
+                    },
                   ),
                 ],
               ),
@@ -277,38 +315,45 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
           else ...[
             for (final (i, item) in _cart.indexed) ...[
               if (i > 0) const Divider(height: 16),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          item.drivingClass.name ?? l10n.orderDetailLesson,
-                          style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final compact = constraints.maxWidth < 420;
+                  final details = Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.drivingClass.name ?? l10n.orderDetailLesson,
+                        style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        [
+                          l10n.orderDetailLessonCount(item.quantity),
+                          if (item.drivingClass.duration != null)
+                            F.durationLabel(l10n, item.drivingClass.duration),
+                          F.money(_itemTotal(item.drivingClass, item.quantity)),
+                        ].whereType<String>().join(' · '),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          [
-                            l10n.orderDetailLessonCount(item.quantity),
-                            if (item.drivingClass.duration != null) F.durationLabel(l10n, item.drivingClass.duration),
-                            F.money(_itemTotal(item.drivingClass, item.quantity)),
-                          ].whereType<String>().join(' · '),
-                          style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Row(
+                      ),
+                    ],
+                  );
+                  final controls = Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
                         visualDensity: VisualDensity.compact,
-                        onPressed: item.quantity > 1 ? () => setState(() => item.quantity--) : null,
+                        onPressed: item.quantity > 1
+                            ? () => setState(() => item.quantity--)
+                            : null,
                         icon: const Icon(Icons.remove_circle_outline, size: 20),
                       ),
-                      Text('${item.quantity}', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
+                      Text(
+                        '${item.quantity}',
+                        style: theme.textTheme.titleSmall
+                            ?.copyWith(fontWeight: FontWeight.w700),
+                      ),
                       IconButton(
                         visualDensity: VisualDensity.compact,
                         onPressed: () => setState(() => item.quantity++),
@@ -321,8 +366,27 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
                         tooltip: l10n.delete,
                       ),
                     ],
-                  ),
-                ],
+                  );
+
+                  if (compact) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        details,
+                        const SizedBox(height: 4),
+                        Align(alignment: Alignment.centerLeft, child: controls),
+                      ],
+                    );
+                  }
+
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(child: details),
+                      controls,
+                    ],
+                  );
+                },
               ),
             ],
             const SizedBox(height: 12),
@@ -363,15 +427,34 @@ class _BuyLessonsScreenState extends ConsumerState<BuyLessonsScreen> {
             sectionTitle(l10n.buyLessonsStepPaymentInstructor, icon: Icons.payments_outlined),
           ] else
             sectionTitle(l10n.buyLessonsStepPaymentStudent, icon: Icons.payments_outlined),
-          SegmentedButton<String>(
-            showSelectedIcon: false,
-            segments: [
-              ButtonSegment(value: 'digital', label: Text(l10n.buyLessonsPaymentOnline), icon: const Icon(Icons.credit_card_outlined)),
-              ButtonSegment(value: 'balance', label: Text(l10n.buyLessonsPaymentBalance), icon: const Icon(Icons.account_balance_wallet_outlined)),
-              ButtonSegment(value: 'cash', label: Text(l10n.buyLessonsPaymentCash), icon: const Icon(Icons.payments_outlined)),
-            ],
-            selected: {_paymentType},
-            onSelectionChanged: (v) => setState(() => _paymentType = v.first),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final compact = constraints.maxWidth < 460;
+              return SegmentedButton<String>(
+                showSelectedIcon: false,
+                segments: [
+                  ButtonSegment(
+                    value: 'digital',
+                    label: Text(l10n.buyLessonsPaymentOnline),
+                    icon: compact ? null : const Icon(Icons.credit_card_outlined),
+                  ),
+                  ButtonSegment(
+                    value: 'balance',
+                    label: Text(l10n.buyLessonsPaymentBalance),
+                    icon: compact
+                        ? null
+                        : const Icon(Icons.account_balance_wallet_outlined),
+                  ),
+                  ButtonSegment(
+                    value: 'cash',
+                    label: Text(l10n.buyLessonsPaymentCash),
+                    icon: compact ? null : const Icon(Icons.payments_outlined),
+                  ),
+                ],
+                selected: {_paymentType},
+                onSelectionChanged: (v) => setState(() => _paymentType = v.first),
+              );
+            },
           ),
           const SizedBox(height: 10),
           Text(

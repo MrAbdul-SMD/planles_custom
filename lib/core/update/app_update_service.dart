@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -56,7 +58,15 @@ class AppUpdateService {
     final latestRaw = tag.isNotEmpty ? tag : (release['name'] as String? ?? '');
     final latest = _normalizeVersion(latestRaw);
     final latestBuild = _parseBuildNumber(latestRaw);
-    final currentBuild = _parseBuildNumber(packageInfo.version) ?? int.tryParse(packageInfo.buildNumber);
+    var currentBuild =
+        _parseBuildNumber(packageInfo.version) ?? int.tryParse(packageInfo.buildNumber);
+
+    // Flutter split-per-ABI Android APKs encode ABI in versionCode
+    // (e.g. 1000*abi + baseVersionCode), which breaks comparisons against the
+    // base pubspec/build-tag version. Normalize to the base code on Android.
+    if (!kIsWeb && Platform.isAndroid && currentBuild != null && currentBuild >= 1000) {
+      currentBuild = currentBuild % 1000;
+    }
 
     final hasUpdate = _isNewerVersion(
       latest: latest,
