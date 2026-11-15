@@ -220,18 +220,43 @@ jobs:
           MACOS_TEAM_ID: ${{ secrets.MACOS_TEAM_ID }}
           MACOS_SIGN_ENABLED: ${{ steps.macos_sign.outputs.enabled }}
         run: |
+          set -euo pipefail
           BUILD_NAME="$(grep '^version:' pubspec.yaml | awk '{print $2}' | cut -d+ -f1)"
           if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
             BUILD_NAME="${GITHUB_REF_NAME#v}"
           fi
           flutter build macos --release --build-name "$BUILD_NAME" --build-number "${GITHUB_RUN_NUMBER}"
           APP_PATH="$(find build/macos/Build/Products/Release -maxdepth 1 -name '*.app' -print -quit)"
+          if [[ -z "${APP_PATH}" || ! -d "${APP_PATH}" ]]; then
+            echo "macOS .app bundle not found after build" >&2
+            exit 1
+          fi
+
+          sign_embedded() {
+            local identity="$1"
+            local opts=()
+            if [[ "$identity" != "-" ]]; then
+              opts+=(--options runtime)
+            fi
+            # Sign nested frameworks/dylibs first so the final bundle is consistent.
+            while IFS= read -r -d '' item; do
+              codesign --force "${opts[@]}" --sign "$identity" "$item"
+            done < <(find "$APP_PATH/Contents/Frameworks" -depth \( -name '*.framework' -o -name '*.dylib' -o -name '*.so' \) -print0 2>/dev/null || true)
+            codesign --force --deep "${opts[@]}" --sign "$identity" "$APP_PATH"
+          }
+
           if [[ "${MACOS_SIGN_ENABLED}" == "true" && -n "${MACOS_CODESIGN_IDENTITY:-}" ]]; then
             if [[ -n "${MACOS_TEAM_ID:-}" ]]; then
               /usr/libexec/PlistBuddy -c "Set :TeamIdentifier ${MACOS_TEAM_ID}" "$APP_PATH/Contents/Info.plist" 2>/dev/null || true
             fi
-            codesign --force --deep --options runtime --sign "$MACOS_CODESIGN_IDENTITY" "$APP_PATH"
+            sign_embedded "$MACOS_CODESIGN_IDENTITY"
             codesign --verify --deep --strict --verbose=2 "$APP_PATH" || echo "Warning: codesign verification failed (self-signed or non-Apple certs may not pass strict verification)."
+          else
+            # Ad-hoc sign the full bundle so embedded plugin frameworks (e.g.
+            # flutter_local_notifications.framework) don't ship with mismatched
+            # Team IDs and crash at launch when downloaded from releases.
+            sign_embedded "-"
+            codesign --verify --deep --strict --verbose=2 "$APP_PATH" || echo "Warning: ad-hoc codesign verification reported issues."
           fi
 
       - name: Create DMG installer
