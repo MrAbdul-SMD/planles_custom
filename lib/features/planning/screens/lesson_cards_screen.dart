@@ -336,7 +336,8 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
                   for (final answer in entry.value)
                     _QuestionRow(
                       answer: answer,
-                      controller: _controllers[answer.question.id]!,
+                      controller: _controllers[answer.question.id] ??
+                          TextEditingController(text: answer.text),
                       editable: _canAnswer(answer.question),
                     ),
                   if (entry.key != subGroups.keys.last)
@@ -348,6 +349,21 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
         ),
       );
     });
+
+    if (widgets.isEmpty && _answers.isNotEmpty) {
+      widgets.add(
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24),
+          child: Text(
+            'Geen leskaartvragen konden worden weergegeven.',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+      );
+    }
 
     return widgets;
   }
@@ -474,6 +490,7 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
       bottomNavigationBar: !hasEditable
           ? null
           : SafeArea(
+              top: false,
               child: Container(
                 padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
                 decoration: BoxDecoration(
@@ -485,20 +502,26 @@ class _LessonCardsScreenState extends ConsumerState<LessonCardsScreen> {
                     ),
                   ),
                 ),
-                child: Center(
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  heightFactor: 1,
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
                         maxWidth: context.isWideDesktop ? 1500 : 1200),
-                    child: FilledButton.icon(
-                      onPressed: _saving ? null : _save,
-                      icon: _saving
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2.2),
-                            )
-                          : const Icon(Icons.save_rounded),
-                      label: Text(l10n.lessonCardSave),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        onPressed: _saving ? null : _save,
+                        icon: _saving
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2.2),
+                              )
+                            : const Icon(Icons.save_rounded),
+                        label: Text(l10n.lessonCardSave),
+                      ),
                     ),
                   ),
                 ),

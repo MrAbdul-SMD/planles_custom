@@ -91,8 +91,22 @@ class PlanningRepository {
 
   Future<List<LessonCardQuestion>> lessonCards(int planningId) async {
     final data = await _api.get('/lesson-cards/$planningId');
-    if (data is! List) return const [];
-    return data
+
+    List raw;
+    if (data is List) {
+      raw = data;
+    } else if (data is Map) {
+      final result = data['result'] ?? data['data'] ?? data['items'];
+      if (result is List) {
+        raw = result;
+      } else {
+        return const [];
+      }
+    } else {
+      return const [];
+    }
+
+    return raw
         .whereType<Map>()
         .map((e) => LessonCardQuestion.fromJson(Map<String, dynamic>.from(e)))
         .toList();
