@@ -41,7 +41,7 @@ dependencies:
   flutter_native_splash: ^2.4.4
 
   # Formatting / external links / images / documents
-  intl: 0.20.2
+  intl: ^0.20.2
   url_launcher: ^6.3.3
   cached_network_image: ^4.0.3
   printing: ^5.15.1
